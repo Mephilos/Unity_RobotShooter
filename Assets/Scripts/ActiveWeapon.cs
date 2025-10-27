@@ -1,20 +1,27 @@
 using UnityEngine;
 using StarterAssets;
 using System.Collections;
+using Cinemachine;
 
 public class ActiveWeapon : MonoBehaviour
 {
     [SerializeField] WeaponSO weaponSO;
+    [SerializeField] GameObject Zoom;
     Animator animator;
     StarterAssetsInputs starterAssetsInputs;
-    Weapon currentWeapon;
+    CinemachineVirtualCamera cinemachineVirtualCamera;
+    FirstPersonController firstPersonController;
 
+    Weapon currentWeapon;
+    float defaultFOV = 75f;
     bool isFire = false;
 
     void Awake()
     {
+        firstPersonController = GetComponentInParent<FirstPersonController>();
         animator = GetComponentInParent<Animator>();
         starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
+        cinemachineVirtualCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
     }
     void Start()
     {
@@ -23,6 +30,7 @@ public class ActiveWeapon : MonoBehaviour
     void Update()
     {
         HandleShoot();
+        HandleZoom();
     }
 
     public void SwitchWeapon(WeaponSO weaponSO)
@@ -56,5 +64,22 @@ public class ActiveWeapon : MonoBehaviour
     {
         yield return new WaitForSeconds(weaponSO.FireRate);
         isFire = false;
+    }
+
+    void HandleZoom()
+    {
+        if (!weaponSO.CanZoom || !cinemachineVirtualCamera) return;
+
+        if (!starterAssetsInputs.zoom)
+        {
+            Zoom.SetActive(false);
+            cinemachineVirtualCamera.m_Lens.FieldOfView = defaultFOV;
+        }
+
+        else
+        {
+            Zoom.SetActive(true);
+            cinemachineVirtualCamera.m_Lens.FieldOfView = weaponSO.ZoomAmount;
+        }
     }
 }

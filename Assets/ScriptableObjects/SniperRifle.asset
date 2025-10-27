@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06d626f2cf17640c99b0f58bae812fd8, type: 3}
   m_Name: SniperRifle
   m_EditorClassIdentifier: 
+  WeaponPrefab: {fileID: 7556116310957177497, guid: cdeb321d8f5114302bf2be6c09102861, type: 3}
   Damage: 5
   FireRate: 2
   HitVFXPrefab: {fileID: 8430451896267564482, guid: 74e69bf1a67af461eb9a7d82adee95e7, type: 3}
+  isAutomatic: 0
+  CanZoom: 1
