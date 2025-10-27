@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
+    [SerializeField] GameObject hitVFXPrefab;
     [SerializeField] Animator animator;
     [SerializeField] float maxDistance = 100f;
     [SerializeField] int damageAmount = 1;
@@ -32,6 +33,8 @@ public class Weapon : MonoBehaviour
 
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity))
         {
+            Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
+            Instantiate(hitVFXPrefab, hit.point, effectRotation);
             EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
             enemyHealth?.TakeDamage(damageAmount);
         }
