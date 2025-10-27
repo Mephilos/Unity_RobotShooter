@@ -1,42 +1,25 @@
-using StarterAssets;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    [SerializeField] GameObject hitVFXPrefab;
-    [SerializeField] Animator animator;
-    [SerializeField] float maxDistance = 100f;
-    [SerializeField] int damageAmount = 1;
-    [SerializeField] ParticleSystem muzzleFlash;
-    StarterAssetsInputs starterAssetsInputs;
+    ParticleSystem muzzleFlash;
 
-    void Awake()
+    void Start()
     {
-        starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
+        muzzleFlash = GetComponentInChildren<ParticleSystem>();
     }
-    void Update()
+    public void Shoot(WeaponSO weaponSO)
     {
-        HandleShoot();
-    }
-
-    void HandleShoot()
-    {
-        if (!starterAssetsInputs.shoot) return;
-
-        animator.Play(Constants.ANIMATION_NAME, 0, 0);
         muzzleFlash.Play();
-
-        starterAssetsInputs.ShootInput(false);
 
         RaycastHit hit;
 
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity))
         {
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
-            Instantiate(hitVFXPrefab, hit.point, effectRotation);
+            Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
             EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
-            enemyHealth?.TakeDamage(damageAmount);
+            enemyHealth?.TakeDamage(weaponSO.Damage);
         }
     }
 }
