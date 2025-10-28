@@ -6,11 +6,12 @@ public class Robot : MonoBehaviour
 {
     FirstPersonController player;
     NavMeshAgent agent;
-
+    EnemyHealth enemyHealth;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        enemyHealth = GetComponent<EnemyHealth>();
     }
 
     void Start()
@@ -20,6 +21,13 @@ public class Robot : MonoBehaviour
 
     void Update()
     {
+        if (!player) return;
         agent.SetDestination(player.transform.position);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag(Constants.PLAYER_TAG)) return;
+        enemyHealth.SelfDestruct();
     }
 }

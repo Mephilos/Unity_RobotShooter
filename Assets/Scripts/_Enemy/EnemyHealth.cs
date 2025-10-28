@@ -18,8 +18,13 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHitPoint <= 0)
         {
-            Instantiate(deathParticle, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            SelfDestruct();
         }
+    }
+
+    public void SelfDestruct()
+    {
+        Instantiate(deathParticle, transform.position, Quaternion.identity);
+        Destroy(gameObject);
     }
 }
