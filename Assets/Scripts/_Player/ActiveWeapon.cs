@@ -9,11 +9,11 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] WeaponSO startingWeaponOS;
     [SerializeField] GameObject Zoom;
     [SerializeField] TMP_Text ammoText;
+    [SerializeField] CinemachineVirtualCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
     Weapon currentWeapon;
     Animator animator;
     StarterAssetsInputs starterAssetsInputs;
-    CinemachineVirtualCamera cinemachineVirtualCamera;
     FirstPersonController firstPersonController;
     WeaponSO weaponSO;
 
@@ -27,7 +27,6 @@ public class ActiveWeapon : MonoBehaviour
         firstPersonController = GetComponentInParent<FirstPersonController>();
         animator = GetComponentInParent<Animator>();
         starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
-        cinemachineVirtualCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
         defaultRotationSpeed = firstPersonController.RotationSpeed;
     }
     void Start()
