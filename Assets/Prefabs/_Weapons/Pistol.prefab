@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2893219670666691798}
-  m_Layer: 3
+  m_Layer: 7
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2297957994179348531}
   - component: {fileID: 7270923315948049330}
-  m_Layer: 3
+  - component: {fileID: 4980888626194091735}
+  m_Layer: 7
   m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,6 +79,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dc26830077304d31b03255a71df40c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InteractionLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &4980888626194091735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7348464399554555020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ImpulseDefinition:
+    m_ImpulseChannel: 1
+    m_ImpulseShape: 2
+    m_CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_ImpulseDuration: 0.2
+    m_ImpulseType: 0
+    m_DissipationRate: 0.25
+    m_RawSignal: {fileID: 0}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_RepeatMode: 0
+    m_Randomize: 1
+    m_TimeEnvelope:
+      m_AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_AttackTime: 0
+      m_SustainTime: 0.2
+      m_DecayTime: 0.7
+      m_ScaleWithImpact: 1
+      m_HoldForever: 0
+    m_ImpactRadius: 100
+    m_DirectionMode: 0
+    m_DissipationMode: 2
+    m_DissipationDistance: 100
+    m_PropagationSpeed: 343
+  m_DefaultVelocity: {x: 0, y: -0.1, z: 0}
 --- !u!1001 &2606332140044310942
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -232,7 +289,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6788947699806767687, guid: b9ab5c09e133b414e945cbd04a836f35, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -302,7 +359,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9d91fae2703d43046a1c37804ae23dad, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
