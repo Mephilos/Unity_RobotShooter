@@ -18,7 +18,7 @@ public class Turret : MonoBehaviour
     }
     void Update()
     {
-        turretHead.LookAt(playerTargetPoint.transform);
+        if (playerTargetPoint) turretHead.LookAt(playerTargetPoint.transform);
     }
 
     IEnumerator FireProjectile()
@@ -27,8 +27,8 @@ public class Turret : MonoBehaviour
         {
             yield return new WaitForSeconds(fireInterval);
 
-            Projectile newProjectile = Instantiate(projectilePrefab, projectileFirePoint.position, turretHead.rotation).GetComponent<Projectile>();
-            newProjectile.transform.LookAt(playerTargetPoint.transform);
+            Projectile newProjectile = Instantiate(projectilePrefab, projectileFirePoint.position, Quaternion.identity).GetComponent<Projectile>();
+            newProjectile.transform.LookAt(playerTargetPoint.transform); // 투사체가 플레이어를 보고 전진하도록
             newProjectile.Initialize(damage);
         }
     }
