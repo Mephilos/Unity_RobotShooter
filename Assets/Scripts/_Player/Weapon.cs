@@ -27,7 +27,7 @@ public class Weapon : MonoBehaviour
         {
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
             Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
-            EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
+            EnemyHealth enemyHealth = hit.collider.GetComponentInParent<EnemyHealth>();
             enemyHealth?.TakeDamage(weaponSO.Damage);
         }
     }
