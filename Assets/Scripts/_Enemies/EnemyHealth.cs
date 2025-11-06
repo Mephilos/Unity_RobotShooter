@@ -4,7 +4,7 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] int hitPoint = 3;
     [SerializeField] GameObject deathParticle;
-    GameManager gameManager;
+    LevelManager levelManager;
     int currentHitPoint;
 
     void Awake()
@@ -14,8 +14,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Start()
     {
-        gameManager = FindFirstObjectByType<GameManager>();
-        gameManager.AdjustEnemiesLeft(1);
+        levelManager = FindFirstObjectByType<LevelManager>();
+        levelManager.AdjustEnemiesLeft(1);
     }
     public void TakeDamage(int amount)
     {
@@ -23,7 +23,7 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHitPoint <= 0)
         {
-            gameManager.AdjustEnemiesLeft(-1);
+            levelManager.AdjustEnemiesLeft(-1);
             SelfDestruct();
         }
     }
