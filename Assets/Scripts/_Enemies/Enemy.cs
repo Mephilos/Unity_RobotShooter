@@ -1,9 +1,8 @@
 using UnityEngine;
 using StarterAssets;
+[RequireComponent(typeof(EnemyHealth))]
 public abstract class Enemy : MonoBehaviour
 {
-    [SerializeField] protected float attackRange = 2f;
-
     protected EnemyHealth enemyHealth;
     protected Transform playerTarget;
 
@@ -33,7 +32,6 @@ public abstract class Enemy : MonoBehaviour
             Move();
         }
     }
-
     protected abstract bool IsTargetInRange(float dist);
     protected abstract void Move();
     protected abstract void TryAttack();
