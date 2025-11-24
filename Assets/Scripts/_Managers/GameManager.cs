@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+
+            transform.SetParent(null);
+
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -30,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
     }
     public void QuitGame()
     {
