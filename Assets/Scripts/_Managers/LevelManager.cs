@@ -1,6 +1,6 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] TMP_Text enemiesLeftText;
