@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using StarterAssets;
 
 public class PlayMenuHandler : MonoBehaviour
 {
@@ -9,16 +10,31 @@ public class PlayMenuHandler : MonoBehaviour
     [SerializeField] Button returnMainMenuButton;
     [SerializeField] Button quitGameButton;
 
+    [SerializeField] Button gameOverQuitButton;
+    [SerializeField] Button gameOverRestartButton;
+
+    StarterAssetsInputs playerInputs;
+
+    void Awake()
+    {
+        Time.timeScale = 1.0f;
+    }
     void Start()
     {
+        playerInputs = FindFirstObjectByType<StarterAssetsInputs>();
+
         if (restartButton != null) restartButton.onClick.AddListener(() => GameManager.instance.RestartButton());
         if (returnMainMenuButton != null) returnMainMenuButton.onClick.AddListener(() => GameManager.instance.ReturnToMainMenu());
         if (quitGameButton != null) quitGameButton.onClick.AddListener(() => GameManager.instance.QuitGame());
+
     }
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (playerInputs == null) return;
+
+        if (playerInputs.pause)
         {
+            playerInputs.pause = false;
             TogglePause();
         }
     }
@@ -32,5 +48,10 @@ public class PlayMenuHandler : MonoBehaviour
 
         Cursor.lockState = isActive ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = isActive;
+
+        if (playerInputs != null)
+        {
+            playerInputs.SetInputBlocked(isActive);
+        }
     }
 }

@@ -17,14 +17,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            QuitGame();
-        }
-    }
-
     public void RestartButton()
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
