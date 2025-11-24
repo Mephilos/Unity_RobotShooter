@@ -4,6 +4,7 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] int hitPoint = 3;
     [SerializeField] GameObject deathParticle;
+    [SerializeField] int ScoreValue = 100;
     LevelManager levelManager;
     int currentHitPoint;
 
@@ -24,6 +25,7 @@ public class EnemyHealth : MonoBehaviour
         if (currentHitPoint <= 0)
         {
             levelManager.AdjustEnemiesLeft(-1);
+            ScoreManager.Instance.AddScore(ScoreValue);
             SelfDestruct();
         }
     }

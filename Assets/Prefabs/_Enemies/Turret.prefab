@@ -48,6 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitPoint: 3
   deathParticle: {fileID: 720670121470902923, guid: c2ec351f2b33142e0848a86d91f306a5, type: 3}
+  ScoreValue: 400
 --- !u!114 &7865183031655105380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,6 +65,7 @@ MonoBehaviour:
   projectileFirePoint: {fileID: 3438339352501189959}
   projectilePrefab: {fileID: 5849176006788580604, guid: 334911fc3bb4b44f7ac12bf6967e74da, type: 3}
   fireInterval: 1
+  damage: 2
 --- !u!1 &6734879799732334286
 GameObject:
   m_ObjectHideFlags: 0

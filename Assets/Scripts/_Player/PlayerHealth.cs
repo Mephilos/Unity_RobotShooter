@@ -9,8 +9,8 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera deathVirtualCam;
     [SerializeField] Transform weaponCamera;
     [SerializeField] Image[] shieldBars;
-    [Range(1, 10)]
-    [SerializeField] int startingHealth = 10;
+    [Range(1, 100000)]
+    [SerializeField] int startingHealth = 100000;
     [SerializeField] GameObject gameOverContainer;
     int currentHitPoint;
     int gameOverVirtualCameraPrioity = 20;
