@@ -9,9 +9,10 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera deathVirtualCam;
     [SerializeField] Transform weaponCamera;
     [SerializeField] Image[] shieldBars;
-    [Range(1, 100000)]
-    [SerializeField] int startingHealth = 100000;
+    [Range(1, 10)]
+    [SerializeField] int startingHealth = 10;
     [SerializeField] GameObject gameOverContainer;
+    [SerializeField] bool invincibleMode = false;
     int currentHitPoint;
     int gameOverVirtualCameraPrioity = 20;
     void Awake()
@@ -20,6 +21,10 @@ public class PlayerHealth : MonoBehaviour
         AdJustShieldUI();
     }
 
+    void Update()
+    {
+        Invincible(invincibleMode);
+    }
     public void TakeDamage(int amount)
     {
         currentHitPoint -= amount;
@@ -47,5 +52,11 @@ public class PlayerHealth : MonoBehaviour
         {
             shieldBars[i].enabled = (i < currentHitPoint);
         }
+    }
+
+    void Invincible(bool invincibleMode)
+    {
+        if (!invincibleMode) return;
+        currentHitPoint = 10000000;
     }
 }

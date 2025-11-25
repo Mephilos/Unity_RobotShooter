@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5147096505089005436}
   - component: {fileID: 5382947623172221460}
   - component: {fileID: 7865183031655105380}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65,6 +65,7 @@ MonoBehaviour:
   projectileFirePoint: {fileID: 3438339352501189959}
   projectilePrefab: {fileID: 5849176006788580604, guid: 334911fc3bb4b44f7ac12bf6967e74da, type: 3}
   fireInterval: 1
+  attackRange: 20
   damage: 2
 --- !u!1 &6734879799732334286
 GameObject:
@@ -75,7 +76,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7742754408139084981}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -111,7 +112,7 @@ GameObject:
   - component: {fileID: 8297951402178875435}
   - component: {fileID: 3916747821308695087}
   - component: {fileID: 8146890848751814354}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TurretBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -216,7 +217,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3438339352501189959}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -250,7 +251,7 @@ GameObject:
   - component: {fileID: 3576793169002481328}
   - component: {fileID: 2946501377467173968}
   - component: {fileID: 1565653779265576848}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TurretHead
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -359,7 +360,7 @@ GameObject:
   - component: {fileID: 488413905668545775}
   - component: {fileID: 2701197555170139680}
   - component: {fileID: 6298085272120360520}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}

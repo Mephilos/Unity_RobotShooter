@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2369489136443708541}
   - component: {fileID: 388885265824039227}
   - component: {fileID: 1148355837159904816}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SpawnGate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5219733043388948644}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7301141861671994319}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 2825356726236688059}
   - component: {fileID: 3570559670845527127}
   - component: {fileID: 6079150357096164300}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -248,7 +248,7 @@ GameObject:
   - component: {fileID: 1234839953455130630}
   - component: {fileID: 2408079649487564191}
   - component: {fileID: 5432737029443453945}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Door_Frame_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

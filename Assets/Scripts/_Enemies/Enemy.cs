@@ -14,7 +14,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void Start()
     {
         var player = FindFirstObjectByType<FirstPersonController>();
-        playerTarget = player.transform;
+        playerTarget = player.transform.Find(Constants.PLAYER_TARGET);
     }
 
     protected virtual void Update()

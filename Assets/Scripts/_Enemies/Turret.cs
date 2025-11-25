@@ -3,33 +3,48 @@ using NUnit.Framework.Internal;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class Turret : MonoBehaviour
+public class Turret : Enemy
 {
     [SerializeField] Transform turretHead;
     [SerializeField] Transform projectileFirePoint;
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] float fireInterval = 3f;
+    [SerializeField] float attackRange = 20f;
     [SerializeField] int damage = 2;
-    ActiveWeapon playerTargetPoint;
-    void Start()
+
+    float lastFire;
+
+    protected override void Awake()
     {
-        playerTargetPoint = FindAnyObjectByType<ActiveWeapon>();
-        StartCoroutine(FireProjectile());
+        base.Awake();
+        // lastFire = -fireInterval;
     }
-    void Update()
+    protected override void Update()
     {
-        if (playerTargetPoint) turretHead.LookAt(playerTargetPoint.transform);
+        base.Update();
+
+        if (playerTarget != null) turretHead.LookAt(playerTarget);
     }
 
-    IEnumerator FireProjectile()
+    protected override bool IsTargetInRange(float dist)
     {
-        while (playerTargetPoint)
+        return dist <= attackRange;
+    }
+
+    protected override void Move() { }
+
+    protected override void TryAttack()
+    {
+        if (Time.time >= lastFire + fireInterval)
         {
-            yield return new WaitForSeconds(fireInterval);
-
-            Projectile newProjectile = Instantiate(projectilePrefab, projectileFirePoint.position, Quaternion.identity).GetComponent<Projectile>();
-            newProjectile.transform.LookAt(playerTargetPoint.transform); // 투사체가 플레이어를 보고 전진하도록
-            newProjectile.Initialize(damage);
+            Fire();
+            lastFire = Time.time;
         }
+    }
+    void Fire()
+    {
+        Projectile newProjectile = Instantiate(projectilePrefab, projectileFirePoint.position, Quaternion.identity).GetComponent<Projectile>();
+        newProjectile.transform.LookAt(playerTarget); // 발사된 투사체가 플레이어를 보고 전진하도록
+        newProjectile.Initialize(damage);
     }
 }

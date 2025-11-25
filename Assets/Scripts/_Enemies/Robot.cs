@@ -34,6 +34,5 @@ public class Robot : Enemy
     }
 
     protected override void TryAttack() { }
-
     protected override bool IsTargetInRange(float dist) => false;
 }
