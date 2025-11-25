@@ -1,21 +1,18 @@
 using UnityEngine;
-
+using System;
 public abstract class Pickup : MonoBehaviour
 {
-    [SerializeField] float rotationSpeed = 100f;
-    void Update()
-    {
-        transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
-    }
-
+    public event Action<Pickup> OnPickup;
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(Constants.PLAYER_TAG))
         {
             ActiveWeapon activeWeapon = other.GetComponentInChildren<ActiveWeapon>();
             OnPick(activeWeapon);
-            Destroy(this.gameObject);
+            OnPickup?.Invoke(this);
         }
     }
     protected abstract void OnPick(ActiveWeapon AW);
+
+    public abstract float GetRespawnTime();
 }

@@ -13,4 +13,5 @@ public class WeaponSO : ScriptableObject
     public float ZoomAmount = 10f;
     public float ZoomSpeed = .5f;
     public int MagazineSize = 10;
+    public float RespawnTime = 15f;
 }

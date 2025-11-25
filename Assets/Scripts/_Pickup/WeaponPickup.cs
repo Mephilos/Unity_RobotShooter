@@ -8,4 +8,9 @@ public class WeaponPickup : Pickup
     {
         AW.SwitchWeapon(weaponSO);
     }
+
+    public override float GetRespawnTime()
+    {
+        return weaponSO != null ? weaponSO.RespawnTime : 30f;
+    }
 }

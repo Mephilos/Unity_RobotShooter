@@ -2,9 +2,15 @@ using UnityEngine;
 
 public class AmmoPickup : Pickup
 {
-    [SerializeField] int ammoValue = 10;
+    [SerializeField] AmmoSO ammoSO;
+
     protected override void OnPick(ActiveWeapon AW)
     {
-        AW.AdjustAmmo(ammoValue);
+        AW.AdjustAmmo(ammoSO.AmmoValue);
+    }
+
+    public override float GetRespawnTime()
+    {
+        return ammoSO != null ? ammoSO.RespawnTime : 30f;
     }
 }
