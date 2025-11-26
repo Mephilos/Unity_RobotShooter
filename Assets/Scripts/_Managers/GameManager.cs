@@ -35,11 +35,13 @@ public class GameManager : MonoBehaviour
     }
     public void RestartButton()
     {
+        InitPause();
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentScene);
     }
     public void NextScene()
     {
+        InitPause();
         int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
         SceneManager.LoadScene(nextScene);
     }
@@ -47,10 +49,17 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
     public void QuitGame()
     {
         Application.Quit();
         Debug.Log("끝 꺼짐");
+    }
+    void InitPause()
+    {
+        IsPause = false;
+        Time.timeScale = 1f;
     }
 }
