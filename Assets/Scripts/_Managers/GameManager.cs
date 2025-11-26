@@ -1,9 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
+using System.Runtime.CompilerServices;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;
+    public bool IsPause { get; private set; } = false;
 
+    public event Action<bool> OnPauseToggle;
     void Awake()
     {
         if (instance == null)
@@ -20,6 +24,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void PauseToggle()
+    {
+        IsPause = !IsPause;
+        Time.timeScale = IsPause ? 0f : 1f;
+        Cursor.lockState = IsPause ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = IsPause;
+
+        OnPauseToggle?.Invoke(IsPause);
+    }
     public void RestartButton()
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;

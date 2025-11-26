@@ -1,25 +1,27 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using TMPro;
-using UnityEditor.UI;
-using Unity.VisualScripting;
-public class MainMenuHandler : MonoBehaviour
+
+public class MainMenuHandler : MenuHandler
 {
     [SerializeField] GameObject optionPanel;
-    [SerializeField] Button gameStartButton;
-    [SerializeField] Button gameOptionButton;
-    [SerializeField] Button quitButton;
+    [SerializeField] InputActionReference cancelDetec;
 
-    void Start()
+    void OnEnable()
     {
-        if (gameStartButton != null)
+        cancelDetec.action.Enable();
+        cancelDetec.action.performed += OnCancelInput;
+    }
+    void OnDisable()
+    {
+        cancelDetec.action.performed -= OnCancelInput;
+        cancelDetec.action.Disable();
+    }
+    void OnCancelInput(InputAction.CallbackContext callback)
+    {
+        if (optionPanel != null && optionPanel.activeSelf)
         {
-            gameStartButton.onClick.AddListener(() => GameManager.instance.NextScene());
-        }
-        if (quitButton != null)
-        {
-            quitButton.onClick.AddListener(() => GameManager.instance.QuitGame());
+            optionPanel.SetActive(false);
         }
     }
-
 }
