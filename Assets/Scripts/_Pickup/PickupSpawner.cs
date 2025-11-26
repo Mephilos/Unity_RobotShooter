@@ -1,17 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using Unity.VisualScripting;
 public class PickupSpawner : MonoBehaviour
 {
     [SerializeField] Pickup pickupPrefab;
     [SerializeField] Transform spawnPoint;
-
+    [SerializeField] Image respawnCoolTimeGaugeImg;
     [SerializeField] float rotationSpeed = 100f;
 
     Pickup currentPickup;
     float respawnTime;
     void Start()
     {
+        respawnCoolTimeGaugeImg.gameObject.SetActive(false);
         RespawnItem();
     }
 
@@ -30,8 +32,10 @@ public class PickupSpawner : MonoBehaviour
         if (currentPickup != null)
         {
             respawnTime = currentPickup.GetRespawnTime();
+            currentPickup.OnPickup -= doPickup;
             currentPickup.OnPickup += doPickup;
             currentPickup.gameObject.SetActive(true);
+            respawnCoolTimeGaugeImg.gameObject.SetActive(false);
         }
     }
     void doPickup(Pickup pickup)
@@ -42,13 +46,17 @@ public class PickupSpawner : MonoBehaviour
 
     IEnumerator RespawnRoutine()
     {
-        // float respawnTimer = 0f;
-        // while (respawnTimer < respawnTime)
-        // {
-        //     respawnTimer += Time.deltaTime;
-        // }
-        yield return new WaitForSeconds(respawnTime);
+        respawnCoolTimeGaugeImg.gameObject.SetActive(true);
+        respawnCoolTimeGaugeImg.fillAmount = 0f;
 
+        float timer = 0f;
+        while (timer < respawnTime)
+        {
+            timer += Time.deltaTime;
+
+            respawnCoolTimeGaugeImg.fillAmount = timer / respawnTime;
+            yield return null;
+        }
         RespawnItem();
     }
 }

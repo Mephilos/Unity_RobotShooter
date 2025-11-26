@@ -20,6 +20,7 @@ public class EnemyHealth : MonoBehaviour
     }
     public void TakeDamage(int amount)
     {
+        // TODO: 죽음 조건 분기 추가
         currentHitPoint -= amount;
 
         if (currentHitPoint <= 0)
