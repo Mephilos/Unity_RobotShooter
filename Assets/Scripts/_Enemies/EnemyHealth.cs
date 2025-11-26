@@ -24,15 +24,15 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHitPoint <= 0)
         {
-            levelManager.AdjustEnemiesLeft(-1);
-            ScoreManager.Instance.AddScore(ScoreValue);
             SelfDestruct();
+            ScoreManager.Instance.AddScore(ScoreValue);
         }
     }
 
     public void SelfDestruct()
     {
         Instantiate(deathParticle, transform.position, Quaternion.identity);
+        levelManager.AdjustEnemiesLeft(-1);
         Destroy(gameObject);
     }
 }

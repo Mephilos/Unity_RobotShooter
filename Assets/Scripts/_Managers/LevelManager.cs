@@ -26,6 +26,7 @@ public class LevelManager : MonoBehaviour
         OnEnemyCountChanged?.Invoke(enemiesLeft);
         if (enemiesLeft <= 0)
         {
+            Debug.Log("승리 호출");
             OnLevelWin?.Invoke();
         }
     }

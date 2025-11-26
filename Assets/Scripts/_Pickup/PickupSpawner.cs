@@ -23,32 +23,31 @@ public class PickupSpawner : MonoBehaviour
 
     void RespawnItem()
     {
-        if (currentPickup != null)
+        if (currentPickup == null)
         {
             currentPickup = Instantiate(pickupPrefab, spawnPoint.position, Quaternion.identity, spawnPoint);
+        }
+        if (currentPickup != null)
+        {
             respawnTime = currentPickup.GetRespawnTime();
             currentPickup.OnPickup += doPickup;
-        }
-        else
-        {
             currentPickup.gameObject.SetActive(true);
         }
     }
     void doPickup(Pickup pickup)
     {
         pickup.gameObject.SetActive(false);
-
         StartCoroutine(RespawnRoutine());
     }
 
     IEnumerator RespawnRoutine()
     {
-        float respawnTimer = 0f;
-        while (respawnTimer < respawnTime)
-        {
-            respawnTimer += Time.deltaTime;
-        }
-        yield return null;
+        // float respawnTimer = 0f;
+        // while (respawnTimer < respawnTime)
+        // {
+        //     respawnTimer += Time.deltaTime;
+        // }
+        yield return new WaitForSeconds(respawnTime);
 
         RespawnItem();
     }
