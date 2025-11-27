@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 3.5
+  deathParticle: {fileID: 720670121470902923, guid: c2ec351f2b33142e0848a86d91f306a5, type: 3}
 --- !u!136 &2728377273232929869
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -201,7 +202,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitPoint: 3
-  deathParticle: {fileID: 720670121470902923, guid: c2ec351f2b33142e0848a86d91f306a5, type: 3}
   scoreValue: 100
   weakPointKillBonus: 50
 --- !u!95 &7955783132782823283

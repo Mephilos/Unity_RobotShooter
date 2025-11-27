@@ -1,13 +1,16 @@
 using UnityEngine;
+using System;
+using Unity.Mathematics;
 
 public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] int hitPoint = 3;
-    [SerializeField] GameObject deathParticle;
     [SerializeField] int scoreValue = 100;
     [SerializeField] int weakPointKillBonus = 50;
     LevelManager levelManager;
     int currentHitPoint;
+    bool isDead;
+    public event Action OnDeath;
 
     void Awake()
     {
@@ -21,21 +24,23 @@ public class EnemyHealth : MonoBehaviour
     }
     public void TakeDamage(int amount, bool isWeakPoint = false)
     {
-        // TODO: 죽음 조건 분기 추가
+        if (isDead) return;
+
         currentHitPoint -= amount;
 
         if (currentHitPoint <= 0)
         {
-            SelfDestruct();
-            int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
-            ScoreManager.Instance.AddScore(finalScore);
+            Die(isWeakPoint);
         }
     }
 
-    public void SelfDestruct()
+    void Die(bool isWeakPoint)
     {
-        Instantiate(deathParticle, transform.position, Quaternion.identity);
+        isDead = true;
+        int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
+        ScoreManager.Instance.AddScore(finalScore);
         levelManager.AdjustEnemiesLeft(-1);
-        Destroy(gameObject);
+
+        OnDeath?.Invoke();
     }
 }

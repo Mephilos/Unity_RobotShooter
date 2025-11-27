@@ -48,7 +48,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitPoint: 3
-  deathParticle: {fileID: 720670121470902923, guid: c2ec351f2b33142e0848a86d91f306a5, type: 3}
   scoreValue: 100
   weakPointKillBonus: 50
 --- !u!114 &7865183031655105380
@@ -66,6 +65,7 @@ MonoBehaviour:
   turretHead: {fileID: 2997180010048946593}
   projectileFirePoint: {fileID: 3438339352501189959}
   projectilePrefab: {fileID: 5849176006788580604, guid: 334911fc3bb4b44f7ac12bf6967e74da, type: 3}
+  deathParticle: {fileID: 6813666361524926675, guid: 1c345a6e6dde44adab33b49311db9aad, type: 3}
   fireInterval: 1
   attackRange: 20
   damage: 2
