@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SocialPlatforms.Impl;
+using StarterAssets;
 
 public class PlaySceneUI : MonoBehaviour
 {
@@ -9,9 +8,11 @@ public class PlaySceneUI : MonoBehaviour
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text accText;
     [SerializeField] GameObject winText;
+    StarterAssetsInputs starterAssetsInputs;
 
     void Start()
     {
+        starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
         LevelManager.Instance.OnEnemyCountChanged += UpdateEnemyLeft;
         LevelManager.Instance.OnLevelWin += ShowWinUI;
         UpdateEnemyLeft(0);
@@ -43,6 +44,10 @@ public class PlaySceneUI : MonoBehaviour
     void ShowWinUI()
     {
         winText.SetActive(true);
+        Time.timeScale = 0f;
+
+        starterAssetsInputs.SetInputBlocked(true);
+        starterAssetsInputs.SetCursorState(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;

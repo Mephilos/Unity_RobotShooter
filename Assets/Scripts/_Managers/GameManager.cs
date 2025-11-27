@@ -48,7 +48,9 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
+        InitPause();
         SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
