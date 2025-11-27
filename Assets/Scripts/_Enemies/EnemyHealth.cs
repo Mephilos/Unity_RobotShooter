@@ -4,7 +4,8 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] int hitPoint = 3;
     [SerializeField] GameObject deathParticle;
-    [SerializeField] int ScoreValue = 100;
+    [SerializeField] int scoreValue = 100;
+    [SerializeField] int weakPointKillBonus = 50;
     LevelManager levelManager;
     int currentHitPoint;
 
@@ -18,7 +19,7 @@ public class EnemyHealth : MonoBehaviour
         levelManager = FindFirstObjectByType<LevelManager>();
         levelManager.AdjustEnemiesLeft(1);
     }
-    public void TakeDamage(int amount)
+    public void TakeDamage(int amount, bool isWeakPoint = false)
     {
         // TODO: 죽음 조건 분기 추가
         currentHitPoint -= amount;
@@ -26,7 +27,8 @@ public class EnemyHealth : MonoBehaviour
         if (currentHitPoint <= 0)
         {
             SelfDestruct();
-            ScoreManager.Instance.AddScore(ScoreValue);
+            int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
+            ScoreManager.Instance.AddScore(finalScore);
         }
     }
 

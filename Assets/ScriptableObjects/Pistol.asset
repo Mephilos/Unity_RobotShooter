@@ -19,3 +19,6 @@ MonoBehaviour:
   isAutomatic: 0
   CanZoom: 0
   ZoomAmount: 10
+  ZoomSpeed: 0.5
+  MagazineSize: 10
+  RespawnTime: 15

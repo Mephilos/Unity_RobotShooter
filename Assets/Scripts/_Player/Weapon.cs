@@ -27,8 +27,17 @@ public class Weapon : MonoBehaviour
         {
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
             Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
-            EnemyHealth enemyHealth = hit.collider.GetComponentInParent<EnemyHealth>();
-            enemyHealth?.TakeDamage(weaponSO.Damage);
+
+            if (hit.collider.TryGetComponent<WeakPoint>(out WeakPoint weakPoint))
+            {
+                weakPoint.OnHit(weaponSO.Damage);
+                Debug.Log("약점 히트");
+            }
+            else
+            {
+                EnemyHealth enemyHealth = hit.collider.GetComponentInParent<EnemyHealth>();
+                enemyHealth?.TakeDamage(weaponSO.Damage);
+            }
         }
     }
 }
