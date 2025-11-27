@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WeakPoint : MonoBehaviour
+public class WeakPoint : MonoBehaviour, IDamageable
 {
     [SerializeField] EnemyHealth enemyHealth;
     [SerializeField] float damageMultiplier = 2.0f;
@@ -9,10 +9,10 @@ public class WeakPoint : MonoBehaviour
     {
         enemyHealth = GetComponentInParent<EnemyHealth>();
     }
-    public void OnHit(int damage)
+
+    public void TakeDamage(int damage, Vector3 hitPoint, DamageType type)
     {
         int critical = Mathf.RoundToInt(damage * damageMultiplier);
-
-        enemyHealth.TakeDamage(critical, true);
+        enemyHealth.TakeDamageProcess(critical, true);
     }
 }

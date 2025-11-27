@@ -44,7 +44,7 @@ public class Robot : Enemy
     void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag(Constants.PLAYER_TAG)) return;
-        enemyHealth.TakeDamage(Constants.ROBOT_SELF_DESTRUCT);
+        enemyHealth.TakeDamageProcess(Constants.ROBOT_SELF_DESTRUCT);
     }
 
     void SelfDestruct()

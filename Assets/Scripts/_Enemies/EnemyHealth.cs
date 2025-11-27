@@ -1,8 +1,7 @@
 using UnityEngine;
 using System;
-using Unity.Mathematics;
 
-public class EnemyHealth : MonoBehaviour
+public class EnemyHealth : MonoBehaviour, IDamageable
 {
     [SerializeField] int hitPoint = 3;
     [SerializeField] int scoreValue = 100;
@@ -22,7 +21,13 @@ public class EnemyHealth : MonoBehaviour
         levelManager = FindFirstObjectByType<LevelManager>();
         levelManager.AdjustEnemiesLeft(1);
     }
-    public void TakeDamage(int amount, bool isWeakPoint = false)
+
+    public void TakeDamage(int damage, Vector3 hitPoint, DamageType type)
+    {
+        TakeDamageProcess(damage, false);
+    }
+
+    public void TakeDamageProcess(int amount, bool isWeakPoint = false)
     {
         if (isDead) return;
 
@@ -43,4 +48,5 @@ public class EnemyHealth : MonoBehaviour
 
         OnDeath?.Invoke();
     }
+
 }
