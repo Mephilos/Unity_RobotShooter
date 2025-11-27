@@ -14,5 +14,6 @@ public class WeakPoint : MonoBehaviour, IDamageable
     {
         int critical = Mathf.RoundToInt(damage * damageMultiplier);
         enemyHealth.TakeDamageProcess(critical, true);
+        Debug.Log("약점샷");
     }
 }

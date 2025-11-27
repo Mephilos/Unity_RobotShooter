@@ -20,6 +20,8 @@ public class Weapon : MonoBehaviour
     {
         muzzleFlash.Play();
         impulseSource.GenerateImpulse();
+
+        ScoreManager.Instance.ReportShot();
         RaycastHit hit;
 
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity,
@@ -28,9 +30,13 @@ public class Weapon : MonoBehaviour
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
             Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
 
-
             IDamageable damageable = hit.collider.GetComponent<IDamageable>();
-            damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
+
+            if (damageable != null)
+            {
+                damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
+                ScoreManager.Instance.ReportHit();
+            }
         }
     }
 }

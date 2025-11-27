@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecd404c12169f4914b8230b386da4133, type: 3}
   m_Name: AmmoSO
   m_EditorClassIdentifier: 
-  AmmoPrefab: {fileID: 0}
+  AmmoPrefab: {fileID: 4073832365010750464, guid: 2d2373d221bc34e52b24d694c07426e9, type: 3}
   AmmoValue: 10
   RespawnTime: 15

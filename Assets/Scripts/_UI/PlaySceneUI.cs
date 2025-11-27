@@ -7,6 +7,7 @@ public class PlaySceneUI : MonoBehaviour
 {
     [SerializeField] TMP_Text enemiesLeftText;
     [SerializeField] TMP_Text scoreText;
+    [SerializeField] TMP_Text accText;
     [SerializeField] GameObject winText;
 
     void Start()
@@ -17,13 +18,15 @@ public class PlaySceneUI : MonoBehaviour
 
         ScoreManager.Instance.OnScoreChanged += UpdateScoreUI;
         UpdateScoreUI(ScoreManager.Instance.GetCurrentScore());
-
+        ScoreManager.Instance.OnAccChanged += UpdateAccUI;
+        UpdateAccUI(ScoreManager.Instance.GetAccuracy());
     }
     void OnDestroy()
     {
         LevelManager.Instance.OnEnemyCountChanged -= UpdateEnemyLeft;
         LevelManager.Instance.OnLevelWin -= ShowWinUI;
         ScoreManager.Instance.OnScoreChanged -= UpdateScoreUI;
+        ScoreManager.Instance.OnAccChanged -= UpdateAccUI;
     }
     void UpdateEnemyLeft(int count)
     {
@@ -32,6 +35,10 @@ public class PlaySceneUI : MonoBehaviour
     void UpdateScoreUI(int score)
     {
         scoreText.text = Constants.SCORE_STRING + $"{score:N0}";
+    }
+    void UpdateAccUI(float acc)
+    {
+        accText.text = Constants.ACC_STRING + $"{acc:F1}%";
     }
     void ShowWinUI()
     {
