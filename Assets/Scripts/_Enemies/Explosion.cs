@@ -6,7 +6,6 @@ public class Explosion : MonoBehaviour
 {
     [SerializeField] float radius = 2f;
     [SerializeField] int explosionDamage = 5;
-
     Collider[] hitCol = new Collider[10];
     void OnEnable()
     {

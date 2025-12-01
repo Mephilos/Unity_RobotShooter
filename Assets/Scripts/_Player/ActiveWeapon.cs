@@ -1,7 +1,7 @@
 using UnityEngine;
 using StarterAssets;
 using System.Collections;
-using Cinemachine;
+using Unity.Cinemachine;
 using TMPro;
 
 public class ActiveWeapon : MonoBehaviour
@@ -9,7 +9,7 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] WeaponSO startingWeaponOS;
     [SerializeField] GameObject Zoom;
     [SerializeField] TMP_Text ammoText;
-    [SerializeField] CinemachineVirtualCamera cinemachineVirtualCamera;
+    [SerializeField] CinemachineCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
     Weapon currentWeapon;
     Animator animator;
@@ -93,7 +93,7 @@ public class ActiveWeapon : MonoBehaviour
         if (!starterAssetsInputs.zoom)
         {
             Zoom.SetActive(false);
-            cinemachineVirtualCamera.m_Lens.FieldOfView = defaultFOV;
+            cinemachineVirtualCamera.Lens.FieldOfView = defaultFOV;
             weaponCamera.fieldOfView = defaultFOV;
             firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
         }
@@ -101,7 +101,7 @@ public class ActiveWeapon : MonoBehaviour
         else
         {
             Zoom.SetActive(true);
-            cinemachineVirtualCamera.m_Lens.FieldOfView = weaponSO.ZoomAmount;
+            cinemachineVirtualCamera.Lens.FieldOfView = weaponSO.ZoomAmount;
             weaponCamera.fieldOfView = weaponSO.ZoomAmount;
             firstPersonController.ChangeRotationSpeed(weaponSO.ZoomSpeed);
         }

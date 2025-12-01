@@ -1,12 +1,12 @@
 using System;
-using Cinemachine;
+using Unity.Cinemachine;
 using StarterAssets;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [SerializeField] CinemachineVirtualCamera deathVirtualCam;
+    [SerializeField] CinemachineCamera deathVirtualCam;
     [SerializeField] Transform weaponCamera;
     [SerializeField] Image[] shieldBars;
     [Range(1, 10)]
