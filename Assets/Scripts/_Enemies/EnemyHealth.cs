@@ -13,12 +13,14 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     void Awake()
     {
-        currentHitPoint = hitPoint;
+        levelManager = FindFirstObjectByType<LevelManager>();
     }
 
-    void Start()
+    void OnEnable()
     {
-        levelManager = FindFirstObjectByType<LevelManager>();
+        currentHitPoint = hitPoint;
+        isDead = false;
+
         levelManager.AdjustEnemiesLeft(1);
     }
 

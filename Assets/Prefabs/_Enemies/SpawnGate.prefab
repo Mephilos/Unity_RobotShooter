@@ -70,8 +70,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitPoint: 3
-  deathParticle: {fileID: 720670121470902923, guid: c2ec351f2b33142e0848a86d91f306a5, type: 3}
-  ScoreValue: 300
+  scoreValue: 100
+  weakPointKillBonus: 50
 --- !u!114 &1148355837159904816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,6 +85,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefabs: {fileID: 2866179155940054124, guid: 7b9d59e23a61e475f92b32c60754423f, type: 3}
+  deathParticle: {fileID: 7202793698699307473, guid: 8e51ca620953d431f9249ac45d82cdf8, type: 3}
   spawnPoint: {fileID: 7301141861671994319}
   enemySpawnTime: 5
 --- !u!1 &2066313001905046669

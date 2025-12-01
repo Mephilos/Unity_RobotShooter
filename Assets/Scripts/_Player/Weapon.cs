@@ -28,7 +28,8 @@ public class Weapon : MonoBehaviour
                              InteractionLayer, QueryTriggerInteraction.Ignore))
         {
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
-            Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
+            // Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
+            PoolManager.Instance.Get(weaponSO.HitVFXPrefab.gameObject, hit.point, effectRotation);
 
             IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
 

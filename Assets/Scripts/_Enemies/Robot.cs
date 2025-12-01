@@ -17,6 +17,8 @@ public class Robot : Enemy
     void OnEnable()
     {
         enemyHealth.OnDeath += SelfDestruct;
+        agent.Warp(transform.position);
+        agent.ResetPath();
     }
 
     protected override void Update()
@@ -49,7 +51,8 @@ public class Robot : Enemy
 
     void SelfDestruct()
     {
-        Instantiate(deathParticle, transform.position, Quaternion.identity);
-        Destroy(gameObject);
+        // Instantiate(deathParticle, transform.position, Quaternion.identity);
+        PoolManager.Instance.Get(deathParticle, transform.position, Quaternion.identity);
+        PoolManager.Instance.Release(gameObject);
     }
 }

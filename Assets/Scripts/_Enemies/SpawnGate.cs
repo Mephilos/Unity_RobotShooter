@@ -37,7 +37,8 @@ public class SpawnGate : MonoBehaviour
                 yield break;
             }
 
-            Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
+            //Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
+            PoolManager.Instance.Get(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
 
             yield return new WaitForSeconds(enemySpawnTime);
         }

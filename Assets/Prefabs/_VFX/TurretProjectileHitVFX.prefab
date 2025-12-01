@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 8863304742462862233}
   - component: {fileID: 8430451896267564482}
   - component: {fileID: 3473332765384288347}
-  m_Layer: 0
+  - component: {fileID: 2957973367846014724}
+  m_Layer: 8
   m_Name: TurretProjectileHitVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +44,7 @@ ParticleSystem:
   serializedVersion: 8
   lengthInSec: 0.1
   simulationSpeed: 1
-  stopAction: 2
+  stopAction: 0
   cullingMode: 3
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
@@ -4834,3 +4835,16 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &2957973367846014724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8404498398839729220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3592e439431f4474e8d746de93e257b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifeTime: 2

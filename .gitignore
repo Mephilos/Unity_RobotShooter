@@ -15,6 +15,7 @@
 # 서드파티 에셋 제외
 /Assets/_3rd Assets/
 /Assets/_3rd Party Assets/
+/OptimizationLogs/
 
 .utmp/
 /[Ll]ibrary/

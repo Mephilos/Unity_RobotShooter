@@ -10,18 +10,19 @@ public class OptimizationMeasurement : MonoBehaviour
     [SerializeField] bool saveToCSV = true;
     [SerializeField] bool before = true;
     [SerializeField] float recordInterval = 0.5f;
+    ProfilerRecorder profilerRecorder;
+    StringBuilder csvContent = new StringBuilder();
 
 
     string savePath;
-    StringBuilder csvContent = new StringBuilder();
     float deltaTime = 0.0f;
     float timer = 0.0f;
+    int initGcCount = 0;
 
-    ProfilerRecorder profilerRecorder;
 
     void OnEnable()
     {
-        profilerRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC in Frame");
+        profilerRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
     }
     void OnDisable()
     {
@@ -29,7 +30,8 @@ public class OptimizationMeasurement : MonoBehaviour
     }
     void Start()
     {
-        csvContent.AppendLine("Time,FPS, Memory, GC Alloc, GC Count");
+        csvContent.AppendLine("Time,FPS, Memory(MB), GC Alloc(KB), GC Count");
+
         if (before)
         {
             savePath = Application.dataPath + "/../OptimizationLogs/Before";
@@ -43,6 +45,8 @@ public class OptimizationMeasurement : MonoBehaviour
         {
             Directory.CreateDirectory(savePath);
         }
+
+        initGcCount = GC.CollectionCount(0);
     }
 
     void Update()
@@ -52,7 +56,7 @@ public class OptimizationMeasurement : MonoBehaviour
         if (saveToCSV)
         {
             timer += Time.deltaTime;
-            if (timer > -recordInterval)
+            if (timer >= recordInterval)
             {
                 RecordData();
                 timer = 0f;
@@ -66,7 +70,7 @@ public class OptimizationMeasurement : MonoBehaviour
         float totalMem = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / 1024f / 1024f;
 
         float gcAlloc = profilerRecorder.LastValue / 1024f;
-        int gcCount = GC.CollectionCount(0);
+        int gcCount = GC.CollectionCount(0) - initGcCount;
 
         csvContent.AppendLine($"{Time.time:F1},{fps:F1},{totalMem:F1},{gcAlloc:F1},{gcCount}");
     }

@@ -7,26 +7,27 @@ public class Turret : Enemy
     [SerializeField] Transform projectileFirePoint;
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] GameObject deathParticle;
-    [SerializeField] float fireInterval = 3f;
-    [SerializeField] float attackRange = 20f;
+    [SerializeField] float fireInterval = 5f;
+    [SerializeField] float attackRange = 10f;
     [SerializeField] int damage = 2;
 
     float lastFire;
+    Quaternion originRotation;
 
     protected override void Awake()
     {
         base.Awake();
-        // lastFire = -fireInterval;
+        originRotation = turretHead.rotation;
     }
     void OnEnable()
     {
         enemyHealth.OnDeath += Death;
+        lastFire = Time.time;
     }
     protected override void Update()
     {
+        // if (playerTarget != null) turretHead.LookAt(playerTarget);
         base.Update();
-
-        if (playerTarget != null) turretHead.LookAt(playerTarget);
     }
     void OnDisable()
     {
@@ -38,10 +39,15 @@ public class Turret : Enemy
         return dist <= attackRange;
     }
 
-    protected override void Move() { }
+    protected override void Move()
+    {
+        turretHead.rotation = Quaternion.Slerp(turretHead.rotation, originRotation, Time.deltaTime * 2f);
+    }
 
     protected override void TryAttack()
     {
+        turretHead.LookAt(playerTarget);
+
         if (Time.time >= lastFire + fireInterval)
         {
             Fire();
@@ -50,13 +56,18 @@ public class Turret : Enemy
     }
     void Fire()
     {
-        Projectile newProjectile = Instantiate(projectilePrefab, projectileFirePoint.position, Quaternion.identity).GetComponent<Projectile>();
-        newProjectile.transform.LookAt(playerTarget); // 발사된 투사체가 플레이어를 보고 전진하도록
+        Vector3 dir = (playerTarget.position - projectileFirePoint.position);
+        Quaternion lookRotation = Quaternion.LookRotation(dir);
+
+        GameObject projectile = PoolManager.Instance.Get(projectilePrefab, projectileFirePoint.position, lookRotation);
+        Projectile newProjectile = projectile.GetComponent<Projectile>();
         newProjectile.Initialize(damage);
     }
     void Death()
     {
         Instantiate(deathParticle, turretHead.position, quaternion.identity);
+        // PoolManager.Instance.Get(deathParticle, transform.position, quaternion.identity);
+
         Destroy(gameObject);
     }
 }
