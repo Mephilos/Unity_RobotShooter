@@ -10,9 +10,13 @@ public class SpawnGate : MonoBehaviour
     [SerializeField] float enemySpawnTime = 5f;
     PlayerHealth player;
     EnemyHealth enemyHealth;
+
+    WaitForSeconds wait;
     void Awake()
     {
         enemyHealth = GetComponent<EnemyHealth>();
+
+        wait = new WaitForSeconds(enemySpawnTime);
     }
     void OnEnable()
     {
@@ -40,7 +44,7 @@ public class SpawnGate : MonoBehaviour
             //Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
             PoolManager.Instance.Get(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
 
-            yield return new WaitForSeconds(enemySpawnTime);
+            yield return wait;
         }
     }
     void Death()
