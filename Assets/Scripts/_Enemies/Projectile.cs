@@ -5,6 +5,7 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] float projectileSpeed = 10f;
     [SerializeField] GameObject projectileHitVFX;
+    [SerializeField] float lifeTime = 3f;
     int damage;
     Rigidbody rb;
 
@@ -16,7 +17,12 @@ public class Projectile : MonoBehaviour
     {
         rb.linearVelocity = transform.forward * projectileSpeed;
     }
+    void OnEnable()
+    {
+        rb.linearVelocity = transform.forward * projectileSpeed;
 
+        CancelInvoke(nameof(Release));
+    }
     public void Initialize(int amount)
     {
         this.damage = amount;
@@ -28,5 +34,9 @@ public class Projectile : MonoBehaviour
 
         Instantiate(projectileHitVFX, transform.position, Quaternion.identity);
         Destroy(this.gameObject);
+    }
+    void Release()
+    {
+
     }
 }

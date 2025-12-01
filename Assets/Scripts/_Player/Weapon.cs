@@ -30,7 +30,7 @@ public class Weapon : MonoBehaviour
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
             Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
 
-            IDamageable damageable = hit.collider.GetComponent<IDamageable>();
+            IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
 
             if (damageable != null)
             {

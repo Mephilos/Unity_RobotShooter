@@ -27,7 +27,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         TakeDamageProcess(damage, false);
     }
 
-    public void TakeDamageProcess(int amount, bool isWeakPoint = false)
+    public void TakeDamageProcess(int amount, bool isWeakPoint = false, bool giveScore = true)
     {
         if (isDead) return;
 
@@ -35,15 +35,18 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         if (currentHitPoint <= 0)
         {
-            Die(isWeakPoint);
+            Die(isWeakPoint, giveScore);
         }
     }
 
-    void Die(bool isWeakPoint)
+    void Die(bool isWeakPoint, bool giveScore)
     {
         isDead = true;
-        int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
-        ScoreManager.Instance.AddScore(finalScore);
+        if (giveScore)
+        {
+            int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
+            ScoreManager.Instance.AddScore(finalScore);
+        }
         levelManager.AdjustEnemiesLeft(-1);
 
         OnDeath?.Invoke();
