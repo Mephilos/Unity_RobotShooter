@@ -44,7 +44,6 @@ public class PlaySceneUI : MonoBehaviour
     void ShowWinUI()
     {
         winText.SetActive(true);
-        Time.timeScale = 0f;
 
         starterAssetsInputs.SetInputBlocked(true);
         starterAssetsInputs.SetCursorState(false);

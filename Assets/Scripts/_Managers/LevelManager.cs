@@ -83,6 +83,16 @@ public class LevelManager : MonoBehaviour
         {
             int timeBonus = Mathf.RoundToInt(timeRemaining * scoreTime);
             ScoreManager.Instance.AddScore(timeBonus);
+            Debug.Log($"[TimeBonus] {timeRemaining:F1}<- 남은시간 \n 시간 보너스 점수: {timeBonus}");
         }
+
+        int curTotalScore = ScoreManager.Instance.GetCurrentScore();
+        float accuracy = ScoreManager.Instance.GetAccuracy();
+        int accBonus = Mathf.RoundToInt(curTotalScore * (accuracy / 100f));
+
+        ScoreManager.Instance.AddScore(accBonus);
+
+        Debug.Log($"정확도 보너스 점수: 정확도{accuracy:F1}% -> 정확도 보너스: {accBonus}");
+        Debug.Log($"최종 점수: {ScoreManager.Instance.GetCurrentScore()}");
     }
 }
