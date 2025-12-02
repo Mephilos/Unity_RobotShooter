@@ -1,0 +1,57 @@
+using UnityEngine;
+using System;
+
+public class EnemyHealth : MonoBehaviour, IDamageable
+{
+    [SerializeField] int hitPoint = 3;
+    [SerializeField] int scoreValue = 100;
+    [SerializeField] int weakPointKillBonus = 50;
+    LevelManager levelManager;
+    int currentHitPoint;
+    bool isDead;
+    public event Action OnDeath;
+
+    void Awake()
+    {
+        levelManager = FindFirstObjectByType<LevelManager>();
+    }
+
+    void OnEnable()
+    {
+        currentHitPoint = hitPoint;
+        isDead = false;
+
+        levelManager.AdjustEnemiesLeft(1);
+    }
+
+    public void TakeDamage(int damage, Vector3 hitPoint, DamageType type)
+    {
+        TakeDamageProcess(damage, false);
+    }
+
+    public void TakeDamageProcess(int amount, bool isWeakPoint = false, bool giveScore = true)
+    {
+        if (isDead) return;
+
+        currentHitPoint -= amount;
+
+        if (currentHitPoint <= 0)
+        {
+            Die(isWeakPoint, giveScore);
+        }
+    }
+
+    void Die(bool isWeakPoint, bool giveScore)
+    {
+        isDead = true;
+        if (giveScore)
+        {
+            int finalScore = scoreValue + (isWeakPoint ? weakPointKillBonus : 0);
+            ScoreManager.Instance.AddScore(finalScore);
+        }
+        levelManager.AdjustEnemiesLeft(-1);
+
+        OnDeath?.Invoke();
+    }
+
+}
