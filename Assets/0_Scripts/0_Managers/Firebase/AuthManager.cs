@@ -78,6 +78,11 @@ public class AuthManager : MonoBehaviour
 
     public void Register(string email, string password, string nickName)
     {
+        if (!IsFirebaseReady || firebaseAuth == null)
+        {
+            OnLoginFailed?.Invoke("서버 연결 중");
+            return;
+        }
         Debug.Log("회원가입 시도");
         firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
@@ -97,6 +102,11 @@ public class AuthManager : MonoBehaviour
 
     public void Login(string email, string password)
     {
+        if (!IsFirebaseReady || firebaseAuth == null)
+        {
+            OnLoginFailed?.Invoke("서버 연결 중");
+            return;
+        }
         Debug.Log("로그인 시도");
         firebaseAuth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
@@ -165,6 +175,9 @@ public class AuthManager : MonoBehaviour
 
     void OnDestroy()
     {
-        firebaseAuth.StateChanged -= AuthStateChanged;
+        if (firebaseAuth != null)
+        {
+            firebaseAuth.StateChanged -= AuthStateChanged;
+        }
     }
 }
