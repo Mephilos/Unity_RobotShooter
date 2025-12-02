@@ -7,16 +7,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Android.Gradle.Manifest;
 
 [Serializable]
 public class UserScoreData
 {
+    public string userName;
     public int score;
     public float time;
     public float acc;
 
-    public UserScoreData(int score, float time, float acc)
+    public UserScoreData(string userName, int score, float time, float acc)
     {
+        this.userName = userName;
         this.score = score;
         this.time = time;
         this.acc = acc;
@@ -26,7 +29,6 @@ public class UserScoreData
 public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager Instance;
-    FirebaseAuth firebaseAuth;
     DatabaseReference databaseReference;
 
     string userId;
@@ -52,46 +54,18 @@ public class FirebaseManager : MonoBehaviour
 
     void Start()
     {
-        InitializeFirebase();
+        AuthManager.Instance.OnLoginSuccess += OnLoginHandler;
     }
 
-    void InitializeFirebase()
+    void OnLoginHandler(Firebase.Auth.FirebaseUser firebaseUser)
     {
-        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
-        {
-            var dependencyStatus = task.Result;
-            if (dependencyStatus == DependencyStatus.Available)
-            {
-                firebaseAuth = FirebaseAuth.DefaultInstance;
-                databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
-                SignInAnonymously();
-            }
-            else
-            {
-                Debug.LogError($"파이어베이스 연결 실패: {dependencyStatus}");
-            }
-        });
+        databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+        LoadMyData();
     }
 
-    void SignInAnonymously()
-    {
-        firebaseAuth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
-        {
-            if (task.IsCanceled || task.IsFaulted)
-            {
-                Debug.LogError("익명 로그인 실패");
-                return;
-            }
-
-            FirebaseUser newUser = task.Result.User;
-            userId = newUser.UserId;
-            Debug.Log($"로그인 완료 ID: {userId}");
-
-            LoadMyData();
-        });
-    }
     void LoadMyData()
     {
+        string userId = AuthManager.Instance.UserId;
         if (string.IsNullOrEmpty(userId)) return;
 
         databaseReference.Child("users").Child(userId).GetValueAsync().ContinueWithOnMainThread(task =>
@@ -102,6 +76,7 @@ public class FirebaseManager : MonoBehaviour
                 if (dataSnapshot.Exists && dataSnapshot.HasChildren)
                 {
                     IDictionary<string, object> data = (IDictionary<string, object>)dataSnapshot.Value;
+
                     if (data.ContainsKey("score")) BestScore = Convert.ToInt32(data["score"]);
                     if (data.ContainsKey("time")) BestTime = Convert.ToSingle(data["time"]);
                     if (data.ContainsKey("score")) BestAcc = Convert.ToSingle(data["acc"]);
@@ -118,6 +93,9 @@ public class FirebaseManager : MonoBehaviour
     }
     public void RenewScore(int currentScore, float currentTime, float currentAcc)
     {
+        string userId = AuthManager.Instance.UserId;
+        string userName = AuthManager.Instance.DisplayName;
+
         if (string.IsNullOrEmpty(userId)) return;
 
         bool isNewScore = false;
@@ -141,11 +119,43 @@ public class FirebaseManager : MonoBehaviour
 
         if (isNewScore)
         {
-            UserScoreData userScoreData = new UserScoreData(BestScore, BestTime, BestAcc);
+            UserScoreData userScoreData = new UserScoreData(userName, BestScore, BestTime, BestAcc);
             string json = JsonUtility.ToJson(userScoreData);
 
             databaseReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-            Debug.Log("서버에 신기록 갱신 완료");
+            Debug.Log($"서버에 신기록 갱신 완료({BestScore})");
         }
+    }
+
+    public void LoadLeaderboardData(Action<List<UserScoreData>> onLoad)
+    {
+        databaseReference.Child("users").OrderByChild("score").LimitToLast(10).GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("리더보드 실패");
+                return;
+            }
+
+            List<UserScoreData> rankList = new List<UserScoreData>();
+            DataSnapshot dataSnapshot = task.Result;
+
+            foreach (DataSnapshot data in dataSnapshot.Children)
+            {
+                IDictionary<string, object> rankData = (IDictionary<string, object>)data.Value;
+
+                string uName = rankData.ContainsKey("userName") ? rankData["userName"].ToString() : "UnknownPlayer";
+                int uScore = rankData.ContainsKey("score") ? Convert.ToInt32(rankData["score"]) : 0;
+                float uTime = rankData.ContainsKey("time") ? Convert.ToSingle(rankData["time"]) : 0f;
+                float uAcc = rankData.ContainsKey("acc") ? Convert.ToSingle(rankData["acc"]) : 0f;
+
+                rankList.Add(new UserScoreData(uName, uScore, uTime, uAcc));
+            }
+
+            rankList.Reverse();
+
+            onLoad?.Invoke(rankList);
+            Debug.Log("리더보드 로드 완료");
+        });
     }
 }

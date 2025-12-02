@@ -10,18 +10,20 @@ public class SpawnGate : MonoBehaviour
     [SerializeField] float enemySpawnTime = 5f;
     PlayerHealth player;
     EnemyHealth enemyHealth;
-
     WaitForSeconds wait;
+
     void Awake()
     {
         enemyHealth = GetComponent<EnemyHealth>();
 
         wait = new WaitForSeconds(enemySpawnTime);
     }
+
     void OnEnable()
     {
         enemyHealth.OnDeath += Death;
     }
+
     void Start()
     {
         player = FindFirstObjectByType<PlayerHealth>();
@@ -32,6 +34,7 @@ public class SpawnGate : MonoBehaviour
     {
         enemyHealth.OnDeath -= Death;
     }
+
     IEnumerator EnemySpawnRoutine()
     {
         while (true)

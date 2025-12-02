@@ -29,10 +29,12 @@ public class ActiveWeapon : MonoBehaviour
         starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
         defaultRotationSpeed = firstPersonController.RotationSpeed;
     }
+
     void Start()
     {
         SwitchWeapon(startingWeaponOS);
     }
+
     void Update()
     {
         HandleShoot();
@@ -62,6 +64,7 @@ public class ActiveWeapon : MonoBehaviour
         currentAmmo = 0;
         AdjustAmmo(weaponSO.MagazineSize);
     }
+
     void HandleShoot()
     {
         if (!starterAssetsInputs.shoot || isFire || currentAmmo <= 0) return;

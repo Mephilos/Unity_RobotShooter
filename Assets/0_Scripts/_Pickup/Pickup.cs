@@ -3,6 +3,7 @@ using System;
 public abstract class Pickup : MonoBehaviour
 {
     public event Action<Pickup> OnPickup;
+
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(Constants.PLAYER_TAG))

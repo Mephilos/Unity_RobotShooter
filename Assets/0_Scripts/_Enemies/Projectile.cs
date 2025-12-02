@@ -17,6 +17,7 @@ public class Projectile : MonoBehaviour
     // {
     //     rb.linearVelocity = transform.forward * projectileSpeed;
     // }
+
     void OnEnable()
     {
         rb.linearVelocity = transform.forward * projectileSpeed;
@@ -24,10 +25,12 @@ public class Projectile : MonoBehaviour
         CancelInvoke(nameof(Release));
         Invoke(nameof(Release), lifeTime);
     }
+
     public void Initialize(int amount)
     {
         this.damage = amount;
     }
+
     void OnTriggerEnter(Collider other)
     {
         PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
@@ -38,10 +41,12 @@ public class Projectile : MonoBehaviour
         //Destroy(this.gameObject);
         Release();
     }
+
     void OnDisable()
     {
         CancelInvoke(nameof(Release));
     }
+
     void Release()
     {
         if (!gameObject.activeSelf) return;

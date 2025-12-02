@@ -10,25 +10,28 @@ public class Turret : Enemy
     [SerializeField] float fireInterval = 5f;
     [SerializeField] float attackRange = 10f;
     [SerializeField] int damage = 2;
+    Quaternion originRotation;
 
     float lastFire;
-    Quaternion originRotation;
 
     protected override void Awake()
     {
         base.Awake();
         originRotation = turretHead.rotation;
     }
+
     void OnEnable()
     {
         enemyHealth.OnDeath += Death;
         lastFire = Time.time;
     }
+
     protected override void Update()
     {
         // if (playerTarget != null) turretHead.LookAt(playerTarget);
         base.Update();
     }
+
     void OnDisable()
     {
         enemyHealth.OnDeath -= Death;

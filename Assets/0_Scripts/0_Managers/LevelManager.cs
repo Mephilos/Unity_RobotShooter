@@ -16,12 +16,14 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
         {
             Destroy(gameObject);
-            return;
         }
-        Instance = this;
     }
 
     void Start()

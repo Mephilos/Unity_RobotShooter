@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class MainMenuHandler : MenuHandler
 {
     [SerializeField] GameObject optionPanel;
+    [SerializeField] GameObject loginPanel;
+    [SerializeField] GameObject leaderBoardPanel;
     [SerializeField] InputActionReference cancelDetec;
 
     void OnEnable()
@@ -22,6 +24,14 @@ public class MainMenuHandler : MenuHandler
         if (optionPanel != null && optionPanel.activeSelf)
         {
             optionPanel.SetActive(false);
+        }
+        if (loginPanel != null && loginPanel.activeSelf)
+        {
+            loginPanel.SetActive(false);
+        }
+        if (leaderBoardPanel != null && leaderBoardPanel.activeSelf)
+        {
+            leaderBoardPanel.SetActive(false);
         }
     }
 }

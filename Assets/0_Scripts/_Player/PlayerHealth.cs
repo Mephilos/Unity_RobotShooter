@@ -15,6 +15,7 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] bool invincibleMode = false;
     int currentHitPoint;
     int gameOverVirtualCameraPrioity = 20;
+
     void Awake()
     {
         currentHitPoint = startingHealth;
@@ -25,6 +26,7 @@ public class PlayerHealth : MonoBehaviour
     {
         Invincible(invincibleMode);
     }
+
     public void TakeDamage(int amount)
     {
         currentHitPoint -= amount;

@@ -11,6 +11,7 @@ public class PickupSpawner : MonoBehaviour
 
     Pickup currentPickup;
     float respawnTime;
+
     void Start()
     {
         respawnCoolTimeGaugeImg.gameObject.SetActive(false);
@@ -38,6 +39,7 @@ public class PickupSpawner : MonoBehaviour
             respawnCoolTimeGaugeImg.gameObject.SetActive(false);
         }
     }
+
     void doPickup(Pickup pickup)
     {
         pickup.gameObject.SetActive(false);

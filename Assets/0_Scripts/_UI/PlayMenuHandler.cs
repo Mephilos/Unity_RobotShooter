@@ -13,6 +13,7 @@ public class PlayMenuHandler : MenuHandler
     {
         Time.timeScale = 1.0f;
     }
+
     protected override void Start()
     {
         base.Start();
@@ -30,7 +31,6 @@ public class PlayMenuHandler : MenuHandler
         pauseDetec.action.Enable();
         pauseDetec.action.performed += OnPauseInput;
     }
-
 
     void OnDestroy()
     {
