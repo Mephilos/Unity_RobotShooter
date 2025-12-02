@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "390403023722",
+    "firebase_url": "https://fpsrobotshooter0613-default-rtdb.firebaseio.com",
+    "project_id": "fpsrobotshooter0613",
+    "storage_bucket": "fpsrobotshooter0613.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390403023722:android:7884d0e6f95e249996fb13",
+        "android_client_info": {
+          "package_name": "com.Mephilos.RobotShooter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwOynqRgldCcLkdie-8hlZTOekolAUJW0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

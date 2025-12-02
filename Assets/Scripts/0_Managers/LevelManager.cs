@@ -11,7 +11,6 @@ public class LevelManager : MonoBehaviour
     public event Action OnLevelWin;
     int enemiesLeft = 0;
     float startTime;
-
     float clearTime;
     int scoreTime;
 
@@ -94,5 +93,9 @@ public class LevelManager : MonoBehaviour
 
         Debug.Log($"정확도 보너스 점수: 정확도{accuracy:F1}% -> 정확도 보너스: {accBonus}");
         Debug.Log($"최종 점수: {ScoreManager.Instance.GetCurrentScore()}");
+    }
+    public int GetEnemiesCount()
+    {
+        return enemiesLeft;
     }
 }

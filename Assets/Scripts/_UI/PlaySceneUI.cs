@@ -15,7 +15,7 @@ public class PlaySceneUI : MonoBehaviour
         starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
         LevelManager.Instance.OnEnemyCountChanged += UpdateEnemyLeft;
         LevelManager.Instance.OnLevelWin += ShowWinUI;
-        UpdateEnemyLeft(0);
+        UpdateEnemyLeft(LevelManager.Instance.GetEnemiesCount());
 
         ScoreManager.Instance.OnScoreChanged += UpdateScoreUI;
         UpdateScoreUI(ScoreManager.Instance.GetCurrentScore());

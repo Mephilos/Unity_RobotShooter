@@ -105,3 +105,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# Firebase Config Files
+google-services.json
+GoogleService-Info.plist
