@@ -31,6 +31,11 @@ public class AuthManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        InitializeAuth();
+    }
+
     public void InitializeAuth()
     {
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
