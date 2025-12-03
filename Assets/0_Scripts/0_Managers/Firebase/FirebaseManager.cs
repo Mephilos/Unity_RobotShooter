@@ -1,13 +1,9 @@
 using UnityEngine;
-using Firebase;
-using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Unity.Android.Gradle.Manifest;
+
 
 [Serializable]
 public class UserScoreData
@@ -55,6 +51,7 @@ public class FirebaseManager : MonoBehaviour
     void Start()
     {
         AuthManager.Instance.OnLoginSuccess += OnLoginHandler;
+        AuthManager.Instance.OnLoginFailed += OnLogoutHandler;
     }
 
     void OnLoginHandler(Firebase.Auth.FirebaseUser firebaseUser)
@@ -62,7 +59,11 @@ public class FirebaseManager : MonoBehaviour
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         LoadMyData();
     }
-
+    void OnLogoutHandler(string msg)
+    {
+        dataInit();
+        isDataLoad = false;
+    }
     void LoadMyData()
     {
         string userId = AuthManager.Instance.UserId;
@@ -86,6 +87,7 @@ public class FirebaseManager : MonoBehaviour
                 else
                 {
                     Debug.Log("신규 유저");
+                    dataInit();
                 }
                 isDataLoad = true;
             }
@@ -103,6 +105,7 @@ public class FirebaseManager : MonoBehaviour
         if (currentScore > BestScore)
         {
             BestScore = currentScore;
+            BestTime = currentTime;
             isNewScore = true;
         }
 
@@ -157,5 +160,11 @@ public class FirebaseManager : MonoBehaviour
             onLoad?.Invoke(rankList);
             Debug.Log("리더보드 로드 완료");
         });
+    }
+    void dataInit()
+    {
+        BestScore = 0;
+        BestTime = 9999f;
+        BestAcc = 0f;
     }
 }

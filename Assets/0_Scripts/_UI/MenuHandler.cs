@@ -8,15 +8,17 @@ public class MenuHandler : MonoBehaviour
 {
     public enum ButtonType
     {
-        Continue,
-        Pause,
+        None1,
+        None2,
         NextStage,
         Restart,
         ReturnToMainMenu,
         GameOption,
         Quit,
         PanelClose,
-        PanelOpen
+        PanelOpen,
+        Login,
+        LogOut,
     }
 
     [System.Serializable]
@@ -65,6 +67,10 @@ public class MenuHandler : MonoBehaviour
                 break;
             case ButtonType.PanelClose:
                 if (mapping.panel != null) mapping.panel.SetActive(false);
+                break;
+
+            case ButtonType.LogOut:
+                AuthManager.Instance.SignOut();
                 break;
         }
     }

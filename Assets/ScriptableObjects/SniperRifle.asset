@@ -18,3 +18,7 @@ MonoBehaviour:
   HitVFXPrefab: {fileID: 8430451896267564482, guid: 74e69bf1a67af461eb9a7d82adee95e7, type: 3}
   isAutomatic: 0
   CanZoom: 1
+  ZoomAmount: 10
+  ZoomSpeed: 0.5
+  MagazineSize: 10
+  RespawnTime: 15

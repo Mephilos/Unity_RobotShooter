@@ -91,10 +91,12 @@ public class ActiveWeapon : MonoBehaviour
 
     void HandleZoom()
     {
-        if (!weaponSO.CanZoom || !cinemachineVirtualCamera) return;
+        if (!weaponSO.CanZoom) return;
 
         if (!starterAssetsInputs.zoom)
         {
+            //TODO: 줌이슈 발생
+            Debug.Log("줌아웃");
             Zoom.SetActive(false);
             cinemachineVirtualCamera.Lens.FieldOfView = defaultFOV;
             weaponCamera.fieldOfView = defaultFOV;
@@ -103,6 +105,7 @@ public class ActiveWeapon : MonoBehaviour
 
         else
         {
+            Debug.Log("줌인");
             Zoom.SetActive(true);
             cinemachineVirtualCamera.Lens.FieldOfView = weaponSO.ZoomAmount;
             weaponCamera.fieldOfView = weaponSO.ZoomAmount;

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using System.Collections;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
