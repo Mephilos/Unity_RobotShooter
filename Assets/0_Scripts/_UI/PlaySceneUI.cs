@@ -49,22 +49,22 @@ public class PlaySceneUI : MonoBehaviour
         float bestTime = FirebaseManager.Instance.BestTime;
         float bestAcc = FirebaseManager.Instance.BestAcc;
 
-        DisplayComparisonScore(finalScoreText, "SCORE", currentScore, bestScore, true);
+        DisplayComparisonScore(finalScoreText, "SCORE", currentScore, bestScore, true, "", 0f);
         DisplayComparisonTime(finalTimeText, currentTime, bestTime);
-        DisplayComparisonScore(finalAccText, "ACCURACY", currentAcc, bestAcc, true, "%");
+        DisplayComparisonScore(finalAccText, "ACCURACY", currentAcc, bestAcc, true, "%", 0f);
 
         FirebaseManager.Instance.RenewScore(currentScore, currentTime, currentAcc);
 
         UnlockCursor();
     }
 
-    void DisplayComparisonScore(TMP_Text textUI, string label, float current, float best, bool isBetter, string suffix = "")
+    void DisplayComparisonScore(TMP_Text textUI, string label, float current, float best, bool isBetter, string suffix = "", float invalidValue = 0f)
     {
         float valueDiff = current - best;
         string comparisonString = "";
         string resultColor = "white";
 
-        if (best == 0 || best > 9000)
+        if (Mathf.Abs(best - invalidValue) < 0.01f)
         {
             comparisonString = " (New Record)";
             resultColor = "yellow";
