@@ -28,10 +28,7 @@ public class AuthManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
 
-    void Start()
-    {
         InitializeAuth();
     }
 

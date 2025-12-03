@@ -41,8 +41,7 @@ public class MenuHandler : MonoBehaviour
 
         foreach (var mapping in Buttons)
         {
-            ButtonMapping btn = mapping;
-            btn.button.onClick.AddListener(() => OnButtonClick(btn));
+            mapping.button.onClick.AddListener(() => OnButtonClick(mapping));
         }
     }
 

@@ -354,7 +354,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &84024110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -910,7 +910,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &186457919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1668,7 +1668,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &481488062
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1904,7 +1904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &497728399
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3995,7 +3995,7 @@ MonoBehaviour:
   - name: GameOption Button
     button: {fileID: 954510768}
     type: 8
-    panel: {fileID: 84024109}
+    panel: {fileID: 1374412722}
   - name: GameQuit
     button: {fileID: 168716688}
     type: 6
@@ -4003,22 +4003,22 @@ MonoBehaviour:
   - name: GameOptionClose Button
     button: {fileID: 256517612}
     type: 7
-    panel: {fileID: 84024109}
+    panel: {fileID: 1374412722}
   - name: Login Button
     button: {fileID: 1244658527}
     type: 8
-    panel: {fileID: 186457918}
+    panel: {fileID: 481488061}
   - name: LeaderBoard Button
     button: {fileID: 447648568}
     type: 8
-    panel: {fileID: 1888550713}
+    panel: {fileID: 497728398}
   - name: Logout Button
     button: {fileID: 795722136}
     type: 10
     panel: {fileID: 0}
-  optionPanel: {fileID: 84024109}
-  loginPanel: {fileID: 186457918}
-  leaderBoardPanel: {fileID: 1888550713}
+  optionPanel: {fileID: 1374412722}
+  loginPanel: {fileID: 481488061}
+  leaderBoardPanel: {fileID: 497728398}
   loginButton: {fileID: 1244658525}
   logoutButton: {fileID: 795722134}
   cancelDetec: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
@@ -4905,7 +4905,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1374412723
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5331,7 +5331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1888550714
 MonoBehaviour:
   m_ObjectHideFlags: 0

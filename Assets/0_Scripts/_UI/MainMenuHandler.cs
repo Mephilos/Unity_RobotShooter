@@ -1,3 +1,5 @@
+using System.Collections;
+using Firebase.Auth;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,14 +13,15 @@ public class MainMenuHandler : MenuHandler
     [SerializeField] GameObject logoutButton;
 
     [SerializeField] InputActionReference cancelDetec;
+    Coroutine authCheckRoutine;
+
 
     void OnEnable()
     {
-        AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
-        AuthManager.Instance.OnLogout += OnLogout;
-
         cancelDetec.action.Enable();
         cancelDetec.action.performed += OnCancelInput;
+
+        authCheckRoutine = StartCoroutine(AuthInitWaitRoutine());
     }
 
     void OnDisable()
@@ -38,9 +41,27 @@ public class MainMenuHandler : MenuHandler
             isLogin = true;
         }
 
-        Debug.Log($"[UI 갱신] 찐로그인 여부: {isLogin} (유저: {firebaseUser?.UserId}, 익명: {firebaseUser?.IsAnonymous})");
+        Debug.Log($"로그인 여부: {isLogin} (유저: {firebaseUser?.UserId}, 익명: {firebaseUser?.IsAnonymous})");
         logoutButton.SetActive(isLogin);
         loginButton.SetActive(!isLogin);
+    }
+
+    IEnumerator AuthInitWaitRoutine()
+    {
+        loginButton.SetActive(false);
+        logoutButton.SetActive(false);
+
+        while (AuthManager.Instance == null)
+        {
+            yield return null;
+        }
+        AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
+        AuthManager.Instance.OnLogout += OnLogout;
+        while (!AuthManager.Instance.IsFirebaseReady)
+        {
+            yield return null;
+        }
+        RefreshAuthUI(AuthManager.Instance.CurrentUser);
     }
     void OnLogout()
     {
