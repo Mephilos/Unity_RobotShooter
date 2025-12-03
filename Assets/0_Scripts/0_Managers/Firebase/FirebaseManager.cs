@@ -27,8 +27,6 @@ public class FirebaseManager : MonoBehaviour
     public static FirebaseManager Instance;
     DatabaseReference databaseReference;
 
-    string userId;
-
     public int BestScore { get; private set; } = 0;
     public float BestTime { get; private set; } = 9999f;
     public float BestAcc { get; private set; } = 0f;
@@ -51,7 +49,7 @@ public class FirebaseManager : MonoBehaviour
     void Start()
     {
         AuthManager.Instance.OnLoginSuccess += OnLoginHandler;
-        AuthManager.Instance.OnLoginFailed += OnLogoutHandler;
+        AuthManager.Instance.OnLogout += OnLogoutHandler;
     }
 
     void OnLoginHandler(Firebase.Auth.FirebaseUser firebaseUser)
@@ -59,7 +57,7 @@ public class FirebaseManager : MonoBehaviour
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         LoadMyData();
     }
-    void OnLogoutHandler(string msg)
+    void OnLogoutHandler()
     {
         dataInit();
         isDataLoad = false;

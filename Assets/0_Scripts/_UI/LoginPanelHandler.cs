@@ -14,14 +14,27 @@ public class LoginPanelHandler : MonoBehaviour
     [SerializeField] GameObject statusPanel;
     [SerializeField] TMP_Text statusText;
     float statusPanelDelay = 1.5f;
-    WaitForSeconds wait;
+    float statusPanelDelayErr = 3f;
+    WaitForSeconds waitSuccess;
+    WaitForSeconds waitErr;
 
     Coroutine currentRoutine;
 
     void Awake()
     {
-        wait = new WaitForSeconds(statusPanelDelay);
+        waitSuccess = new WaitForSeconds(statusPanelDelay);
+        waitErr = new WaitForSeconds(statusPanelDelayErr);
     }
+
+    void OnEnable()
+    {
+        AuthManager.Instance.OnLoginSuccess += HandlerSuccess;
+        AuthManager.Instance.OnLoginFailed += HandlerFail;
+
+        statusPanel.SetActive(false);
+        statusText.text = "";
+    }
+
     void Start()
     {
         loginButton.onClick.AddListener(OnClickLogin);
@@ -60,54 +73,63 @@ public class LoginPanelHandler : MonoBehaviour
 
     void UpdateStatus(string msg)
     {
-        if (currentRoutine != null)
-        {
-            StopCoroutine(currentRoutine);
-        }
-
+        CheckCurRoutineAndStop();
         statusPanel.SetActive(true);
         statusText.text = msg;
     }
 
     void OffStatusPanel()
     {
+        CheckCurRoutineAndStop();
         statusPanel.SetActive(false);
     }
 
     void HandlerSuccess(Firebase.Auth.FirebaseUser user)
     {
-        if (currentRoutine != null)
-        {
-            StopCoroutine(currentRoutine);
-        }
+        if (user != null && user.IsAnonymous) return;
+        CheckCurRoutineAndStop();
         currentRoutine = StartCoroutine(SuccessRoutine());
     }
 
     void HandlerFail(string err)
     {
-        if (currentRoutine != null)
-        {
-            StopCoroutine(currentRoutine);
-        }
-        UpdateStatus($"오류 발생: {err}");
+        CheckCurRoutineAndStop();
+        currentRoutine = StartCoroutine(FailRoutine(err));
     }
+
     IEnumerator SuccessRoutine()
     {
         statusText.text = "로그인 성공";
 
-        yield return wait;
+        yield return waitSuccess;
 
         OffStatusPanel();
+        gameObject.SetActive(false);
     }
-    void OnEnable()
+
+    IEnumerator FailRoutine(string msg)
     {
-        AuthManager.Instance.OnLoginSuccess += HandlerSuccess;
-        AuthManager.Instance.OnLoginFailed += HandlerFail;
+        statusText.text = msg;
+
+        yield return waitErr;
+
+        OffStatusPanel();
     }
 
     void OnDisable()
     {
         AuthManager.Instance.OnLoginSuccess -= HandlerSuccess;
         AuthManager.Instance.OnLoginFailed -= HandlerFail;
+
+        CheckCurRoutineAndStop();
+        statusPanel.SetActive(false);
+    }
+
+    void CheckCurRoutineAndStop()
+    {
+        if (currentRoutine != null)
+        {
+            StopCoroutine(currentRoutine);
+        }
     }
 }

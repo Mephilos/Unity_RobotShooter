@@ -41,7 +41,8 @@ public class MenuHandler : MonoBehaviour
 
         foreach (var mapping in Buttons)
         {
-            mapping.button.onClick.AddListener(() => OnButtonClick(mapping));
+            ButtonMapping btn = mapping;
+            btn.button.onClick.AddListener(() => OnButtonClick(btn));
         }
     }
 
@@ -63,6 +64,8 @@ public class MenuHandler : MonoBehaviour
                 break;
 
             case ButtonType.PanelOpen:
+            case ButtonType.Login:
+            case ButtonType.GameOption:
                 if (mapping.panel != null) mapping.panel.SetActive(true);
                 break;
             case ButtonType.PanelClose:

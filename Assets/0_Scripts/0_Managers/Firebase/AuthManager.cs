@@ -9,13 +9,13 @@ public class AuthManager : MonoBehaviour
 
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
-
     public FirebaseUser CurrentUser => firebaseUser;
     public string UserId => firebaseUser != null ? firebaseUser.UserId : "";
     public string DisplayName => firebaseUser != null ? firebaseUser.DisplayName : "UnknowPlayer";
     public bool IsFirebaseReady { get; private set; } = false;
     public event Action<FirebaseUser> OnLoginSuccess;
     public event Action<string> OnLoginFailed;
+    public event Action OnLogout;
 
     void Awake()
     {
@@ -49,7 +49,10 @@ public class AuthManager : MonoBehaviour
 
                 AuthStateChanged(this, null);
 
-                SignInAnonymously();
+                if (firebaseAuth.CurrentUser == null)
+                {
+                    SignInAnonymously();
+                }
             }
             else
             {
@@ -62,20 +65,17 @@ public class AuthManager : MonoBehaviour
     {
         if (firebaseAuth.CurrentUser != firebaseUser)
         {
-            bool signedIn = firebaseUser != firebaseAuth.CurrentUser && firebaseAuth.CurrentUser != null;
-
-            if (!signedIn && firebaseUser != null)
-            {
-                Debug.Log("로그아웃: " + firebaseUser.UserId);
-            }
-
             firebaseUser = firebaseAuth.CurrentUser;
 
-            if (signedIn)
+            if (firebaseUser != null)
             {
-                Debug.Log($"로그인 감지: {firebaseUser.UserId}");
-
+                Debug.Log($"로그인 감지 (StateChanged): {firebaseUser.UserId}");
                 OnLoginSuccess?.Invoke(firebaseUser);
+            }
+            else
+            {
+                Debug.Log("로그아웃 감지");
+                OnLogout?.Invoke();
             }
         }
     }
@@ -98,7 +98,7 @@ public class AuthManager : MonoBehaviour
             }
 
             FirebaseUser newUser = task.Result.User;
-            Debug.Log("회원가입 성공");
+            Debug.Log($"회원가입 성공{newUser.DisplayName}");
 
             UpdateProfile(nickName);
         });
@@ -120,9 +120,9 @@ public class AuthManager : MonoBehaviour
                 OnLoginFailed?.Invoke("로그인 실패");
                 return;
             }
-
-            FirebaseUser user = task.Result.User;
-            Debug.Log($"로그인 성공 {user.DisplayName}");
+            FirebaseUser loginUser = task.Result.User;
+            Debug.Log($"로그인 성공 {loginUser.DisplayName}");
+            OnLoginSuccess?.Invoke(loginUser);
         });
     }
 
@@ -175,6 +175,18 @@ public class AuthManager : MonoBehaviour
     public void SignOut()
     {
         firebaseAuth.SignOut();
+        SignInAnonymously();
+    }
+
+    void OnApplicationQuit()
+    {
+#if UNITY_EDITOR
+        if (firebaseAuth != null)
+        {
+            firebaseAuth.SignOut();
+            Debug.Log(" [에디터 종료] 자동 로그아웃");
+        }
+#endif
     }
 
     void OnDestroy()
