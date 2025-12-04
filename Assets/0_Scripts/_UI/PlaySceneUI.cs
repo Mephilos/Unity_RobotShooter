@@ -92,7 +92,7 @@ public class PlaySceneUI : MonoBehaviour
                 resultColor = "#FF0000";
             }
         }
-        textUI.text = $"{label}: {current:0.##}{suffix} <color={resultColor}>{comparisonString}</color>";
+        textUI.text = $"{label}: {current:F1}{suffix} <color={resultColor}>{comparisonString}</color>";
     }
 
     void DisplayComparisonTime(TMP_Text textUI, float currentTime, float bestTime)

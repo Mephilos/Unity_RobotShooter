@@ -35,8 +35,8 @@ public class Weapon : MonoBehaviour
 
             if (damageable != null)
             {
-                damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
                 ScoreManager.Instance.ReportHit();
+                damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
             }
         }
     }

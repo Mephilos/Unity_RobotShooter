@@ -3,6 +3,8 @@ using Firebase.Database;
 using Firebase.Extensions;
 using System;
 using System.Collections.Generic;
+using TMPro;
+using NUnit.Framework;
 
 
 [Serializable]
@@ -99,6 +101,7 @@ public class FirebaseManager : MonoBehaviour
         if (string.IsNullOrEmpty(userId)) return;
 
         bool isNewScore = false;
+        bool isNewAcc = false;
 
         if (currentScore > BestScore)
         {
@@ -116,25 +119,33 @@ public class FirebaseManager : MonoBehaviour
         if (currentAcc > BestAcc)
         {
             BestAcc = currentAcc;
+            isNewAcc = true;
         }
 
-        if (isNewScore)
+        if (isNewScore || isNewAcc)
         {
             UserScoreData userScoreData = new UserScoreData(userName, BestScore, BestTime, BestAcc);
             string json = JsonUtility.ToJson(userScoreData);
 
             databaseReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-            Debug.Log($"서버에 신기록 갱신 완료({BestScore})");
+            if (isNewScore)
+            {
+                Debug.Log($"신기록 갱신 완료 서버 등록({BestScore})");
+            }
+            if (isNewAcc)
+            {
+                Debug.Log($"새로운 정확도 갱신 서버 등록({BestAcc})");
+            }
         }
     }
 
     public void LoadLeaderboardData(Action<List<UserScoreData>> onLoad)
     {
-        databaseReference.Child("users").OrderByChild("score").LimitToLast(10).GetValueAsync().ContinueWithOnMainThread(task =>
+        databaseReference.Child("users").OrderByChild("score").GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
-                Debug.LogError("리더보드 실패");
+                Debug.LogError("리더보드 로드 실패" + task.Exception);
                 return;
             }
 
@@ -156,7 +167,7 @@ public class FirebaseManager : MonoBehaviour
             rankList.Reverse();
 
             onLoad?.Invoke(rankList);
-            Debug.Log("리더보드 로드 완료");
+            Debug.Log($"리더보드 로드 완료 총: {rankList.Count}");
         });
     }
     void dataInit()
