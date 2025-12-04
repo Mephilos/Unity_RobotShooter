@@ -23,8 +23,6 @@ public class LeaderboardHandler : MonoBehaviour
         prevButton.onClick.AddListener(PrevPage);
         nextButton.onClick.AddListener(NextPage);
         myRankButton.onClick.AddListener(JumpMyRank);
-
-        FirebaseManager.Instance.LoadLeaderboardData(OnDataLoad);
     }
     void OnEnable()
     {
@@ -37,7 +35,7 @@ public class LeaderboardHandler : MonoBehaviour
         totalCount = allData.Count;
 
         maxPage = Mathf.CeilToInt((float)totalCount / rowPerPage);
-        if (1 < maxPage)
+        if (1 > maxPage)
         {
             maxPage = 1;
         }

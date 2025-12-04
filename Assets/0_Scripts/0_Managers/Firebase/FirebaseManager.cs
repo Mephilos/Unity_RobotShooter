@@ -122,20 +122,29 @@ public class FirebaseManager : MonoBehaviour
             isNewAcc = true;
         }
 
-        if (isNewScore || isNewAcc)
-        {
-            UserScoreData userScoreData = new UserScoreData(userName, BestScore, BestTime, BestAcc);
-            string json = JsonUtility.ToJson(userScoreData);
+        DatabaseReference userDataRef = databaseReference.Child("users").Child(userId);
 
-            databaseReference.Child("users").Child(userId).SetRawJsonValueAsync(json);
-            if (isNewScore)
-            {
-                Debug.Log($"신기록 갱신 완료 서버 등록({BestScore})");
-            }
-            if (isNewAcc)
-            {
-                Debug.Log($"새로운 정확도 갱신 서버 등록({BestAcc})");
-            }
+        if (isNewScore)
+        {
+            Dictionary<string, object> scoreUpdate = new Dictionary<string, object>();
+
+            scoreUpdate["userName"] = userName;
+            scoreUpdate["score"] = BestScore;
+            scoreUpdate["time"] = BestTime;
+
+            userDataRef.UpdateChildrenAsync(scoreUpdate);
+            Debug.Log($"신기록 갱신 완료 서버 등록({BestScore})");
+        }
+
+        if (isNewAcc)
+        {
+            Dictionary<string, object> accUpdate = new Dictionary<string, object>();
+
+            accUpdate["userName"] = userName;
+            accUpdate["acc"] = BestAcc;
+
+            userDataRef.UpdateChildrenAsync(accUpdate);
+            Debug.Log($"정확도 갱신 완료 서버 등록({BestAcc})");
         }
     }
 
