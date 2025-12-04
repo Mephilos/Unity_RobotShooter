@@ -3,9 +3,6 @@ using Firebase.Database;
 using Firebase.Extensions;
 using System;
 using System.Collections.Generic;
-using TMPro;
-using NUnit.Framework;
-
 
 [Serializable]
 public class UserScoreData
@@ -33,7 +30,7 @@ public class FirebaseManager : MonoBehaviour
     public float BestTime { get; private set; } = 9999f;
     public float BestAcc { get; private set; } = 0f;
 
-    public bool isDataLoad = false;
+    bool isDataLoad = false;
 
     void Awake()
     {
@@ -126,31 +123,95 @@ public class FirebaseManager : MonoBehaviour
 
         if (isNewScore)
         {
-            Dictionary<string, object> scoreUpdate = new Dictionary<string, object>();
-
-            scoreUpdate["userName"] = userName;
-            scoreUpdate["score"] = BestScore;
-            scoreUpdate["time"] = BestTime;
-
+            Dictionary<string, object> scoreUpdate = new Dictionary<string, object>
+            {
+                ["userName"] = userName,
+                ["score"] = BestScore,
+                ["time"] = BestTime
+            };
             userDataRef.UpdateChildrenAsync(scoreUpdate);
             Debug.Log($"신기록 갱신 완료 서버 등록({BestScore})");
         }
 
         if (isNewAcc)
         {
-            Dictionary<string, object> accUpdate = new Dictionary<string, object>();
-
-            accUpdate["userName"] = userName;
-            accUpdate["acc"] = BestAcc;
-
+            Dictionary<string, object> accUpdate = new Dictionary<string, object>
+            {
+                ["userName"] = userName,
+                ["acc"] = BestAcc
+            };
             userDataRef.UpdateChildrenAsync(accUpdate);
             Debug.Log($"정확도 갱신 완료 서버 등록({BestAcc})");
         }
     }
 
-    public void LoadLeaderboardData(Action<List<UserScoreData>> onLoad)
+    public void StageRecordSave(int stageIndex, int score, float time, float acc)
     {
-        databaseReference.Child("users").OrderByChild("score").GetValueAsync().ContinueWithOnMainThread(task =>
+        string userId = AuthManager.Instance.UserId;
+        if (string.IsNullOrEmpty(userId)) return;
+
+        DatabaseReference stageDataRef = databaseReference.Child("users").Child(userId).Child("stages").Child(stageIndex.ToString());
+
+        Dictionary<string, object> update = new Dictionary<string, object>()
+        {
+            ["score"] = score,
+            ["time"] = time,
+            ["acc"] = acc
+        };
+
+        stageDataRef.UpdateChildrenAsync(update).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                TryUpdateTotalScore();
+            }
+        });
+    }
+
+    void TryUpdateTotalScore()
+    {
+        string userId = AuthManager.Instance.UserId;
+        if (string.IsNullOrEmpty(userId)) return;
+
+        databaseReference.Child("users").Child(userId).Child("stages").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted || !task.Result.Exists) return;
+
+            DataSnapshot stagesSnapshot = task.Result;
+
+            if (stagesSnapshot.ChildrenCount < Constants.TOTAL_STAGE_COUNT)
+            {
+                Debug.Log($"합산X: {stagesSnapshot.ChildrenCount} / {Constants.TOTAL_STAGE_COUNT}");
+                return;
+            }
+
+            int totalScore = 0;
+            float totalTime = 0;
+            float totalAccSum = 0;
+            int count = 0;
+
+            foreach (DataSnapshot stage in stagesSnapshot.Children)
+            {
+                IDictionary<string, object> value = (IDictionary<string, object>)stage.Value;
+                totalScore += Convert.ToInt32(value["score"]);
+                totalTime += Convert.ToSingle(value["time"]);
+                totalAccSum += Convert.ToSingle(value["acc"]);
+                count++;
+            }
+
+            int finalTotalScore = totalScore;
+            float finalTotalTime = totalTime;
+            float finalAvgAcc = (count > 0) ? (totalAccSum / count) : 0f;
+
+            Debug.Log($"스테이지 올 클리어 합산 결과> 점수: {finalTotalScore}/ 시간: {finalTotalTime}/ 정확도: {finalAvgAcc}");
+            RenewScore(finalTotalScore, finalTotalTime, finalAvgAcc);
+        });
+    }
+    public void LoadLeaderboardData(int stageIndex, Action<List<UserScoreData>> onLoad)
+    {
+        string stageScorePath = (stageIndex == 0) ? "score" : $"stages/{stageIndex}/score";
+
+        databaseReference.Child("users").OrderByChild(stageScorePath).GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
@@ -163,16 +224,38 @@ public class FirebaseManager : MonoBehaviour
 
             foreach (DataSnapshot data in dataSnapshot.Children)
             {
-                IDictionary<string, object> rankData = (IDictionary<string, object>)data.Value;
+                string uName = "UnknownPlayer";
+                if (data.HasChild("userName"))
+                {
+                    uName = data.Child("userName").Value.ToString();
+                }
 
-                string uName = rankData.ContainsKey("userName") ? rankData["userName"].ToString() : "UnknownPlayer";
-                int uScore = rankData.ContainsKey("score") ? Convert.ToInt32(rankData["score"]) : 0;
-                float uTime = rankData.ContainsKey("time") ? Convert.ToSingle(rankData["time"]) : 0f;
-                float uAcc = rankData.ContainsKey("acc") ? Convert.ToSingle(rankData["acc"]) : 0f;
+                int uScore = 0;
+                float uTime = 0f;
+                float uAcc = 0f;
 
+                if (stageIndex == 0)
+                {
+
+                    if (!data.HasChild("score")) continue;
+
+                    uScore = Convert.ToInt32(data.Child("score").Value);
+                    if (data.HasChild("time")) uTime = Convert.ToSingle(data.Child("time").Value);
+                    if (data.HasChild("acc")) uAcc = Convert.ToSingle(data.Child("acc").Value);
+                }
+                else
+                {
+                    if (!data.HasChild("stages")) continue;
+
+                    DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
+                    if (!stageSnap.Exists) continue;
+
+                    if (stageSnap.HasChild("score")) uScore = Convert.ToInt32(stageSnap.Child("score").Value);
+                    if (stageSnap.HasChild("time")) uTime = Convert.ToSingle(stageSnap.Child("time").Value);
+                    if (stageSnap.HasChild("acc")) uAcc = Convert.ToSingle(stageSnap.Child("acc").Value);
+                }
                 rankList.Add(new UserScoreData(uName, uScore, uTime, uAcc));
             }
-
             rankList.Reverse();
 
             onLoad?.Invoke(rankList);

@@ -69,12 +69,26 @@ public class LevelManager : MonoBehaviour
         if (enemiesLeft <= 0)
         {
             Debug.Log("승리 호출");
-            CalculateTimeBonus();
-            OnLevelWin?.Invoke();
+            ProcessStageClearScore();
         }
     }
 
-    void CalculateTimeBonus()
+    void ProcessStageClearScore()
+    {
+        CalculateTimeAndAccBonus();
+
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        int stageScore = ScoreManager.Instance.GetCurrentScore();
+        float stageTime = Time.timeSinceLevelLoad;
+        float stageAcc = ScoreManager.Instance.GetAccuracy();
+
+        ScoreManager.Instance.RecordScore(currentLevelIndex, stageScore, stageTime, stageAcc);
+        FirebaseManager.Instance.StageRecordSave(currentLevelIndex, stageScore, stageTime, stageAcc);
+
+        OnLevelWin?.Invoke();
+    }
+
+    void CalculateTimeAndAccBonus()
     {
         float levelClearTime = Time.time - startTime;
         float timeRemaining = clearTime - levelClearTime;

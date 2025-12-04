@@ -11,6 +11,10 @@ public class LeaderboardHandler : MonoBehaviour
     [SerializeField] Button prevButton;
     [SerializeField] Button nextButton;
     [SerializeField] Button myRankButton;
+
+    [SerializeField] Button totalScoreButton;
+    [SerializeField] Button[] stageScoreButton;
+
     [SerializeField] int rowPerPage = 11;
 
     List<UserScoreData> allData = new List<UserScoreData>();
@@ -18,15 +22,37 @@ public class LeaderboardHandler : MonoBehaviour
     int currentPage = 1;
     int maxPage = 1;
 
+    int currentScoreView = 0;
+
     void Start()
     {
         prevButton.onClick.AddListener(PrevPage);
         nextButton.onClick.AddListener(NextPage);
         myRankButton.onClick.AddListener(JumpMyRank);
+
+        totalScoreButton.onClick.AddListener(() => ChangeScoreView(0));
+
+        for (int i = 0; i < stageScoreButton.Length; i++)
+        {
+            int stageNum = i + 1;
+            stageScoreButton[i].onClick.AddListener(() => ChangeScoreView(stageNum));
+        }
     }
     void OnEnable()
     {
-        FirebaseManager.Instance.LoadLeaderboardData(OnDataLoad);
+        ChangeScoreView(currentScoreView);
+    }
+    void ChangeScoreView(int stage)
+    {
+        currentScoreView = stage;
+        currentPage = 1;
+
+        foreach (Transform child in contentParent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        FirebaseManager.Instance.LoadLeaderboardData(currentScoreView, OnDataLoad);
     }
 
     void OnDataLoad(List<UserScoreData> userScoreDatas)
