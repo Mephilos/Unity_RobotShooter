@@ -24,12 +24,12 @@ public class UserScoreData
 public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager Instance;
-    DatabaseReference databaseReference;
 
     public int BestScore { get; private set; } = 0;
     public float BestTime { get; private set; } = 9999f;
     public float BestAcc { get; private set; } = 0f;
 
+    DatabaseReference databaseReference;
     bool isDataLoad = false;
 
     void Awake()
@@ -53,11 +53,8 @@ public class FirebaseManager : MonoBehaviour
 
     void OnLoginHandler(Firebase.Auth.FirebaseUser firebaseUser)
     {
-        if (isDataLoad)
-        {
-            Debug.Log("이미 데이터가 로드되어 있습니다. (중복 호출 방지)");
-            return;
-        }
+        if (isDataLoad) return;
+
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         LoadMyData();
     }
@@ -95,7 +92,7 @@ public class FirebaseManager : MonoBehaviour
             }
         });
     }
-    public void RenewScore(int currentScore, float currentTime, float currentAcc)
+    void RenewScore(int currentScore, float currentTime, float currentAcc)
     {
         string userId = AuthManager.Instance.UserId;
         string userName = AuthManager.Instance.DisplayName;
@@ -234,9 +231,9 @@ public class FirebaseManager : MonoBehaviour
                 int uScore = 0;
                 float uTime = 0f;
                 float uAcc = 0f;
+                string uName = "UnknownPlayer";
 
-                string uName = data.HasChild("userName") ? data.Child("userName").Value.ToString() : Constants.UNKNOWN_PLAYER;
-
+                if (data.HasChild("userName")) uName = data.Child("userName").Value.ToString();
 
                 if (stageIndex == 0)
                 {

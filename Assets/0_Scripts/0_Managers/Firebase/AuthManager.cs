@@ -3,6 +3,7 @@ using System;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
+
 public class AuthManager : MonoBehaviour
 {
     public static AuthManager Instance { get; private set; }
@@ -24,7 +25,6 @@ public class AuthManager : MonoBehaviour
         }
     }
     public bool IsFirebaseReady { get; private set; } = false;
-
 
     public event Action<FirebaseUser> OnLoginSuccess;
     public event Action<string> OnLoginFailed;
@@ -49,7 +49,7 @@ public class AuthManager : MonoBehaviour
         InitializeAuth();
     }
 
-    public void InitializeAuth()
+    void InitializeAuth()
     {
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
@@ -104,11 +104,8 @@ public class AuthManager : MonoBehaviour
 
     public void Register(string email, string password, string nickName)
     {
-        if (!IsFirebaseReady || firebaseAuth == null)
-        {
-            OnLoginFailed?.Invoke("서버 연결 중");
-            return;
-        }
+        if (!IsFirebaseReady) return;
+
         Debug.Log("회원가입 시도");
         firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
@@ -128,31 +125,23 @@ public class AuthManager : MonoBehaviour
 
     public void Login(string email, string password)
     {
-        if (!IsFirebaseReady || firebaseAuth == null)
-        {
-            OnLoginFailed?.Invoke("서버 연결 중");
-            return;
-        }
+        if (!IsFirebaseReady) return;
+
         Debug.Log("로그인 시도");
         firebaseAuth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
             if (task.IsCanceled || task.IsFaulted)
             {
-                Debug.LogError("로그인 실패: " + task.Exception);
                 OnLoginFailed?.Invoke("로그인 실패");
                 return;
             }
-            FirebaseUser loginUser = task.Result.User;
-            localDisplayName = loginUser.DisplayName;
-            Debug.Log($"로그인 성공 {loginUser.DisplayName}");
-            OnLoginSuccess?.Invoke(loginUser);
+            localDisplayName = task.Result.User.DisplayName;
         });
     }
 
-    public void SignInAnonymously()
+    void SignInAnonymously()
     {
         Debug.Log("익명으로 로그인 합니다");
-
         firebaseAuth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
@@ -162,9 +151,7 @@ public class AuthManager : MonoBehaviour
                 return;
             }
 
-            FirebaseUser newUser = task.Result.User;
-
-            if (string.IsNullOrEmpty(newUser.DisplayName))
+            if (string.IsNullOrEmpty(task.Result.User.DisplayName))
             {
                 SetGuestName();
             }
@@ -175,13 +162,15 @@ public class AuthManager : MonoBehaviour
     {
         string randomSuffix = UnityEngine.Random.Range(10000, 99999).ToString();
         string newName = $"Guest_{randomSuffix}";
+
         localDisplayName = newName;
         UpdateProfile(newName);
     }
 
-    public void UpdateProfile(string newNickname)
+    void UpdateProfile(string newNickname)
     {
         localDisplayName = newNickname;
+
         UserProfile profile = new UserProfile { DisplayName = newNickname };
 
         firebaseUser.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
@@ -191,9 +180,11 @@ public class AuthManager : MonoBehaviour
                 Debug.LogError("닉네임 설정 실패");
                 return;
             }
-            Debug.Log($"닉네임 업데이트 완료: {newNickname}");
-
-            OnLoginSuccess?.Invoke(firebaseUser);
+            else
+            {
+                Debug.Log($"닉네임 업데이트 완료: {newNickname}");
+                OnLoginSuccess?.Invoke(firebaseUser);
+            }
         });
     }
 
