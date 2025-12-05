@@ -7,7 +7,7 @@ public class LevelManager : MonoBehaviour
     public static LevelManager Instance { get; private set; }
 
     public event Action<int> OnEnemyCountChanged;
-    public event Action OnLevelWin;
+    public event Action<int, float, float, int, bool> OnStageClearData;
     int enemiesLeft = 0;
     float startTime;
     float clearTime;
@@ -75,40 +75,21 @@ public class LevelManager : MonoBehaviour
 
     void ProcessStageClearScore()
     {
-        CalculateTimeAndAccBonus();
+        float levelClearTime = Time.time - startTime;
+        ScoreManager.Instance.CalculateTimeAndAccBonus(levelClearTime, clearTime, scoreTime);
 
         int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
         int stageScore = ScoreManager.Instance.GetCurrentScore();
-        float stageTime = Time.timeSinceLevelLoad;
         float stageAcc = ScoreManager.Instance.GetAccuracy();
 
-        ScoreManager.Instance.RecordScore(currentLevelIndex, stageScore, stageTime, stageAcc);
-        FirebaseManager.Instance.StageRecordSave(currentLevelIndex, stageScore, stageTime, stageAcc);
-
-        OnLevelWin?.Invoke();
-    }
-
-    void CalculateTimeAndAccBonus()
-    {
-        float levelClearTime = Time.time - startTime;
-        float timeRemaining = clearTime - levelClearTime;
-
-        if (timeRemaining > 0)
+        ScoreManager.Instance.RecordScore(currentLevelIndex, stageScore, levelClearTime, stageAcc);
+        FirebaseManager.Instance.StageScoreSave(currentLevelIndex, stageScore, levelClearTime, stageAcc, (isNewScore, dbBestScore) =>
         {
-            int timeBonus = Mathf.RoundToInt(timeRemaining * scoreTime);
-            ScoreManager.Instance.AddScore(timeBonus);
-            Debug.Log($"[TimeBonus] {timeRemaining:F1}<- 남은시간 \n 시간 보너스 점수: {timeBonus}");
-        }
-
-        int curTotalScore = ScoreManager.Instance.GetCurrentScore();
-        float accuracy = ScoreManager.Instance.GetAccuracy();
-        int accBonus = Mathf.RoundToInt(curTotalScore * (accuracy / 100f));
-
-        ScoreManager.Instance.AddScore(accBonus);
-
-        Debug.Log($"정확도 보너스 점수: 정확도{accuracy:F1}% -> 정확도 보너스: {accBonus}");
-        Debug.Log($"최종 점수: {ScoreManager.Instance.GetCurrentScore()}");
+            int bestScoreToDisplay = isNewScore ? stageScore : dbBestScore;
+            OnStageClearData?.Invoke(stageScore, levelClearTime, stageAcc, bestScoreToDisplay, isNewScore);
+        });
     }
+
     public int GetEnemiesCount()
     {
         return enemiesLeft;

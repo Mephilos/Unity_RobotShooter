@@ -81,6 +81,26 @@ public class ScoreManager : MonoBehaviour
         stageScores.Add(newScore);
     }
 
+    public void CalculateTimeAndAccBonus(float clearTime, float timeLimit, int scorePerSec)
+    {
+        float timeRemaining = timeLimit - clearTime;
+
+        if (timeRemaining > 0)
+        {
+            int timeBonus = Mathf.RoundToInt(timeRemaining * scorePerSec);
+            AddScore(timeBonus);
+            Debug.Log($"[TimeBonus] {timeRemaining:F1}<- 남은시간 \n 시간 보너스 점수: {timeBonus}");
+        }
+
+        float accuracy = GetAccuracy();
+        int accBonus = Mathf.RoundToInt(currentScore * (accuracy / 100f));
+
+        AddScore(accBonus);
+
+        Debug.Log($"정확도 보너스 점수: 정확도{accuracy:F1}% -> 정확도 보너스: {accBonus}");
+        Debug.Log($"최종 점수: {GetCurrentScore()}");
+    }
+
     public (int totalScore, float totalTime, float avgAcc) GetTotalStats()
     {
         int totalScore = stageScores.Sum(r => r.score);

@@ -54,6 +54,10 @@ public class LeaderboardHandler : MonoBehaviour
 
         FirebaseManager.Instance.LoadLeaderboardData(currentScoreView, OnDataLoad);
     }
+    public void LoadStageLeaderboard(int stageIndex)
+    {
+        ChangeScoreView(stageIndex);
+    }
 
     void OnDataLoad(List<UserScoreData> userScoreDatas)
     {

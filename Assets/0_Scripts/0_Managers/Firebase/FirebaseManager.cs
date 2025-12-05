@@ -92,81 +92,68 @@ public class FirebaseManager : MonoBehaviour
             }
         });
     }
-    void RenewScore(int currentScore, float currentTime, float currentAcc)
+    public void StageScoreSave(int stageIndex, int currentScore, float currentTime, float currentAcc, Action<bool, int> OnComplete)
     {
         string userId = AuthManager.Instance.UserId;
         string userName = AuthManager.Instance.DisplayName;
 
         if (string.IsNullOrEmpty(userId)) return;
 
-        bool isNewScore = false;
-        bool isNewAcc = false;
-
-        if (currentScore > BestScore)
+        DatabaseReference stageDataRef = databaseReference.Child("users").Child(userId).Child("stages").Child(stageIndex.ToString());
+        stageDataRef.GetValueAsync().ContinueWithOnMainThread(task =>
         {
-            BestScore = currentScore;
-            BestTime = currentTime;
-            isNewScore = true;
-        }
-
-        else if (currentScore == BestScore && currentTime < BestTime)
-        {
-            BestTime = currentTime;
-            isNewScore = true;
-        }
-
-        if (currentAcc > BestAcc)
-        {
-            BestAcc = currentAcc;
-            isNewAcc = true;
-        }
-
-        DatabaseReference userDataRef = databaseReference.Child("users").Child(userId);
-
-        if (isNewScore)
-        {
-            Dictionary<string, object> scoreUpdate = new Dictionary<string, object>
+            bool isNewScore = false;
+            if (task.IsFaulted)
             {
-                ["userName"] = userName,
-                ["score"] = BestScore,
-                ["time"] = BestTime
-            };
-            userDataRef.UpdateChildrenAsync(scoreUpdate);
-            Debug.Log($"신기록 갱신 완료 서버 등록({BestScore})");
-        }
+                Debug.LogError("기록조회 실패");
+                OnComplete?.Invoke(false, 0);
+                return;
+            }
 
-        if (isNewAcc)
-        {
-            Dictionary<string, object> accUpdate = new Dictionary<string, object>
+            DataSnapshot snapshot = task.Result;
+            int dbBestScore = 0;
+            float dbBestTime = 9999f;
+
+            if (snapshot.Exists && snapshot.HasChildren)
             {
-                ["userName"] = userName,
-                ["acc"] = BestAcc
-            };
-            userDataRef.UpdateChildrenAsync(accUpdate);
-            Debug.Log($"정확도 갱신 완료 서버 등록({BestAcc})");
-        }
-    }
+                IDictionary<string, object> data = (IDictionary<string, object>)snapshot.Value;
+                if (data.ContainsKey("score")) dbBestScore = Convert.ToInt32(data["score"]);
+                if (data.ContainsKey("time")) dbBestTime = Convert.ToSingle(data["time"]);
+            }
 
-    public void StageRecordSave(int stageIndex, int score, float time, float acc)
-    {
-        string userId = AuthManager.Instance.UserId;
-        string userName = AuthManager.Instance.DisplayName;
-
-        if (string.IsNullOrEmpty(userId)) return;
-
-        DatabaseReference userDataRef = databaseReference.Child("users").Child(userId);
-        Dictionary<string, object> updates = new Dictionary<string, object>
-        {
-            ["userName"] = userName,
-            [$"stages/{stageIndex}/score"] = score,
-            [$"stages/{stageIndex}/time"] = time,
-            [$"stages/{stageIndex}/acc"] = acc
-        };
-        userDataRef.UpdateChildrenAsync(updates).ContinueWithOnMainThread(task =>
-        {
-            if (task.IsCompleted)
+            if (currentScore > dbBestScore)
             {
-                TryUpdateTotalScore();
+                isNewScore = true;
+            }
+            else if (currentScore == dbBestScore && currentTime < dbBestTime)
+            {
+                isNewScore = true;
+            }
+
+            if (isNewScore)
+            {
+                Dictionary<string, object> updates = new Dictionary<string, object>
+                {
+                    ["userName"] = userName,
+                    ["score"] = currentScore,
+                    ["time"] = currentTime,
+                    ["acc"] = currentAcc
+                };
+                databaseReference.Child("users").Child(userId).Child("userName").SetValueAsync(userName);
+
+                stageDataRef.UpdateChildrenAsync(updates).ContinueWithOnMainThread(updateTask =>
+                {
+                    if (updateTask.IsCompleted)
+                    {
+                        Debug.Log($"[신기록 달성] 스테이지 {stageIndex} | 점수: {currentScore}");
+                        TryUpdateTotalScore();
+                        OnComplete?.Invoke(true, currentScore);
+                    }
+                });
+            }
+            else
+            {
+                OnComplete?.Invoke(false, dbBestScore);
             }
         });
     }
@@ -202,14 +189,45 @@ public class FirebaseManager : MonoBehaviour
                 count++;
             }
 
-            int finalTotalScore = totalScore;
-            float finalTotalTime = totalTime;
             float finalAvgAcc = (count > 0) ? (totalAccSum / count) : 0f;
 
-            Debug.Log($"스테이지 올 클리어 합산 결과> 점수: {finalTotalScore}/ 시간: {finalTotalTime}/ 정확도: {finalAvgAcc}");
-            RenewScore(finalTotalScore, finalTotalTime, finalAvgAcc);
+            Debug.Log($"스테이지 올 클리어 합산 결과> 점수: {totalScore}/ 시간: {totalTime}/ 정확도: {finalAvgAcc}");
+            RenewScore(totalScore, totalTime, finalAvgAcc);
         });
     }
+
+    void RenewScore(int currentScore, float currentTime, float currentAcc)
+    {
+        string userId = AuthManager.Instance.UserId;
+        string userName = AuthManager.Instance.DisplayName;
+
+        if (string.IsNullOrEmpty(userId)) return;
+
+        bool isNewScore = false;
+
+        if (currentScore > BestScore)
+        {
+            isNewScore = true;
+        }
+
+        else if (currentScore == BestScore && currentTime < BestTime)
+        {
+            isNewScore = true;
+        }
+
+        if (isNewScore)
+        {
+            Dictionary<string, object> scoreUpdate = new Dictionary<string, object>
+            {
+                ["userName"] = userName,
+                ["score"] = BestScore,
+                ["time"] = BestTime
+            };
+            databaseReference.Child("users").Child(userId).UpdateChildrenAsync(scoreUpdate);
+            Debug.Log($"종합기록 갱신 완료 서버 등록({BestScore})");
+        }
+    }
+
     public void LoadLeaderboardData(int stageIndex, Action<List<UserScoreData>> onLoad)
     {
         string stageScorePath = (stageIndex == 0) ? "score" : $"stages/{stageIndex}/score";
@@ -245,11 +263,9 @@ public class FirebaseManager : MonoBehaviour
                 }
                 else
                 {
-                    if (!data.HasChild("stages")) continue;
+                    if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) continue;
 
                     DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
-                    if (!stageSnap.Exists) continue;
-
                     if (stageSnap.HasChild("score")) uScore = Convert.ToInt32(stageSnap.Child("score").Value);
                     if (stageSnap.HasChild("time")) uTime = Convert.ToSingle(stageSnap.Child("time").Value);
                     if (stageSnap.HasChild("acc")) uAcc = Convert.ToSingle(stageSnap.Child("acc").Value);

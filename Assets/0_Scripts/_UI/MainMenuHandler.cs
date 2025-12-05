@@ -35,11 +35,8 @@ public class MainMenuHandler : MenuHandler
 
     void RefreshAuthUI(Firebase.Auth.FirebaseUser firebaseUser)
     {
-        bool isLogin = false;
-        if (firebaseUser != null && !firebaseUser.IsAnonymous)
-        {
-            isLogin = true;
-        }
+
+        bool isLogin = (firebaseUser != null && !firebaseUser.IsAnonymous);
 
         Debug.Log($"로그인 여부: {isLogin} (유저: {firebaseUser?.UserId}, 익명: {firebaseUser?.IsAnonymous})");
         logoutButton.SetActive(isLogin);
