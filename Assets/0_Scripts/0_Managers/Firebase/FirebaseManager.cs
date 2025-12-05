@@ -53,6 +53,11 @@ public class FirebaseManager : MonoBehaviour
 
     void OnLoginHandler(Firebase.Auth.FirebaseUser firebaseUser)
     {
+        if (isDataLoad)
+        {
+            Debug.Log("이미 데이터가 로드되어 있습니다. (중복 호출 방지)");
+            return;
+        }
         databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
         LoadMyData();
     }
@@ -148,18 +153,19 @@ public class FirebaseManager : MonoBehaviour
     public void StageRecordSave(int stageIndex, int score, float time, float acc)
     {
         string userId = AuthManager.Instance.UserId;
+        string userName = AuthManager.Instance.DisplayName;
+
         if (string.IsNullOrEmpty(userId)) return;
 
-        DatabaseReference stageDataRef = databaseReference.Child("users").Child(userId).Child("stages").Child(stageIndex.ToString());
-
-        Dictionary<string, object> update = new Dictionary<string, object>()
+        DatabaseReference userDataRef = databaseReference.Child("users").Child(userId);
+        Dictionary<string, object> updates = new Dictionary<string, object>
         {
-            ["score"] = score,
-            ["time"] = time,
-            ["acc"] = acc
+            ["userName"] = userName,
+            [$"stages/{stageIndex}/score"] = score,
+            [$"stages/{stageIndex}/time"] = time,
+            [$"stages/{stageIndex}/acc"] = acc
         };
-
-        stageDataRef.UpdateChildrenAsync(update).ContinueWithOnMainThread(task =>
+        userDataRef.UpdateChildrenAsync(updates).ContinueWithOnMainThread(task =>
         {
             if (task.IsCompleted)
             {
@@ -224,19 +230,16 @@ public class FirebaseManager : MonoBehaviour
 
             foreach (DataSnapshot data in dataSnapshot.Children)
             {
-                string uName = "UnknownPlayer";
-                if (data.HasChild("userName"))
-                {
-                    uName = data.Child("userName").Value.ToString();
-                }
 
                 int uScore = 0;
                 float uTime = 0f;
                 float uAcc = 0f;
 
+                string uName = data.HasChild("userName") ? data.Child("userName").Value.ToString() : Constants.UNKNOWN_PLAYER;
+
+
                 if (stageIndex == 0)
                 {
-
                     if (!data.HasChild("score")) continue;
 
                     uScore = Convert.ToInt32(data.Child("score").Value);

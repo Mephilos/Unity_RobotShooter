@@ -53,7 +53,7 @@ public class PlaySceneUI : MonoBehaviour
         DisplayComparisonTime(finalTimeText, currentTime, bestTime);
         DisplayComparisonScore(finalAccText, "ACCURACY", currentAcc, bestAcc, true, "%", 0f);
 
-        FirebaseManager.Instance.RenewScore(currentScore, currentTime, currentAcc);
+        // FirebaseManager.Instance.RenewScore(currentScore, currentTime, currentAcc);
 
         UnlockCursor();
     }

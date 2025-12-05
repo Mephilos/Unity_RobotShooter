@@ -6,16 +6,33 @@ using Firebase.Extensions;
 public class AuthManager : MonoBehaviour
 {
     public static AuthManager Instance { get; private set; }
-
-    FirebaseAuth firebaseAuth;
-    FirebaseUser firebaseUser;
     public FirebaseUser CurrentUser => firebaseUser;
     public string UserId => firebaseUser != null ? firebaseUser.UserId : "";
-    public string DisplayName => firebaseUser != null ? firebaseUser.DisplayName : "UnknowPlayer";
+    public string DisplayName
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(localDisplayName)) return localDisplayName;
+            if (firebaseUser != null && !string.IsNullOrEmpty(firebaseUser.DisplayName))
+            {
+                return firebaseUser.DisplayName;
+            }
+            else
+            {
+                return "UnknownPlayer";
+            }
+        }
+    }
     public bool IsFirebaseReady { get; private set; } = false;
+
+
     public event Action<FirebaseUser> OnLoginSuccess;
     public event Action<string> OnLoginFailed;
     public event Action OnLogout;
+
+    FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    string localDisplayName;
 
     void Awake()
     {
@@ -66,11 +83,19 @@ public class AuthManager : MonoBehaviour
 
             if (firebaseUser != null)
             {
+                localDisplayName = firebaseUser.DisplayName;
+
+                if (firebaseUser.IsAnonymous && string.IsNullOrEmpty(localDisplayName))
+                {
+                    Debug.Log("닉네임이 유실된 익명 유저 감지 -> 이름 재부여 시도");
+                    SetGuestName();
+                }
                 Debug.Log($"로그인 감지 (StateChanged): {firebaseUser.UserId}");
                 OnLoginSuccess?.Invoke(firebaseUser);
             }
             else
             {
+                localDisplayName = null;
                 Debug.Log("로그아웃 감지");
                 OnLogout?.Invoke();
             }
@@ -118,6 +143,7 @@ public class AuthManager : MonoBehaviour
                 return;
             }
             FirebaseUser loginUser = task.Result.User;
+            localDisplayName = loginUser.DisplayName;
             Debug.Log($"로그인 성공 {loginUser.DisplayName}");
             OnLoginSuccess?.Invoke(loginUser);
         });
@@ -149,11 +175,13 @@ public class AuthManager : MonoBehaviour
     {
         string randomSuffix = UnityEngine.Random.Range(10000, 99999).ToString();
         string newName = $"Guest_{randomSuffix}";
+        localDisplayName = newName;
         UpdateProfile(newName);
     }
 
     public void UpdateProfile(string newNickname)
     {
+        localDisplayName = newNickname;
         UserProfile profile = new UserProfile { DisplayName = newNickname };
 
         firebaseUser.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>

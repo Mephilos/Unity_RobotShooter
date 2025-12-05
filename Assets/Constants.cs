@@ -6,6 +6,7 @@ public class Constants
     public const string SCORE_STRING = "Score: ";
     public const string ACC_STRING = "Acc: ";
     public const string PLAYER_TARGET = "PlayerCameraRoot";
+    public const string UNKNOWN_PLAYER = "Unknow Player";
     public const int SCENE_MAIN_MENU = 0;
     public const int ROBOT_SELF_DESTRUCT = 1000;
     public const int TOTAL_STAGE_COUNT = 6;
