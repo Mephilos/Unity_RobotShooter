@@ -11,6 +11,7 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] TMP_Text ammoText;
     [SerializeField] CinemachineCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
+    [SerializeField] float zoomTransSpeed = 20f;
     Weapon currentWeapon;
     Animator animator;
     StarterAssetsInputs starterAssetsInputs;
@@ -21,6 +22,7 @@ public class ActiveWeapon : MonoBehaviour
     float defaultFOV = 75f;
     float defaultRotationSpeed;
     bool isFire = false;
+    bool isZoom = false;
 
     void Awake()
     {
@@ -93,23 +95,24 @@ public class ActiveWeapon : MonoBehaviour
     {
         if (!weaponSO.CanZoom) return;
 
-        if (!starterAssetsInputs.zoom)
+        if (starterAssetsInputs.zoom != isZoom)
         {
-            //TODO: 줌이슈 발생
-            Debug.Log("줌아웃");
-            Zoom.SetActive(false);
-            cinemachineVirtualCamera.Lens.FieldOfView = defaultFOV;
-            weaponCamera.fieldOfView = defaultFOV;
-            firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
-        }
+            Debug.Log("줌 변환");
+            isZoom = starterAssetsInputs.zoom;
 
-        else
+            Zoom.SetActive(isZoom);
+
+            if (isZoom) firstPersonController.ChangeRotationSpeed(weaponSO.ZoomSpeed); // 줌인 감도
+            else firstPersonController.ChangeRotationSpeed(defaultRotationSpeed); // 디폴트 감도
+        }
+        float changeFOV = isZoom ? weaponSO.ZoomAmount : defaultFOV;
+
+        if (Mathf.Abs(cinemachineVirtualCamera.Lens.FieldOfView - changeFOV) > 0.1f)
         {
-            Debug.Log("줌인");
-            Zoom.SetActive(true);
-            cinemachineVirtualCamera.Lens.FieldOfView = weaponSO.ZoomAmount;
-            weaponCamera.fieldOfView = weaponSO.ZoomAmount;
-            firstPersonController.ChangeRotationSpeed(weaponSO.ZoomSpeed);
+            float newFOV = Mathf.Lerp(cinemachineVirtualCamera.Lens.FieldOfView, changeFOV, Time.deltaTime * zoomTransSpeed);
+
+            cinemachineVirtualCamera.Lens.FieldOfView = newFOV;
+            weaponCamera.fieldOfView = newFOV;
         }
     }
 }
