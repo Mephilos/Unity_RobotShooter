@@ -11,7 +11,7 @@ public class SpawnGate : MonoBehaviour
     PlayerHealth player;
     EnemyHealth enemyHealth;
     WaitForSeconds wait;
-    Coroutine currentRoutine;
+    // Coroutine currentRoutine;
 
     void Awake()
     {

@@ -17,7 +17,7 @@ public class ActiveWeapon : MonoBehaviour
     StarterAssetsInputs starterAssetsInputs;
     FirstPersonController firstPersonController;
     WeaponSO weaponSO;
-
+    WaitForSeconds waitFire;
     int currentAmmo = 0;
     float defaultFOV = 75f;
     float defaultRotationSpeed;
@@ -35,6 +35,7 @@ public class ActiveWeapon : MonoBehaviour
     void Start()
     {
         SwitchWeapon(startingWeaponOS);
+        waitFire = new WaitForSeconds(weaponSO.FireRate);
     }
 
     void Update()
@@ -57,12 +58,20 @@ public class ActiveWeapon : MonoBehaviour
     {
         if (currentWeapon != null)
         {
-            Destroy(currentWeapon.gameObject);
+            PoolManager.Instance.Release(currentWeapon.gameObject);
         }
 
-        Weapon newWeapon = Instantiate(weaponSO.WeaponPrefab, transform).GetComponent<Weapon>();
+        // Weapon newWeapon = Instantiate(weaponSO.WeaponPrefab, transform).GetComponent<Weapon>();
+
+        GameObject newWeaponObj = PoolManager.Instance.Get(weaponSO.WeaponPrefab, transform.position, transform.rotation);
+        newWeaponObj.transform.SetParent(transform);
+        newWeaponObj.transform.localPosition = weaponSO.WeaponPrefab.transform.position;
+        newWeaponObj.transform.localRotation = weaponSO.WeaponPrefab.transform.rotation;
+
+        Weapon newWeapon = newWeaponObj.GetComponent<Weapon>();
         currentWeapon = newWeapon;
         this.weaponSO = weaponSO;
+        waitFire = new WaitForSeconds(weaponSO.FireRate);
         currentAmmo = 0;
         AdjustAmmo(weaponSO.MagazineSize);
     }
@@ -87,7 +96,7 @@ public class ActiveWeapon : MonoBehaviour
 
     IEnumerator FireRateRoutine()
     {
-        yield return new WaitForSeconds(weaponSO.FireRate);
+        yield return waitFire;
         isFire = false;
     }
 
