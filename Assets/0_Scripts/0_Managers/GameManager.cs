@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using System.Runtime.CompilerServices;
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;
@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
 
         OnPauseToggle?.Invoke(IsPause);
     }
+
     public void RestartButton()
     {
         InitPause();
@@ -42,8 +43,18 @@ public class GameManager : MonoBehaviour
     public void NextScene()
     {
         InitPause();
-        int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
-        SceneManager.LoadScene(nextScene);
+
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+
+        if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
+        {
+            SceneManager.LoadScene(nextSceneIndex);
+        }
+        else
+        {
+            Debug.Log("다음 씬 없음. 메인메뉴로 돌아감");
+            ReturnToMainMenu();
+        }
     }
 
     public void ReturnToMainMenu()

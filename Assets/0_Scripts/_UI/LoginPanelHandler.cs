@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
-using Unity.VisualScripting;
 
 public class LoginPanelHandler : MonoBehaviour
 {
@@ -42,21 +41,21 @@ public class LoginPanelHandler : MonoBehaviour
         statusText.text = "";
     }
 
-    public void OnClickLogin()
+    void OnClickLogin()
     {
         string email = emailInputField.text;
         string password = passwordInputField.text;
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
-            UpdateStatus("아이디, 비밀번호 입력 필요");
+            UpdateStatus("아이디, 비밀번호 입력 필요", true);
             return;
         }
-        UpdateStatus("로그인 시도 중");
+        UpdateStatus("로그인 시도 중", false);
         AuthManager.Instance.Login(email, password);
     }
 
-    public void OnClickRegister()
+    void OnClickRegister()
     {
         string email = emailInputField.text;
         string password = passwordInputField.text;
@@ -64,18 +63,23 @@ public class LoginPanelHandler : MonoBehaviour
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(nickName))
         {
-            UpdateStatus("가입 정보를 입력해주세요");
+            UpdateStatus("가입 정보를 입력해주세요", true);
             return;
         }
-        UpdateStatus("회원가입 요청 중");
+        UpdateStatus("회원가입 요청 중", false);
         AuthManager.Instance.Register(email, password, nickName);
     }
 
-    void UpdateStatus(string msg)
+    void UpdateStatus(string msg, bool isErr)
     {
         CheckCurRoutineAndStop();
         statusPanel.SetActive(true);
         statusText.text = msg;
+
+        if (isErr)
+        {
+            currentRoutine = StartCoroutine(FailRoutine(msg));
+        }
     }
 
     void OffStatusPanel()
