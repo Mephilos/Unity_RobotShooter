@@ -21,6 +21,7 @@ public class ActiveWeapon : MonoBehaviour
     int currentAmmo = 0;
     float defaultFOV = 75f;
     float defaultRotationSpeed;
+    float keepFireSpread = 0f;
     bool isFire = false;
     bool isZoom = false;
 
@@ -35,15 +36,22 @@ public class ActiveWeapon : MonoBehaviour
     void Start()
     {
         SwitchWeapon(startingWeaponOS);
-        waitFire = new WaitForSeconds(weaponSO.FireRate);
     }
 
     void Update()
     {
         HandleShoot();
         HandleZoom();
+        HandleSpreadRecovery();
     }
-
+    void HandleSpreadRecovery()
+    {
+        if (!isFire && keepFireSpread > 0)
+        {
+            keepFireSpread -= weaponSO.RecoverySpreadSpeed * Time.deltaTime;
+            if (keepFireSpread < 0) keepFireSpread = 0;
+        }
+    }
     public void AdjustAmmo(int Amount)
     {
         currentAmmo += Amount;
@@ -71,8 +79,11 @@ public class ActiveWeapon : MonoBehaviour
         Weapon newWeapon = newWeaponObj.GetComponent<Weapon>();
         currentWeapon = newWeapon;
         this.weaponSO = weaponSO;
+
         waitFire = new WaitForSeconds(weaponSO.FireRate);
+
         currentAmmo = 0;
+        keepFireSpread = 0;
         AdjustAmmo(weaponSO.MagazineSize);
     }
 
@@ -84,7 +95,16 @@ public class ActiveWeapon : MonoBehaviour
 
         animator.Play(Constants.ANIMATION_NAME, 0, 0);
 
-        currentWeapon.Shoot(weaponSO);
+        float currentSpread = GetCurrentSpread();
+
+        currentWeapon.Shoot(weaponSO, currentSpread);
+        if (!isZoom)
+        {
+            firstPersonController.ApplyRecoil(weaponSO.RecoilForce * Time.deltaTime * 50f);
+        }
+
+        keepFireSpread += weaponSO.IncreaseSpreadPerShot;
+
         AdjustAmmo(-1);
 
         if (!weaponSO.isAutomatic)
@@ -123,5 +143,22 @@ public class ActiveWeapon : MonoBehaviour
             cinemachineVirtualCamera.Lens.FieldOfView = newFOV;
             weaponCamera.fieldOfView = newFOV;
         }
+    }
+
+    public float GetCurrentSpread()
+    {
+        float currentSpread = weaponSO.DefaultSpread;
+        float currentSpeed = firstPersonController.GetCurrentSpeed();
+
+        if (currentSpeed > 0.1f)
+        {
+            currentSpread += weaponSO.MoveSpreadFactor * (currentSpeed / firstPersonController.SprintSpeed);
+        }
+
+        currentSpread += keepFireSpread;
+
+        if (isZoom) currentSpread *= 0.1f;
+
+        return Mathf.Min(currentSpread, weaponSO.MaxSpread);
     }
 }

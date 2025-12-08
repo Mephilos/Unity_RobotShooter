@@ -17,7 +17,14 @@ MonoBehaviour:
   FireRate: 0.2
   HitVFXPrefab: {fileID: 8430451896267564482, guid: 74e69bf1a67af461eb9a7d82adee95e7, type: 3}
   isAutomatic: 1
+  MagazineSize: 30
+  RespawnTime: 15
   CanZoom: 0
   ZoomAmount: 10
   ZoomSpeed: 0.5
-  MagazineSize: 30
+  DefaultSpread: 0.01
+  IncreaseSpreadPerShot: 0.05
+  MaxSpread: 0.17
+  MoveSpreadFactor: 0.5
+  RecoverySpreadSpeed: 2
+  RecoilForce: 4

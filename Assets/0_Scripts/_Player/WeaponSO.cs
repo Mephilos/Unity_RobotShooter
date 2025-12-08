@@ -9,9 +9,17 @@ public class WeaponSO : ScriptableObject
     public float FireRate = 100f;
     public ParticleSystem HitVFXPrefab;
     public bool isAutomatic = false;
+    public int MagazineSize = 10;
+    public float RespawnTime = 15f;
+
     public bool CanZoom = false;
     public float ZoomAmount = 10f;
     public float ZoomSpeed = .5f;
-    public int MagazineSize = 10;
-    public float RespawnTime = 15f;
+
+    public float DefaultSpread = 0.1f;
+    public float IncreaseSpreadPerShot = 0.05f;
+    public float MaxSpread = 0.2f;
+    public float MoveSpreadFactor = 0.5f;
+    public float RecoverySpreadSpeed = 2.0f;
+    public float RecoilForce = 2.0f;
 }

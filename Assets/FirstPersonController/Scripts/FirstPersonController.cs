@@ -137,7 +137,7 @@ namespace StarterAssets
 		private void CameraRotation()
 		{
 			// if there is an input
-			if (_input.look.sqrMagnitude >= _threshold)
+			//if (_input.look.sqrMagnitude >= _threshold)
 			{
 				//Don't multiply mouse input by Time.deltaTime
 				float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
@@ -269,5 +269,19 @@ namespace StarterAssets
 			// when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
 			Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
 		}
+
+		#region Cumstom Method
+
+		public float GetCurrentSpeed()
+		{
+			return new Vector3(_controller.velocity.x, 0, _controller.velocity.z).magnitude;
+		}
+
+		public void ApplyRecoil(float recoilAmount)
+		{
+			_cinemachineTargetPitch -= recoilAmount;
+		}
+
+		#endregion
 	}
 }

@@ -16,7 +16,7 @@ public class Weapon : MonoBehaviour
     {
         muzzleFlash = GetComponentInChildren<ParticleSystem>();
     }
-    public void Shoot(WeaponSO weaponSO)
+    public void Shoot(WeaponSO weaponSO, float currentSpread)
     {
         muzzleFlash.Play();
         impulseSource.GenerateImpulse();
@@ -24,7 +24,13 @@ public class Weapon : MonoBehaviour
         ScoreManager.Instance.ReportShot();
         RaycastHit hit;
 
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, Mathf.Infinity,
+        // 반동 설정
+        Vector3 spread = Camera.main.transform.up * Random.Range(-currentSpread, currentSpread) +
+                            Camera.main.transform.right * Random.Range(-currentSpread, currentSpread);
+        Vector3 shootDirection = (Camera.main.transform.forward + spread).normalized;
+
+
+        if (Physics.Raycast(Camera.main.transform.position, shootDirection, out hit, Mathf.Infinity,
                              InteractionLayer, QueryTriggerInteraction.Ignore))
         {
             Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
