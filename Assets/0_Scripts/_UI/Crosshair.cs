@@ -2,15 +2,27 @@ using UnityEngine;
 
 public class Crosshair : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] RectTransform top;
+    [SerializeField] RectTransform bottom;
+    [SerializeField] RectTransform left;
+    [SerializeField] RectTransform right;
 
-    // Update is called once per frame
+    [SerializeField] float spreadMultiplier = 500f;
+    [SerializeField] float spreadSmooth = 15f;
+    [SerializeField] float aimNarrow = 5f;
+    [SerializeField] ActiveWeapon activeWeapon;
+
+    float spreadMove = 0;
+
     void Update()
     {
-        
+        float currentSpread = activeWeapon.GetCurrentSpread() * spreadMultiplier;
+        spreadMove = Mathf.Lerp(currentSpread, currentSpread, Time.deltaTime * spreadSmooth);
+
+        top.anchoredPosition = new Vector2(0, currentSpread + aimNarrow);
+        bottom.anchoredPosition = new Vector2(0, -currentSpread - aimNarrow);
+        left.anchoredPosition = new Vector2(-currentSpread - aimNarrow, 0);
+        right.anchoredPosition = new Vector2(currentSpread + aimNarrow, 0);
     }
+
 }

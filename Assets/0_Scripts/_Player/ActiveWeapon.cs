@@ -12,6 +12,7 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] CinemachineCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
     [SerializeField] float zoomTransSpeed = 20f;
+    [SerializeField] bool isInfinityAmmo;
     Weapon currentWeapon;
     Animator animator;
     StarterAssetsInputs starterAssetsInputs;
@@ -21,7 +22,7 @@ public class ActiveWeapon : MonoBehaviour
     int currentAmmo = 0;
     float defaultFOV = 75f;
     float defaultRotationSpeed;
-    float keepFireSpread = 0f;
+    float keepFireRecoilPenalty = 0f;
     bool isFire = false;
     bool isZoom = false;
 
@@ -44,14 +45,7 @@ public class ActiveWeapon : MonoBehaviour
         HandleZoom();
         HandleSpreadRecovery();
     }
-    void HandleSpreadRecovery()
-    {
-        if (!isFire && keepFireSpread > 0)
-        {
-            keepFireSpread -= weaponSO.RecoverySpreadSpeed * Time.deltaTime;
-            if (keepFireSpread < 0) keepFireSpread = 0;
-        }
-    }
+
     public void AdjustAmmo(int Amount)
     {
         currentAmmo += Amount;
@@ -83,7 +77,7 @@ public class ActiveWeapon : MonoBehaviour
         waitFire = new WaitForSeconds(weaponSO.FireRate);
 
         currentAmmo = 0;
-        keepFireSpread = 0;
+        keepFireRecoilPenalty = 0;
         AdjustAmmo(weaponSO.MagazineSize);
     }
 
@@ -95,17 +89,19 @@ public class ActiveWeapon : MonoBehaviour
 
         animator.Play(Constants.ANIMATION_NAME, 0, 0);
 
-        float currentSpread = GetCurrentSpread();
+        currentWeapon.Shoot(weaponSO, GetCurrentSpread());
 
-        currentWeapon.Shoot(weaponSO, currentSpread);
         if (!isZoom)
         {
-            firstPersonController.ApplyRecoil(weaponSO.RecoilForce * Time.deltaTime * 50f);
+            float currentRecoil = Mathf.Min(weaponSO.DefaultRecoil +
+                                            (Mathf.Pow(keepFireRecoilPenalty, 2) * weaponSO.RecoilFactor), weaponSO.MaxRecoil);
+            firstPersonController.ApplyRecoil(currentRecoil * Time.deltaTime * 50f);
         }
 
-        keepFireSpread += weaponSO.IncreaseSpreadPerShot;
+        keepFireRecoilPenalty += 1f;
 
-        AdjustAmmo(-1);
+        if (!isInfinityAmmo)
+            AdjustAmmo(-1);
 
         if (!weaponSO.isAutomatic)
         {
@@ -154,11 +150,20 @@ public class ActiveWeapon : MonoBehaviour
         {
             currentSpread += weaponSO.MoveSpreadFactor * (currentSpeed / firstPersonController.SprintSpeed);
         }
-
-        currentSpread += keepFireSpread;
+        float keepFirePenalty = Mathf.Pow(keepFireRecoilPenalty, 2) * weaponSO.IncreaseSpreadPerShot;
+        currentSpread += keepFirePenalty;
 
         if (isZoom) currentSpread *= 0.1f;
 
         return Mathf.Min(currentSpread, weaponSO.MaxSpread);
+    }
+
+    void HandleSpreadRecovery()
+    {
+        if (!isFire && keepFireRecoilPenalty > 0)
+        {
+            keepFireRecoilPenalty = Mathf.Lerp(keepFireRecoilPenalty, 0f, weaponSO.RecoverySpreadSpeed * Time.deltaTime);
+            if (keepFireRecoilPenalty < 0) keepFireRecoilPenalty = 0;
+        }
     }
 }

@@ -17,9 +17,12 @@ public class WeaponSO : ScriptableObject
     public float ZoomSpeed = .5f;
 
     public float DefaultSpread = 0.1f;
-    public float IncreaseSpreadPerShot = 0.05f;
+    public float IncreaseSpreadPerShot = 0.002f;
     public float MaxSpread = 0.2f;
     public float MoveSpreadFactor = 0.5f;
-    public float RecoverySpreadSpeed = 2.0f;
-    public float RecoilForce = 2.0f;
+    public float DefaultRecoil = 1.0f;
+    public float RecoilFactor = 0.02f;
+    public float MaxRecoil = 10f;
+    public float RecoverySpreadSpeed = 8.0f;
+
 }

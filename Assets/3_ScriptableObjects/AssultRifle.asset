@@ -22,9 +22,10 @@ MonoBehaviour:
   CanZoom: 0
   ZoomAmount: 10
   ZoomSpeed: 0.5
-  DefaultSpread: 0.01
-  IncreaseSpreadPerShot: 0.05
+  DefaultSpread: 0.001
+  IncreaseSpreadPerShot: 0.005
   MaxSpread: 0.17
   MoveSpreadFactor: 0.5
-  RecoverySpreadSpeed: 2
-  RecoilForce: 4
+  DefaultRecoil: 1
+  RecoilFactor: 1
+  RecoverySpreadSpeed: 4
