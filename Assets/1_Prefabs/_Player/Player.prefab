@@ -314,10 +314,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcd9b0e2b77204369af160d5c999d126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingWeaponOS: {fileID: 11400000, guid: f8dbdd3366f0d4767913242b73bc1a05, type: 2}
+  startingWeaponOS: {fileID: 11400000, guid: 0f1b20bb78070483bac56145aa639720, type: 2}
   Zoom: {fileID: 0}
-  ammoText: {fileID: 0}
+  cinemachineVirtualCamera: {fileID: 0}
   weaponCamera: {fileID: 3787504867006164239}
+  zoomTransSpeed: 20
+  isInfinityAmmo: 1
 --- !u!1 &9087960357637285243
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,6 +334,8 @@ GameObject:
   - component: {fileID: 4652453124376842143}
   - component: {fileID: 8933197433072829427}
   - component: {fileID: 8989627679749764366}
+  - component: {fileID: 8278475662082735142}
+  - component: {fileID: 1313572322852563355}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -445,6 +449,8 @@ MonoBehaviour:
   sprint: 0
   shoot: 0
   zoom: 0
+  inputBlocked: 0
+  pause: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -546,3 +552,52 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &8278475662082735142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9087960357637285243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a531a6785ac4a0cacbe34865e2fd85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deathVirtualCam: {fileID: 0}
+  weaponCamera: {fileID: 8751591782258475727}
+  shieldBars:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  startingHealth: 10
+  gameOverContainer: {fileID: 0}
+  invincibleMode: 1
+--- !u!114 &1313572322852563355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9087960357637285243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b5489c73d70b48cfbf8d1d5959d5989, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  walkInterval: 0.5
+  runInterval: 0.3
+  velocityThreshold: 2
+  stepClips:
+  - {fileID: 8300000, guid: d25a8335420d09f43bedf446e2deffa0, type: 3}
+  - {fileID: 8300000, guid: 149e8ca9df68d744e9722158daa78ab1, type: 3}
+  - {fileID: 8300000, guid: b2d0936410eda534bb65c5f1794cb663, type: 3}
+  - {fileID: 8300000, guid: d2b2858ce5c7ca9428bfd0e424d5a82d, type: 3}
+  landClip: {fileID: 8300000, guid: 0462feb393ce2b64b9f78c8bc9303014, type: 3}
