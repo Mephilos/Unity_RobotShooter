@@ -10,7 +10,8 @@ public class LevelManager : MonoBehaviour
     public event Action<int, float, float, int, bool> OnStageClearData;
     int enemiesLeft = 0;
     float startTime;
-    float clearTime;
+
+    float limitTime;
     int scoreTime;
 
     void Awake()
@@ -28,39 +29,19 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         startTime = Time.time;
-        LoadDataFromCSV();
+        InitStageClearData();
     }
 
-    void LoadDataFromCSV()
+    void InitStageClearData()
     {
-        TextAsset csvData = Resources.Load<TextAsset>("TimeData");
-
-        if (csvData == null)
-        {
-            Debug.LogError("CSV파일 필요");
-            return;
-        }
-
-        string[] line = csvData.text.Split('\n');
         int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
 
-        for (int i = 1; i < line.Length; i++)
-        {
-            if (string.IsNullOrWhiteSpace(line[i])) continue;
+        StageClearTimeData data = CSVManager.Instance.GetStageClearTimeData(currentLevelIndex);
 
-            string[] data = line[i].Split(',');
-
-            int leveIndex = int.Parse(data[0]);
-
-            if (leveIndex == currentLevelIndex)
-            {
-                clearTime = float.Parse(data[1]);
-                scoreTime = int.Parse(data[2]);
-
-                return;
-            }
-        }
+        limitTime = data.limitTime;
+        scoreTime = data.scoreTime;
     }
+
     public void AdjustEnemiesLeft(int amount)
     {
         enemiesLeft += amount;
@@ -76,7 +57,7 @@ public class LevelManager : MonoBehaviour
     void ProcessStageClearScore()
     {
         float levelClearTime = Time.time - startTime;
-        ScoreManager.Instance.CalculateTimeAndAccBonus(levelClearTime, clearTime, scoreTime);
+        ScoreManager.Instance.CalculateTimeAndAccBonus(levelClearTime, limitTime, scoreTime);
 
         int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
         int stageScore = ScoreManager.Instance.GetCurrentScore();
