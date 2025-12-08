@@ -143,8 +143,6 @@ public class PlaySceneUI : MonoBehaviour
     void UnlockCursor()
     {
         starterAssetsInputs.SetInputBlocked(true);
-        starterAssetsInputs.SetCursorState(false);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        CursorManager.Instance.SetCursor(false);
     }
 }

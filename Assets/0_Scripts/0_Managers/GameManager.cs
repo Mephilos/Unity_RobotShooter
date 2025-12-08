@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = IsPause ? 0f : 1f;
         Cursor.lockState = IsPause ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = IsPause;
-
+        CursorManager.Instance.SetCursor(!IsPause);
         OnPauseToggle?.Invoke(IsPause);
     }
 
@@ -62,8 +62,7 @@ public class GameManager : MonoBehaviour
         InitPause();
         SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        CursorManager.Instance.SetCursor(false);
     }
     public void QuitGame()
     {
