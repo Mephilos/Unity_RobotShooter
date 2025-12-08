@@ -25,4 +25,5 @@ public class WeaponSO : ScriptableObject
     public float MaxRecoil = 10f;
     public float RecoverySpreadSpeed = 8.0f;
 
+    public AudioClip ShootClip;
 }

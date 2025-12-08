@@ -21,6 +21,9 @@ public class Weapon : MonoBehaviour
         muzzleFlash.Play();
         impulseSource.GenerateImpulse();
 
+        float randomPitch = Random.Range(.9f, 1.1f);
+        SoundManager.Instance.PlaySFX(weaponSO.ShootClip, transform.position, randomPitch);
+
         ScoreManager.Instance.ReportShot();
         RaycastHit hit;
 

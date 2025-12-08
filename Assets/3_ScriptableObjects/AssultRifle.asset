@@ -28,4 +28,6 @@ MonoBehaviour:
   MoveSpreadFactor: 0.5
   DefaultRecoil: 1
   RecoilFactor: 1
+  MaxRecoil: 10
   RecoverySpreadSpeed: 4
+  ShootClip: {fileID: 8300000, guid: fc4c1ca26a3264a259dfa43a61a2f70e, type: 3}
