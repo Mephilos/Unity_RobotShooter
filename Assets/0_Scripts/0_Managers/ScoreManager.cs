@@ -103,9 +103,13 @@ public class ScoreManager : MonoBehaviour
 
     public (int totalScore, float totalTime, float avgAcc) GetTotalStats()
     {
-        int totalScore = stageScores.Sum(r => r.score);
-        float totalTime = stageScores.Sum(r => r.time);
-        float avgAcc = stageScores.Average(r => r.acc);
+        return CalculateStats(this.stageScores);
+    }
+    public static (int totalScore, float totalTime, float avgAcc) CalculateStats(List<StagesScore> scoreList)
+    {
+        int totalScore = scoreList.Sum(r => r.score);
+        float totalTime = scoreList.Sum(r => r.time);
+        float avgAcc = scoreList.Average(r => r.acc);
 
         return (totalScore, totalTime, avgAcc);
     }

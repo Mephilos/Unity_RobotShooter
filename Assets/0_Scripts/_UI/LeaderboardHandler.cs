@@ -98,7 +98,7 @@ public class LeaderboardHandler : MonoBehaviour
 
             bool isMyName = (userScoreData.userName == myName);
 
-            leaderboardRow.SetData(rank, userScoreData.userName, userScoreData.score, userScoreData.acc, percent, isMyName);
+            leaderboardRow.SetData(rank, userScoreData.userName, userScoreData.score, userScoreData.time, userScoreData.acc, percent, isMyName);
         }
         pageText.text = $"{currentPage} / {maxPage}";
 

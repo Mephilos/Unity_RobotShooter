@@ -79,7 +79,7 @@ public class FirebaseManager : MonoBehaviour
 
                     if (data.ContainsKey("score")) BestScore = Convert.ToInt32(data["score"]);
                     if (data.ContainsKey("time")) BestTime = Convert.ToSingle(data["time"]);
-                    if (data.ContainsKey("score")) BestAcc = Convert.ToSingle(data["acc"]);
+                    if (data.ContainsKey("acc")) BestAcc = Convert.ToSingle(data["acc"]);
 
                     Debug.Log($"기록 로드 완료| 점수: {BestScore}, 시간: {BestTime}, 정확도:{BestAcc}");
                 }
@@ -175,24 +175,28 @@ public class FirebaseManager : MonoBehaviour
                 return;
             }
 
-            int totalScore = 0;
-            float totalTime = 0;
-            float totalAccSum = 0;
-            int count = 0;
+            List<StagesScore> dbScore = new List<StagesScore>();
+            // int totalScore = 0;
+            // float totalTime = 0;
+            // float totalAccSum = 0;
+            // int count = 0;
 
             foreach (DataSnapshot stage in stagesSnapshot.Children)
             {
                 IDictionary<string, object> value = (IDictionary<string, object>)stage.Value;
-                totalScore += Convert.ToInt32(value["score"]);
-                totalTime += Convert.ToSingle(value["time"]);
-                totalAccSum += Convert.ToSingle(value["acc"]);
-                count++;
+                StagesScore scoreDate = new StagesScore
+                {
+                    score = Convert.ToInt32(value["score"]),
+                    time = Convert.ToSingle(value["time"]),
+                    acc = Convert.ToSingle(value["acc"])
+                };
+                dbScore.Add(scoreDate);
             }
 
-            float finalAvgAcc = (count > 0) ? (totalAccSum / count) : 0f;
+            var stats = ScoreManager.CalculateStats(dbScore);
 
-            Debug.Log($"스테이지 올 클리어 합산 결과> 점수: {totalScore}/ 시간: {totalTime}/ 정확도: {finalAvgAcc}");
-            RenewScore(totalScore, totalTime, finalAvgAcc);
+            Debug.Log($"스테이지 올 클리어 합산 결과> 점수: {stats.totalScore}/ 시간: {stats.totalTime}/ 정확도: {stats.avgAcc}");
+            RenewScore(stats.totalScore, stats.totalTime, stats.avgAcc);
         });
     }
 
@@ -220,8 +224,9 @@ public class FirebaseManager : MonoBehaviour
             Dictionary<string, object> scoreUpdate = new Dictionary<string, object>
             {
                 ["userName"] = userName,
-                ["score"] = BestScore,
-                ["time"] = BestTime
+                ["score"] = currentScore,
+                ["time"] = currentTime,
+                ["acc"] = currentAcc
             };
             databaseReference.Child("users").Child(userId).UpdateChildrenAsync(scoreUpdate);
             Debug.Log($"종합기록 갱신 완료 서버 등록({BestScore})");

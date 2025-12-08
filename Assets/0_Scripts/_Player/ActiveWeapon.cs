@@ -2,17 +2,19 @@ using UnityEngine;
 using StarterAssets;
 using System.Collections;
 using Unity.Cinemachine;
-using TMPro;
+using System;
 
 public class ActiveWeapon : MonoBehaviour
 {
     [SerializeField] WeaponSO startingWeaponOS;
     [SerializeField] GameObject Zoom;
-    [SerializeField] TMP_Text ammoText;
+    // [SerializeField] TMP_Text ammoText;
     [SerializeField] CinemachineCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
     [SerializeField] float zoomTransSpeed = 20f;
     [SerializeField] bool isInfinityAmmo;
+
+    public event Action<int, int> OnAmmoChange;
     Weapon currentWeapon;
     Animator animator;
     StarterAssetsInputs starterAssetsInputs;
@@ -53,9 +55,15 @@ public class ActiveWeapon : MonoBehaviour
         {
             currentAmmo = weaponSO.MagazineSize;
         }
-        ammoText.text = currentAmmo.ToString("D2");
+        OnAmmoChange?.Invoke(currentAmmo, weaponSO.MagazineSize);
+        //ammoText.text = currentAmmo.ToString("D2");
     }
-
+    public (int currentAmmo, int maxAmmo) GetAmmo()
+    {
+        int currentAmmo = this.currentAmmo;
+        int maxAmmo = weaponSO.MagazineSize;
+        return (currentAmmo, maxAmmo);
+    }
     public void SwitchWeapon(WeaponSO weaponSO)
     {
         if (currentWeapon != null)

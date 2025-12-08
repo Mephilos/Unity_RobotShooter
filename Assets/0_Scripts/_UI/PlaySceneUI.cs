@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class PlaySceneUI : MonoBehaviour
 {
+    [SerializeField] ActiveWeapon activeWeapon;
+    [SerializeField] TMP_Text ammoText;
     [SerializeField] TMP_Text enemiesLeftText;
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text accText;
@@ -20,6 +22,8 @@ public class PlaySceneUI : MonoBehaviour
     {
         starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
 
+        activeWeapon.OnAmmoChange += UpdateAmmoUI;
+        UpdateAmmoUI(activeWeapon.GetAmmo().currentAmmo, activeWeapon.GetAmmo().maxAmmo);
         LevelManager.Instance.OnEnemyCountChanged += UpdateEnemyLeft;
         LevelManager.Instance.OnStageClearData += ShowWinUI;
         UpdateEnemyLeft(LevelManager.Instance.GetEnemiesCount());
@@ -31,11 +35,20 @@ public class PlaySceneUI : MonoBehaviour
     }
     void OnDestroy()
     {
+        activeWeapon.OnAmmoChange -= UpdateAmmoUI;
+
         LevelManager.Instance.OnEnemyCountChanged -= UpdateEnemyLeft;
         LevelManager.Instance.OnStageClearData -= ShowWinUI;
+
         ScoreManager.Instance.OnScoreChanged -= UpdateScoreUI;
         ScoreManager.Instance.OnAccChanged -= UpdateAccUI;
     }
+
+    void UpdateAmmoUI(int currentAmmo, int maxAmmo)
+    {
+        ammoText.text = currentAmmo.ToString("D2");
+    }
+
     void ShowWinUI(int stageScore, float levelClearTime, float stageAcc, int bestScore, bool isNewScore)
     {
         winContainer.SetActive(true);
