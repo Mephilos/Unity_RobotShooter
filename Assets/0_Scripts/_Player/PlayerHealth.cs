@@ -3,11 +3,14 @@ using Unity.Cinemachine;
 using StarterAssets;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] CinemachineCamera deathVirtualCam;
     [SerializeField] Transform weaponCamera;
+    [SerializeField] Image damageOverlay;
+    [SerializeField] float damageFlashSpeed = 2f;
     [SerializeField] Image[] shieldBars;
     [Range(1, 10)]
     [SerializeField] int startingHealth = 10;
@@ -32,9 +35,24 @@ public class PlayerHealth : MonoBehaviour
         currentHitPoint -= amount;
         AdJustShieldUI();
 
+        StartCoroutine(DamageFlashRoutine());
         if (currentHitPoint <= 0)
         {
             PlayerGameOver();
+        }
+    }
+
+    IEnumerator DamageFlashRoutine()
+    {
+        Color color = damageOverlay.color;
+        color.a = 0.8f; // 순간적으로 빨갛게
+        damageOverlay.color = color;
+
+        while (damageOverlay.color.a > 0)
+        {
+            color.a -= Time.deltaTime * damageFlashSpeed;
+            damageOverlay.color = color;
+            yield return null;
         }
     }
 

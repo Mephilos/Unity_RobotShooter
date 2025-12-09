@@ -16,6 +16,7 @@ MonoBehaviour:
   Damage: 1
   FireRate: 0.2
   HitVFXPrefab: {fileID: 8430451896267564482, guid: 74e69bf1a67af461eb9a7d82adee95e7, type: 3}
+  CriVFXPrefab: {fileID: 4738451210866625002, guid: 6df81460064294f56ae46af4e4f12462, type: 3}
   isAutomatic: 1
   MagazineSize: 30
   RespawnTime: 15

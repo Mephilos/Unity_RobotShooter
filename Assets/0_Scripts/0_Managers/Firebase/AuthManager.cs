@@ -41,13 +41,13 @@ public class AuthManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            InitializeAuth();
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
-
-        InitializeAuth();
     }
 
     void InitializeAuth()

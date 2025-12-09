@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using NUnit.Framework;
 
 public class LeaderboardHandler : MonoBehaviour
 {
@@ -29,22 +31,55 @@ public class LeaderboardHandler : MonoBehaviour
 
     void Start()
     {
-        prevButton.onClick.AddListener(PrevPage);
-        nextButton.onClick.AddListener(NextPage);
-        myRankButton.onClick.AddListener(JumpMyRank);
+        if (prevButton != null) prevButton.onClick.AddListener(PrevPage);
+        if (nextButton != null) nextButton.onClick.AddListener(NextPage);
+        if (myRankButton != null) myRankButton.onClick.AddListener(JumpMyRank);
 
-        totalScoreButton.onClick.AddListener(() => ChangeScoreView(0));
-
-        for (int i = 0; i < stageScoreButton.Length; i++)
+        if (totalScoreButton != null) totalScoreButton.onClick.AddListener(() => ChangeScoreView(0));
+        if (stageScoreButton != null)
         {
-            int stageNum = i + 1;
-            int index = i;
-            stageScoreButton[index].onClick.AddListener(() => ChangeScoreView(stageNum));
+            for (int i = 0; i < stageScoreButton.Length; i++)
+            {
+                if (stageScoreButton[i] == null) continue;
+                int stageNum = i + 1;
+                int index = i;
+                stageScoreButton[index].onClick.AddListener(() => ChangeScoreView(stageNum));
+            }
         }
     }
 
     void OnEnable()
     {
+        StartCoroutine(WaitLoadDataRoutine());
+    }
+
+    void OnDisable()
+    {
+        if (AuthManager.Instance != null)
+        {
+            AuthManager.Instance.OnLoginSuccess -= OnLoginSuccessRefresh;
+        }
+    }
+
+    IEnumerator WaitLoadDataRoutine()
+    {
+        SetLoadingState(true);
+
+        while (AuthManager.Instance == null)
+        {
+            yield return null;
+        }
+        AuthManager.Instance.OnLoginSuccess += OnLoginSuccessRefresh;
+
+        if (AuthManager.Instance.IsFirebaseReady)
+        {
+            OnLoginSuccessRefresh(AuthManager.Instance.CurrentUser);
+        }
+    }
+
+    void OnLoginSuccessRefresh(Firebase.Auth.FirebaseUser user)
+    {
+        isLoading = false;
         ChangeScoreView(currentScoreView);
     }
 
@@ -84,13 +119,17 @@ public class LeaderboardHandler : MonoBehaviour
 
         loadingObject.SetActive(loading);
 
-        totalScoreButton.interactable = !loading;
-        foreach (var button in stageScoreButton)
+        if (totalScoreButton != null) totalScoreButton.interactable = !loading;
+        if (stageScoreButton != null)
         {
-            button.interactable = !loading;
+            foreach (var button in stageScoreButton)
+            {
+                if (button != null) button.interactable = !loading;
+            }
         }
-        prevButton.interactable = !loading;
-        nextButton.interactable = !loading;
+        if (prevButton != null) prevButton.interactable = !loading;
+        if (nextButton != null) nextButton.interactable = !loading;
+        if (myRankButton != null) myRankButton.interactable = !loading;
     }
 
     void RefreshUI()
@@ -120,14 +159,16 @@ public class LeaderboardHandler : MonoBehaviour
 
             leaderboardRow.SetData(rank, userScoreData.userName, userScoreData.score, userScoreData.time, userScoreData.acc, percent, isMyName);
         }
-        pageText.text = $"{currentPage} / {maxPage}";
+        if (pageText != null) pageText.text = $"{currentPage} / {maxPage}";
 
-        prevButton.interactable = (currentPage > 1);
-        nextButton.interactable = (currentPage < maxPage);
+        if (prevButton != null) prevButton.interactable = (currentPage > 1);
+        if (nextButton != null) nextButton.interactable = (currentPage < maxPage);
     }
 
     public void LoadStageLeaderboard(int stageIndex)
     {
+        // currentScoreView = stageIndex;
+        isLoading = false;
         ChangeScoreView(stageIndex);
     }
 

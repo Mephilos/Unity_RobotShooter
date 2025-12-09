@@ -8,6 +8,7 @@ public class WeaponSO : ScriptableObject
     public int Damage = 1;
     public float FireRate = 100f;
     public ParticleSystem HitVFXPrefab;
+    public ParticleSystem CriVFXPrefab;
     public bool isAutomatic = false;
     public int MagazineSize = 10;
     public float RespawnTime = 15f;
