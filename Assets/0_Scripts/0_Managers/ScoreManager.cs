@@ -48,13 +48,18 @@ public class ScoreManager : MonoBehaviour
     public void RestoreScore()
     {
         currentScore = 0;
+        totalShots = 0;
+        totalHits = 0;
         OnScoreChanged?.Invoke(currentScore);
+        OnAccChanged?.Invoke(0f);
     }
+
     public void ReportShot()
     {
         totalShots++;
         OnAccChanged?.Invoke(GetAccuracy());
     }
+
     public void ReportHit()
     {
         totalHits++;

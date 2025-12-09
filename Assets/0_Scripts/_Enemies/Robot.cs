@@ -14,11 +14,13 @@ public class Robot : Enemy
         agent.speed = moveSpeed;
     }
 
-    void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         enemyHealth.OnDeath += SelfDestruct;
+        if (agent.isOnNavMesh)
+            agent.ResetPath();
         agent.Warp(transform.position);
-        agent.ResetPath();
     }
 
     protected override void Update()

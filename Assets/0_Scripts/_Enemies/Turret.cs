@@ -20,8 +20,9 @@ public class Turret : Enemy
         originRotation = turretHead.rotation;
     }
 
-    void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         enemyHealth.OnDeath += Death;
         lastFire = Time.time;
     }

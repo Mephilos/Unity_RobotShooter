@@ -29,6 +29,7 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         startTime = Time.time;
+        ScoreManager.Instance.RestoreScore();
         InitStageClearData();
     }
 

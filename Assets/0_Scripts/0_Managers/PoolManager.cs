@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class PoolManager : MonoBehaviour
 {
@@ -47,6 +48,7 @@ public class PoolManager : MonoBehaviour
 
         obj.transform.SetParent(null);
 
+        SceneManager.MoveGameObjectToScene(obj, SceneManager.GetActiveScene());
         return obj;
     }
 

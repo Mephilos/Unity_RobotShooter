@@ -13,16 +13,19 @@ public class Crosshair : MonoBehaviour
     [SerializeField] ActiveWeapon activeWeapon;
 
     float spreadMove = 0;
-
+    void Awake()
+    {
+        activeWeapon = FindFirstObjectByType<ActiveWeapon>();
+    }
     void Update()
     {
         float currentSpread = activeWeapon.GetCurrentSpread() * spreadMultiplier;
         spreadMove = Mathf.Lerp(currentSpread, currentSpread, Time.deltaTime * spreadSmooth);
 
-        top.anchoredPosition = new Vector2(0, currentSpread + aimNarrow);
-        bottom.anchoredPosition = new Vector2(0, -currentSpread - aimNarrow);
-        left.anchoredPosition = new Vector2(-currentSpread - aimNarrow, 0);
-        right.anchoredPosition = new Vector2(currentSpread + aimNarrow, 0);
+        top.anchoredPosition = new Vector2(0, spreadMove + aimNarrow);
+        bottom.anchoredPosition = new Vector2(0, -spreadMove - aimNarrow);
+        left.anchoredPosition = new Vector2(-spreadMove - aimNarrow, 0);
+        right.anchoredPosition = new Vector2(spreadMove + aimNarrow, 0);
     }
 
 }

@@ -11,13 +11,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     bool isDead;
     public event Action OnDeath;
 
-    void Awake()
-    {
-        levelManager = FindFirstObjectByType<LevelManager>();
-    }
-
     void OnEnable()
     {
+        levelManager = FindFirstObjectByType<LevelManager>();
         currentHitPoint = hitPoint;
         isDead = false;
 

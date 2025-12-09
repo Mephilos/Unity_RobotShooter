@@ -11,7 +11,7 @@ public abstract class Enemy : MonoBehaviour
         enemyHealth = GetComponent<EnemyHealth>();
     }
 
-    protected virtual void Start()
+    protected virtual void OnEnable()
     {
         var player = FindFirstObjectByType<FirstPersonController>();
         playerTarget = player.transform.Find(Constants.PLAYER_TARGET);

@@ -60,6 +60,7 @@ public class ActiveWeapon : MonoBehaviour
     }
     public (int currentAmmo, int maxAmmo) GetAmmo()
     {
+        if (weaponSO == null) return (0, 0);
         int currentAmmo = this.currentAmmo;
         int maxAmmo = weaponSO.MagazineSize;
         return (currentAmmo, maxAmmo);
