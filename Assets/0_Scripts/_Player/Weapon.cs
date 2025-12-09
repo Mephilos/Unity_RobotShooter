@@ -1,8 +1,10 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using MoreMountains.Feedbacks;
 
 public class Weapon : MonoBehaviour
 {
+    [SerializeField] MMF_Player shootFeedback;
     [SerializeField] LayerMask InteractionLayer;
     ParticleSystem muzzleFlash;
     CinemachineImpulseSource impulseSource;
@@ -32,7 +34,7 @@ public class Weapon : MonoBehaviour
                             Camera.main.transform.right * Random.Range(-currentSpread, currentSpread);
         Vector3 shootDirection = (Camera.main.transform.forward + spread).normalized;
 
-
+        shootFeedback?.PlayFeedbacks();
         if (Physics.Raycast(Camera.main.transform.position, shootDirection, out hit, Mathf.Infinity,
                              InteractionLayer, QueryTriggerInteraction.Ignore))
         {

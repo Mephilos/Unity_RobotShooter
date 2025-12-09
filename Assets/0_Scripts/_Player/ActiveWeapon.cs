@@ -96,7 +96,7 @@ public class ActiveWeapon : MonoBehaviour
 
         isFire = true;
 
-        animator.Play(Constants.ANIMATION_NAME, 0, 0);
+        //animator.Play(Constants.ANIMATION_NAME, 0, 0);
 
         currentWeapon.Shoot(weaponSO, GetCurrentSpread());
 
