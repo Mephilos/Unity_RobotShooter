@@ -8,6 +8,8 @@ public class LeaderboardHandler : MonoBehaviour
     [SerializeField] GameObject leaderboardRowPrefab;
     [SerializeField] Transform contentParent;
     [SerializeField] TMP_Text pageText;
+    [SerializeField] GameObject loadingObject;
+
     [SerializeField] Button prevButton;
     [SerializeField] Button nextButton;
     [SerializeField] Button myRankButton;
@@ -23,6 +25,7 @@ public class LeaderboardHandler : MonoBehaviour
     int maxPage = 1;
 
     int currentScoreView = 0;
+    bool isLoading = false;
 
     void Start()
     {
@@ -35,32 +38,34 @@ public class LeaderboardHandler : MonoBehaviour
         for (int i = 0; i < stageScoreButton.Length; i++)
         {
             int stageNum = i + 1;
-            stageScoreButton[i].onClick.AddListener(() => ChangeScoreView(stageNum));
+            int index = i;
+            stageScoreButton[index].onClick.AddListener(() => ChangeScoreView(stageNum));
         }
     }
+
     void OnEnable()
     {
         ChangeScoreView(currentScoreView);
     }
+
     void ChangeScoreView(int stage)
     {
+        if (isLoading) return;
+
         currentScoreView = stage;
         currentPage = 1;
 
-        foreach (Transform child in contentParent)
-        {
-            Destroy(child.gameObject);
-        }
+        SetLoadingState(true);
 
         FirebaseManager.Instance.LoadLeaderboardData(currentScoreView, OnDataLoad);
-    }
-    public void LoadStageLeaderboard(int stageIndex)
-    {
-        ChangeScoreView(stageIndex);
     }
 
     void OnDataLoad(List<UserScoreData> userScoreDatas)
     {
+        if (this == null) return; // 로드중에 파괴되면 중단
+
+        SetLoadingState(false);
+
         allData = userScoreDatas;
         totalCount = allData.Count;
 
@@ -71,6 +76,21 @@ public class LeaderboardHandler : MonoBehaviour
         }
 
         JumpMyRank();
+    }
+
+    void SetLoadingState(bool loading)
+    {
+        isLoading = loading;
+
+        loadingObject.SetActive(loading);
+
+        totalScoreButton.interactable = !loading;
+        foreach (var button in stageScoreButton)
+        {
+            button.interactable = !loading;
+        }
+        prevButton.interactable = !loading;
+        nextButton.interactable = !loading;
     }
 
     void RefreshUI()
@@ -104,6 +124,11 @@ public class LeaderboardHandler : MonoBehaviour
 
         prevButton.interactable = (currentPage > 1);
         nextButton.interactable = (currentPage < maxPage);
+    }
+
+    public void LoadStageLeaderboard(int stageIndex)
+    {
+        ChangeScoreView(stageIndex);
     }
 
     public void PrevPage()

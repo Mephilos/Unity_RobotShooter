@@ -5502,9 +5502,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1888550717}
     m_Modifications:
+    - target: {fileID: 1283830366086156202, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283830366086156202, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6160860952313961306, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
       propertyPath: m_Name
       value: LeaderBoardPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7794546273197760083, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7794546273197760083, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8849702866966740118, guid: 5f082d211de274f5eaa3e68c0053d7ec, type: 3}
       propertyPath: m_Pivot.x
