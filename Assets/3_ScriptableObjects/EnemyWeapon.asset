@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28a0180bc368a4424b7306c15dd631a1, type: 3}
+  m_Name: EnemyWeapon
+  m_EditorClassIdentifier: 
+  ProjectilePrefab: {fileID: 5849176006788580604, guid: 334911fc3bb4b44f7ac12bf6967e74da, type: 3}
+  Damage: 10
+  FireRate: 0.5
+  AttackRange: 15
+  AccuracyError: 2
+  BurstCount: 3
