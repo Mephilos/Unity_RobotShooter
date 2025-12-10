@@ -242,6 +242,7 @@ public class FirebaseManager : MonoBehaviour
             if (task.IsFaulted)
             {
                 Debug.LogError("리더보드 로드 실패" + task.Exception);
+                onLoad?.Invoke(new List<UserScoreData>());
                 return;
             }
 

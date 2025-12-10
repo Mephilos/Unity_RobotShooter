@@ -5,22 +5,30 @@ public class Robot : Enemy
 {
     [SerializeField] float moveSpeed = 3.5f;
     [SerializeField] GameObject deathParticle;
+
     NavMeshAgent agent;
+    float backupSpeed;
 
     protected override void Awake()
     {
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
         agent.speed = moveSpeed;
+        backupSpeed = moveSpeed;
     }
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        enemyHealth.OnDeath += SelfDestruct;
         if (agent.isOnNavMesh)
+        {
             agent.ResetPath();
+        }
+        agent.speed = backupSpeed;
         agent.Warp(transform.position);
+
+        enemyHealth.OnDeath += SelfDestruct;
+
     }
 
     protected override void Update()
@@ -30,9 +38,15 @@ public class Robot : Enemy
         Move();
     }
 
-    void OnDisable()
+    protected override void OnDisable()
     {
         enemyHealth.OnDeath -= SelfDestruct;
+    }
+
+    protected override void OnSpeedChange(float speedFactor)
+    {
+        agent.speed = backupSpeed * speedFactor;
+        agent.velocity = agent.velocity.normalized * agent.speed;
     }
 
     protected override void Move()
@@ -42,7 +56,7 @@ public class Robot : Enemy
             agent.SetDestination(playerTarget.position);
         }
     }
-    protected override void TryAttack() { }
+
     protected override bool IsTargetInRange(float dist) => false;
 
     void OnTriggerEnter(Collider other)
@@ -57,4 +71,6 @@ public class Robot : Enemy
         PoolManager.Instance.Get(deathParticle, transform.position, Quaternion.identity);
         PoolManager.Instance.Release(gameObject);
     }
+
+    protected override void TryAttack() { }
 }

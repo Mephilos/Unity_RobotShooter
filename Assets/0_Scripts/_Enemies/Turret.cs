@@ -10,14 +10,17 @@ public class Turret : Enemy
     [SerializeField] float fireInterval = 5f;
     [SerializeField] float attackRange = 10f;
     [SerializeField] int damage = 2;
-    Quaternion originRotation;
+    [SerializeField] float turnSpeedHead = 2f;
 
+    Quaternion originRotation;
+    float currentTurnSpeed;
     float lastFire;
 
     protected override void Awake()
     {
         base.Awake();
         originRotation = turretHead.rotation;
+        currentTurnSpeed = turnSpeedHead;
     }
 
     protected override void OnEnable()
@@ -33,7 +36,7 @@ public class Turret : Enemy
         base.Update();
     }
 
-    void OnDisable()
+    protected override void OnDisable()
     {
         enemyHealth.OnDeath -= Death;
     }
@@ -43,14 +46,22 @@ public class Turret : Enemy
         return dist <= attackRange;
     }
 
+    protected override void OnSpeedChange(float speedFactor)
+    {
+        currentTurnSpeed = turnSpeedHead * speedFactor;
+    }
+
     protected override void Move()
     {
-        turretHead.rotation = Quaternion.Slerp(turretHead.rotation, originRotation, Time.deltaTime * 2f);
+        turretHead.rotation = Quaternion.Slerp(turretHead.rotation, originRotation, Time.deltaTime * currentTurnSpeed);
     }
 
     protected override void TryAttack()
     {
-        turretHead.LookAt(playerTarget);
+        Vector3 direction = playerTarget.position - turretHead.position;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        turretHead.rotation = Quaternion.Slerp(turretHead.rotation, lookRotation, Time.deltaTime * currentTurnSpeed);
+        // turretHead.LookAt(playerTarget);
 
         if (Time.time >= lastFire + fireInterval)
         {
@@ -58,6 +69,7 @@ public class Turret : Enemy
             lastFire = Time.time;
         }
     }
+
     void Fire()
     {
         Vector3 dir = (playerTarget.position - projectileFirePoint.position);
@@ -67,6 +79,7 @@ public class Turret : Enemy
         Projectile newProjectile = projectile.GetComponent<Projectile>();
         newProjectile.Initialize(damage);
     }
+
     void Death()
     {
         Instantiate(deathParticle, turretHead.position, quaternion.identity);
@@ -74,4 +87,5 @@ public class Turret : Enemy
 
         Destroy(gameObject);
     }
+
 }

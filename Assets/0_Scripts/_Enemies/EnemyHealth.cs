@@ -10,6 +10,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     int currentHitPoint;
     bool isDead;
     public event Action OnDeath;
+    public event Action OnHit;
 
     void OnEnable()
     {
@@ -30,6 +31,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHitPoint -= amount;
+
+        OnHit?.Invoke();
 
         if (currentHitPoint <= 0)
         {
