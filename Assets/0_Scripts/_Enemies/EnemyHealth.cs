@@ -12,6 +12,16 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public event Action OnDeath;
     public event Action OnHit;
 
+    public int CurrentHP => currentHitPoint;
+    public int MaxHP => hitPoint;
+
+    public void InitializeHealth(int HP)
+    {
+        hitPoint = HP;
+        currentHitPoint = HP;
+        isDead = false;
+    }
+
     void OnEnable()
     {
         levelManager = FindFirstObjectByType<LevelManager>();

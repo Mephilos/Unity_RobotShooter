@@ -1700,6 +1700,10 @@ PrefabInstance:
       propertyPath: m_NavMeshData
       value: 
       objectReference: {fileID: 23800000, guid: d2e14b4fd01c24d46a71e68949dbe048, type: 2}
+    - target: {fileID: 5499658597634312967, guid: 4472006e629c04cf88f96e4a5229d0cf, type: 3}
+      propertyPath: m_LayerMask.m_Bits
+      value: 567
+      objectReference: {fileID: 0}
     - target: {fileID: 5516981427168490231, guid: 4472006e629c04cf88f96e4a5229d0cf, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -7717,7 +7721,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1582951855}
   m_Layer: 6
-  m_Name: Eye
+  m_Name: Sight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9027,8 +9031,11 @@ MonoBehaviour:
   viewLayerMask:
     serializedVersion: 2
     m_Bits: 959
+  firePoint: {fileID: 0}
   currentState: 0
   currentStrategy: 0
+  combatTime: 5
+  combatDistance: 10
 --- !u!114 &2010028352
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9041,7 +9048,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615acfda15c4349d59b282f94acef46e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitPoint: 3
+  hitPoint: 100
   scoreValue: 100
   weakPointKillBonus: 50
 --- !u!136 &2010028353
@@ -9128,15 +9135,16 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2010028350}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4161625, y: 1.05, z: -9.81}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -3.78, y: 1.05, z: 16.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1582951855}
   - {fileID: 566380390}
+  - {fileID: 2023281662}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!195 &2010028357
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -9175,6 +9183,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6da43522623d4704e979466dc7650b65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2023281661
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2023281662}
+  m_Layer: 6
+  m_Name: FirePosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2023281662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2023281661}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2010028356}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2040910242
 PrefabInstance:
   m_ObjectHideFlags: 0

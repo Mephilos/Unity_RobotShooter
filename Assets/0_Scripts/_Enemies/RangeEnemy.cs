@@ -1,25 +1,39 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using System.Linq;
 
 public class RangeEnemy : Enemy
 {
-    public enum AIState { Patrol, Chase, Combat, Search }
-    public enum Strategy { Aggressive, Defensive };
+    public enum AIState { Patrol, Combat, Search }
+    public enum Covering { Near, FarPlayer, NearPlayer }
+    public enum Strategy
+    {
+        Equal,
+        DisAdvFar,
+        DisAdvNear,
+        AdvFar,
+        AdvNear
+    }
 
     [SerializeField] EnemyBodySO enemyBodySO;
     [SerializeField] EnemyWeaponSO enemyWeaponSO;
     [SerializeField] LayerMask coverLayer;
     [SerializeField] Transform eyePosition;
     [SerializeField] LayerMask viewLayerMask;
+    [SerializeField] Transform firePoint;
 
     [SerializeField] AIState currentState;
     [SerializeField] Strategy currentStrategy;
+    [SerializeField] float combatTime = 5f;
+    [SerializeField] float combatDistance = 15f;
 
     NavMeshAgent agent;
-    Vector3 lastTargetPos;
+    PlayerHealth playerHealth;
+    Vector3 lastPlayerPosition;
+
     float lastAttacTime;
-    float searchTimer;
+    float combatDuration;
     bool isActing = false;
 
     protected override void Awake()
@@ -35,20 +49,34 @@ public class RangeEnemy : Enemy
 
         currentState = AIState.Patrol;
         isActing = false;
-        searchTimer = 0;
+        combatDuration = 0;
+        enemyHealth.InitializeHealth((int)enemyBodySO.MaxHP);
+        playerHealth = FindFirstObjectByType<PlayerHealth>();
     }
 
     protected override void Update()
     {
         if (playerTarget == null) return;
 
+        if (CanSeePlayer())
+        {
+            lastPlayerPosition = playerTarget.position;
+            combatDuration = 0;
+        }
+        else if (currentState == AIState.Combat)
+        {
+            combatDuration += Time.deltaTime;
+            if (combatDuration > combatTime)
+            {
+                SearchMode();
+                return;
+            }
+        }
+
         switch (currentState)
         {
             case AIState.Patrol:
                 UpdatePatrol();
-                break;
-            case AIState.Chase:
-                UpdateChase();
                 break;
             case AIState.Combat:
                 UpdateCombat();
@@ -61,10 +89,17 @@ public class RangeEnemy : Enemy
 
     void UpdatePatrol()
     {
-        if (CanSeeTarget())
+        Debug.LogWarning("정찰모드");
+
+        if (!agent.updateRotation)
+        {
+            agent.updateRotation = true;
+        }
+
+        if (CanSeePlayer())
         {
             Debug.Log("원거리 적: 찾음");
-            currentState = AIState.Chase;
+            currentState = AIState.Combat;
             return;
         }
 
@@ -73,158 +108,216 @@ public class RangeEnemy : Enemy
             Vector3 randomPoint = GetRandomPointOnNavMesh(transform.position, 10f);
             agent.SetDestination(randomPoint);
         }
-        // TODO: 순찰로직
-    }
 
-    void UpdateChase()
-    {
-        Debug.Log("원거리 적: 추노 ㄱㄱ");
-        float dist = Vector3.Distance(transform.position, playerTarget.position);
-
-        // 사거리 안에 들어왔고 시야에 들어와 있으면 전투 모드
-        if (dist <= enemyWeaponSO.AttackRange && CanSeeTarget())
-        {
-            Debug.Log("원거리 적: 전투모드");
-            currentState = AIState.Combat;
-            agent.ResetPath();
-            return;
-        }
-
-        // 시야에서 놓쳤다면 마지막 위치로 서치
-        if (!CanSeeTarget())
-        {
-            Debug.Log("원거리 적: 시야에서 놓침");
-            lastTargetPos = playerTarget.position;
-            currentState = AIState.Search;
-            return;
-        }
-
-        // 계속 추격
-        agent.SetDestination(playerTarget.position);
     }
 
     void UpdateCombat()
     {
-        // 찾지못한 상태라면 리턴
-        if (!CanSeeTarget())
-        {
-            currentState = AIState.Search;
-            lastTargetPos = playerTarget.position;
-            return;
-        }
+        Debug.LogWarning("전투모드");
+        if (isActing) return; // 이미 행동 중이면 리턴
 
-        if (isActing) return; // 이미 사격,엄폐 행동 중이면 리턴
-
-        // 전략판단 로직
-        Debug.Log("원거리 적: 전투모드 들어음 전략 판단 ㄱㄱ");
-        currentStrategy = DetermineAction();
-
-        if (currentStrategy == Strategy.Defensive)
-        {
-            StartCoroutine(CoverShootRoutine());
-        }
-        else
-        {
-            StartCoroutine(AggressiveShootRoutine());
-        }
+        currentStrategy = DetermineStrategy();
+        StartCoroutine(StrategyActionRoutine(currentStrategy));
     }
 
     void UpdateSearch()
     {
-        if (CanSeeTarget())
+        Debug.LogWarning("서치모드");
+
+        if (CanSeePlayer())
         {
             Debug.Log("수색중 적 찾음");
             currentState = AIState.Combat;
+            StopAllCoroutines();
+            isActing = false;
             return;
         }
-        Debug.Log("수색 ㄱㄱ");
-        // 마지막 목격 지점으로 이동
-        agent.SetDestination(lastTargetPos);
 
-        // 도착 후 
-        if (Vector3.Distance(transform.position, lastTargetPos) < 2f)
+        if (!isActing)
         {
-            Debug.Log("목격 지점 도착");
-            searchTimer += Time.deltaTime;
-            // 일정 시간 지나면 다시 정찰
-            if (searchTimer > enemyBodySO.LostTargetSearchTime)
+            StartCoroutine(SearchRoutine());
+        }
+
+        // Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
+        // lookDir.y = 0;
+
+        // if (lookDir != Vector3.zero)
+        // {
+        //     transform.rotation = Quaternion.LookRotation(lookDir);
+        // }
+
+        // agent.SetDestination(lastPlayerPosition);
+
+        // // 도착 후 
+        // if (Vector3.Distance(transform.position, lastPlayerPosition) < 2f)
+        // {
+        //     currentState = AIState.Patrol;
+        // }
+    }
+
+    Strategy DetermineStrategy()
+    {
+        if (playerHealth == null) return Strategy.Equal;
+
+        int myHP = enemyHealth.CurrentHP;
+        int playerHP = playerHealth.CurrentHP;
+        float dist = Vector3.Distance(transform.position, playerTarget.position);
+
+        if (Mathf.Abs(myHP - playerHP) <= 2)
+        {
+            return Strategy.Equal;
+        }
+
+        if (myHP < playerHP)
+        {
+            if (dist > combatDistance)
             {
-                Debug.Log("없네...");
-                currentState = AIState.Patrol;
-                searchTimer = 0;
+                return Strategy.DisAdvFar;
+            }
+            else
+            {
+                return Strategy.DisAdvNear;
+            }
+        }
+        else
+        {
+            if (dist > combatDistance)
+            {
+                return Strategy.AdvFar;
+            }
+            else
+            {
+                return Strategy.AdvNear;
             }
         }
     }
 
-    Strategy DetermineAction()
-    {
-        float aggressiveScore = 0f;
-        float defensiveScore = 0f;
-
-        float dist = Vector3.Distance(transform.position, playerTarget.position);
-        if (dist > 10f)
-        {
-            defensiveScore += 10f;
-        }
-        else
-        {
-            aggressiveScore += 10f;
-        }
-
-        if (!HasCoverNearBy()) defensiveScore -= 100f;
-
-        Vector3 playerDirTo = (transform.position - playerTarget.position).normalized;
-
-        if (Vector3.Dot(playerTarget.forward, playerDirTo) > 0.8f)
-        {
-            defensiveScore += 30f;
-        }
-        else
-        {
-            aggressiveScore += 10f;
-        }
-        Debug.Log($"원거리 적:{defensiveScore}:{aggressiveScore}");
-        return (defensiveScore > aggressiveScore) ? Strategy.Defensive : Strategy.Aggressive;
-    }
-
-    IEnumerator CoverShootRoutine()
+    IEnumerator StrategyActionRoutine(Strategy strategy)
     {
         isActing = true;
 
-        Vector3 coverPos = FindCoverPos();
-        if (coverPos != Vector3.zero)
-        {
-            agent.SetDestination(coverPos);
+        agent.isStopped = false;
+        agent.speed = enemyBodySO.MoveSpeed;
+        agent.updateRotation = false;
 
-            yield return new WaitForSeconds(1f);
+        bool canShoot = true;
+        Vector3 destPos = transform.position;
+
+        switch (strategy)
+        {
+            case Strategy.Equal:
+                destPos = FindCover(Covering.Near);
+                break;
+
+            case Strategy.DisAdvFar:
+                destPos = FindCover(Covering.FarPlayer);
+                canShoot = false;
+                agent.updateRotation = true;
+                agent.speed = enemyBodySO.MoveSpeed * 1.5f;
+                break;
+
+            case Strategy.DisAdvNear:
+                destPos = transform.position;
+                agent.isStopped = true;
+                break;
+
+            case Strategy.AdvFar:
+                destPos = FindCover(Covering.NearPlayer);
+                break;
+
+            case Strategy.AdvNear:
+                destPos = playerTarget.position;
+                break;
         }
 
-        Vector3 peekPos = transform.position + transform.right * 1f;
-        agent.SetDestination(peekPos);
+        if (!agent.isStopped && destPos != Vector3.zero)
+        {
+            agent.SetDestination(destPos);
+        }
 
-        yield return new WaitForSeconds(.5f);
+        float actionTimer = 0f;
+        while (actionTimer < 2.0f)
+        {
+            actionTimer += Time.deltaTime;
 
-        yield return StartCoroutine(FireBurst());
+            if (playerTarget != null && canShoot)
+            {
+                Vector3 lookTarget = CanSeePlayer() ? playerTarget.position : lastPlayerPosition;
+                Vector3 lookDir = (lookTarget - transform.position).normalized;
+                lookDir.y = 0;
 
-        agent.SetDestination(coverPos);
+                if (lookDir != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(lookDir);
+                }
+            }
 
-        yield return new WaitForSeconds(1f);
+            if (canShoot && Time.time >= lastAttacTime + enemyWeaponSO.FireRate)
+            {
+                if (strategy == Strategy.AdvNear || strategy == Strategy.DisAdvNear || CanSeePlayer())
+                {
+                    yield return StartCoroutine(FireBurst());
+                    lastAttacTime = Time.time;
+                }
+            }
 
+            if (strategy == Strategy.AdvNear)
+            {
+                agent.SetDestination(playerTarget.position);
+            }
+            yield return null;
+        }
         isActing = false;
     }
 
-    IEnumerator AggressiveShootRoutine()
+    IEnumerator SearchRoutine()
     {
         isActing = true;
-
-        agent.isStopped = true;
-        transform.LookAt(playerTarget);
-
-        yield return StartCoroutine(FireBurst());
-
         agent.isStopped = false;
-        yield return new WaitForSeconds(enemyWeaponSO.FireRate);
+        agent.speed = enemyBodySO.MoveSpeed;
+        agent.updateRotation = false;
 
+        int wayPointCounter = Random.Range(1, 3);
+
+
+
+        for (int i = 0; i < wayPointCounter; i++)
+        {
+            Vector3 bluffPosition = GetRandomPointOnNavMesh(lastPlayerPosition, 10f);
+
+            agent.SetDestination(bluffPosition);
+
+            while (agent.pathPending || agent.remainingDistance > .5f)
+            {
+                if (CanSeePlayer())
+                {
+                    isActing = false;
+                    yield break;
+                }
+                Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
+                lookDir.y = 0;
+                if (lookDir != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
+                }
+                yield return null;
+            }
+        }
+
+        agent.SetDestination(lastPlayerPosition);
+
+        while (agent.pathPending || agent.remainingDistance > 0.5f)
+        {
+            if (CanSeePlayer())
+            {
+                isActing = false;
+                yield break;
+            }
+            yield return null;
+        }
+
+        Debug.Log("수색 모드에서 정찰 모드로 전환");
+        currentState = AIState.Patrol;
         isActing = false;
     }
 
@@ -233,8 +326,6 @@ public class RangeEnemy : Enemy
         for (int i = 0; i < enemyWeaponSO.BurstCount; i++)
         {
             if (playerTarget == null) break;
-
-
             FireProjectile();
             yield return new WaitForSeconds(0.1f);
         }
@@ -254,7 +345,7 @@ public class RangeEnemy : Enemy
         return hit.position;
     }
 
-    bool CanSeeTarget()
+    bool CanSeePlayer()
     {
         if (playerTarget == null) return false;
         Vector3 eyePos = eyePosition.position;
@@ -271,6 +362,50 @@ public class RangeEnemy : Enemy
         }
         return false;
     }
+
+    Vector3 FindCover(Covering action)
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 20f, coverLayer);
+        if (colliders.Length == 0) return Vector3.zero;
+
+        Collider bestCover = null;
+
+        switch (action)
+        {
+            case Covering.Near:
+                // 나랑 제일 가까운 거
+                bestCover = colliders.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).FirstOrDefault();
+                break;
+
+            case Covering.FarPlayer:
+                bestCover = colliders.OrderByDescending(c => Vector3.Distance(playerTarget.position, c.transform.position)).FirstOrDefault();
+                break;
+
+            case Covering.NearPlayer:
+                bestCover = colliders.OrderBy(c => Vector3.Distance(playerTarget.position, c.transform.position)).FirstOrDefault();
+                break;
+        }
+
+        if (bestCover != null)
+        {
+            Vector3 hideDir = (bestCover.transform.position - playerTarget.position).normalized;
+            Vector3 hidePos = bestCover.transform.position + hideDir * 2.0f;
+
+            if (NavMesh.SamplePosition(hidePos, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+            {
+                return hit.position;
+            }
+        }
+        return transform.position;
+    }
+
+    void SearchMode()
+    {
+        currentState = AIState.Search;
+        agent.ResetPath();
+        isActing = false;
+    }
+
     void OnDrawGizmos()
     {
         if (playerTarget == null) return;
@@ -298,17 +433,6 @@ public class RangeEnemy : Enemy
             Gizmos.color = Color.red;
         }
         Gizmos.DrawLine(eyePos, playerTarget.position);
-    }
-
-    bool HasCoverNearBy()
-    {
-        Debug.Log("엄페물 찾기");
-        return Physics.CheckSphere(transform.position, 5f, coverLayer);
-    }
-
-    Vector3 FindCoverPos()
-    {
-        return transform.position;
     }
 
     protected override void OnSpeedChange(float speedFactor)

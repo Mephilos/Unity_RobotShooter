@@ -18,6 +18,8 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] bool invincibleMode = false;
     int currentHitPoint;
     int gameOverVirtualCameraPrioity = 20;
+    public int CurrentHP => currentHitPoint;
+    public int MaxHP => startingHealth;
 
     void Awake()
     {
@@ -45,7 +47,7 @@ public class PlayerHealth : MonoBehaviour
     IEnumerator DamageFlashRoutine()
     {
         Color color = damageOverlay.color;
-        color.a = 0.8f; // 순간적으로 빨갛게
+        color.a = 0.8f;
         damageOverlay.color = color;
 
         while (damageOverlay.color.a > 0)
@@ -78,6 +80,6 @@ public class PlayerHealth : MonoBehaviour
     void Invincible(bool invincibleMode)
     {
         if (!invincibleMode) return;
-        currentHitPoint = 10000000;
+        currentHitPoint = 100;
     }
 }
