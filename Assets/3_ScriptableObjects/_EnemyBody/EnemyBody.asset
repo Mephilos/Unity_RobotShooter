@@ -16,4 +16,3 @@ MonoBehaviour:
   MoveSpeed: 3.5
   DetectionRadius: 20
   ViewAngle: 110
-  LostTargetSearchTime: 5

@@ -12,7 +12,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] MMF_Player hitFeedback;
 
     protected EnemyHealth enemyHealth;
-    protected Transform playerTarget;
+    protected Transform playerPosition;
     protected Coroutine slowRoutine;
 
     protected virtual void Awake()
@@ -23,7 +23,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void OnEnable()
     {
         var player = FindFirstObjectByType<FirstPersonController>();
-        playerTarget = player.transform.Find(Constants.PLAYER_TARGET);
+        playerPosition = player.transform.Find(Constants.PLAYER_TARGET);
         enemyHealth.OnHit += OnDamage;
     }
 
@@ -34,9 +34,9 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (playerTarget == null) return;
+        if (playerPosition == null) return;
 
-        float distToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+        float distToPlayer = Vector3.Distance(transform.position, playerPosition.position);
 
         if (IsTargetInRange(distToPlayer))
         {

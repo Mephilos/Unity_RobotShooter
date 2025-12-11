@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
+
 
 public class RangeEnemy : Enemy
 {
@@ -35,6 +37,7 @@ public class RangeEnemy : Enemy
     float lastAttacTime;
     float combatDuration;
     bool isActing = false;
+    bool firstAttack = false;
 
     protected override void Awake()
     {
@@ -50,17 +53,42 @@ public class RangeEnemy : Enemy
         currentState = AIState.Patrol;
         isActing = false;
         combatDuration = 0;
-        enemyHealth.InitializeHealth((int)enemyBodySO.MaxHP);
+        enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
         playerHealth = FindFirstObjectByType<PlayerHealth>();
     }
 
+    protected override void OnDamage()
+    {
+        if (currentState == AIState.Combat) return;
+
+        StopAllCoroutines();
+        isActing = false;
+
+        base.OnDamage();
+
+        Vector3 lookDir = (playerPosition.position - transform.position).normalized;
+        lookDir.y = 0;
+
+        if (lookDir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(lookDir);
+        }
+
+        if (currentState != AIState.Combat)
+        {
+            Debug.Log("기습당함");
+            currentState = AIState.Combat;
+            lastPlayerPosition = playerPosition.position;
+            combatDuration = 0;
+        }
+    }
     protected override void Update()
     {
-        if (playerTarget == null) return;
+        if (playerPosition == null) return;
 
         if (CanSeePlayer())
         {
-            lastPlayerPosition = playerTarget.position;
+            lastPlayerPosition = playerPosition.position;
             combatDuration = 0;
         }
         else if (currentState == AIState.Combat)
@@ -98,7 +126,8 @@ public class RangeEnemy : Enemy
 
         if (CanSeePlayer())
         {
-            Debug.Log("원거리 적: 찾음");
+            Debug.Log("정찰중 적찾음");
+            firstAttack = true;
             currentState = AIState.Combat;
             return;
         }
@@ -127,6 +156,7 @@ public class RangeEnemy : Enemy
         if (CanSeePlayer())
         {
             Debug.Log("수색중 적 찾음");
+            firstAttack = true;
             currentState = AIState.Combat;
             StopAllCoroutines();
             isActing = false;
@@ -161,21 +191,23 @@ public class RangeEnemy : Enemy
 
         int myHP = enemyHealth.CurrentHP;
         int playerHP = playerHealth.CurrentHP;
-        float dist = Vector3.Distance(transform.position, playerTarget.position);
+        float dist = Vector3.Distance(transform.position, playerPosition.position);
 
-        if (Mathf.Abs(myHP - playerHP) <= 2)
+        if (Mathf.Abs(myHP - playerHP) <= 40)
         {
+            Debug.Log("동등");
             return Strategy.Equal;
         }
-
-        if (myHP < playerHP)
+        else if (myHP < playerHP)
         {
             if (dist > combatDistance)
             {
+                Debug.Log("약세 멈");
                 return Strategy.DisAdvFar;
             }
             else
             {
+                Debug.Log("약세 가까움");
                 return Strategy.DisAdvNear;
             }
         }
@@ -183,10 +215,12 @@ public class RangeEnemy : Enemy
         {
             if (dist > combatDistance)
             {
+                Debug.Log("우세 멈");
                 return Strategy.AdvFar;
             }
             else
             {
+                Debug.Log("우세 가까움");
                 return Strategy.AdvNear;
             }
         }
@@ -195,13 +229,32 @@ public class RangeEnemy : Enemy
     IEnumerator StrategyActionRoutine(Strategy strategy)
     {
         isActing = true;
+        agent.updateRotation = false;
+
+        if (firstAttack)
+        {
+            Debug.Log("기습공격");
+            agent.isStopped = true;
+
+            if (playerPosition != null)
+            {
+                Vector3 lookDir = (playerPosition.position - transform.position).normalized;
+                lookDir.y = 0;
+                transform.rotation = Quaternion.LookRotation(lookDir);
+            }
+
+            yield return StartCoroutine(FireBurst());
+
+            firstAttack = false;
+        }
 
         agent.isStopped = false;
         agent.speed = enemyBodySO.MoveSpeed;
-        agent.updateRotation = false;
 
         bool canShoot = true;
         Vector3 destPos = transform.position;
+
+        // yield return StartCoroutine(FireBurst());
 
         switch (strategy)
         {
@@ -226,7 +279,7 @@ public class RangeEnemy : Enemy
                 break;
 
             case Strategy.AdvNear:
-                destPos = playerTarget.position;
+                destPos = playerPosition.position;
                 break;
         }
 
@@ -240,9 +293,9 @@ public class RangeEnemy : Enemy
         {
             actionTimer += Time.deltaTime;
 
-            if (playerTarget != null && canShoot)
+            if (playerPosition != null && canShoot)
             {
-                Vector3 lookTarget = CanSeePlayer() ? playerTarget.position : lastPlayerPosition;
+                Vector3 lookTarget = CanSeePlayer() ? playerPosition.position : lastPlayerPosition;
                 Vector3 lookDir = (lookTarget - transform.position).normalized;
                 lookDir.y = 0;
 
@@ -263,7 +316,7 @@ public class RangeEnemy : Enemy
 
             if (strategy == Strategy.AdvNear)
             {
-                agent.SetDestination(playerTarget.position);
+                agent.SetDestination(playerPosition.position);
             }
             yield return null;
         }
@@ -278,8 +331,6 @@ public class RangeEnemy : Enemy
         agent.updateRotation = false;
 
         int wayPointCounter = Random.Range(1, 3);
-
-
 
         for (int i = 0; i < wayPointCounter; i++)
         {
@@ -325,7 +376,7 @@ public class RangeEnemy : Enemy
     {
         for (int i = 0; i < enemyWeaponSO.BurstCount; i++)
         {
-            if (playerTarget == null) break;
+            if (playerPosition == null) break;
             FireProjectile();
             yield return new WaitForSeconds(0.1f);
         }
@@ -333,9 +384,22 @@ public class RangeEnemy : Enemy
 
     void FireProjectile()
     {
-        // TODO: 정확도(AccuracyError) 적용 해서 총알 발사
+        Vector3 spawnPosition = firePoint.position;
+        Vector3 targetPosition = playerPosition.position;
+        Vector3 direction = (targetPosition - spawnPosition).normalized;
 
-        Debug.Log("적군 발사!");
+        float accErr = enemyWeaponSO.AccuracyError;
+
+        direction.x += Random.Range(-accErr, accErr) * .01f;
+        direction.y += Random.Range(-accErr, accErr) * .01f;
+        direction.z += Random.Range(-accErr, accErr) * .01f;
+
+        GameObject newProjectile = PoolManager.Instance.Get(enemyWeaponSO.ProjectilePrefab, spawnPosition, Quaternion.LookRotation(direction));
+        if (newProjectile.TryGetComponent<Projectile>(out Projectile p))
+        {
+            p.Initialize(enemyWeaponSO.Damage, enemyWeaponSO.ProjectileSpeed, enemyWeaponSO.ProjectileLifeTime);
+        }
+        Debug.Log("적발사");
     }
 
     Vector3 GetRandomPointOnNavMesh(Vector3 center, float range)
@@ -347,9 +411,9 @@ public class RangeEnemy : Enemy
 
     bool CanSeePlayer()
     {
-        if (playerTarget == null) return false;
+        if (playerPosition == null) return false;
         Vector3 eyePos = eyePosition.position;
-        Vector3 targetDir = (playerTarget.position - eyePos).normalized;
+        Vector3 targetDir = (playerPosition.position - eyePos).normalized;
         float angle = Vector3.Angle(eyePosition.forward, targetDir);
 
         RaycastHit hit;
@@ -365,37 +429,43 @@ public class RangeEnemy : Enemy
 
     Vector3 FindCover(Covering action)
     {
+        Debug.Log("장애물 찾기");
         Collider[] colliders = Physics.OverlapSphere(transform.position, 20f, coverLayer);
         if (colliders.Length == 0) return Vector3.zero;
 
-        Collider bestCover = null;
+        List<Collider> bestCover = null;
 
         switch (action)
         {
             case Covering.Near:
                 // 나랑 제일 가까운 거
-                bestCover = colliders.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).FirstOrDefault();
+                bestCover = colliders.OrderBy(c => Vector3.Distance(transform.position, c.transform.position)).ToList();
+                Debug.Log("장애물 찾기 액션 체크중 그냥 가장 가까운 장애물");
                 break;
 
             case Covering.FarPlayer:
-                bestCover = colliders.OrderByDescending(c => Vector3.Distance(playerTarget.position, c.transform.position)).FirstOrDefault();
+                bestCover = colliders.OrderByDescending(c => Vector3.Distance(playerPosition.position, c.transform.position)).ToList();
+                Debug.Log("장애물 찾기 액션 체크중플레이어로부터멈");
                 break;
 
             case Covering.NearPlayer:
-                bestCover = colliders.OrderBy(c => Vector3.Distance(playerTarget.position, c.transform.position)).FirstOrDefault();
+                bestCover = colliders.OrderBy(c => Vector3.Distance(playerPosition.position, c.transform.position)).ToList();
+                Debug.Log("장애물 찾기 액션 체크중 플레이어에게가까움");
                 break;
         }
 
-        if (bestCover != null)
+        foreach (var c in bestCover)
         {
-            Vector3 hideDir = (bestCover.transform.position - playerTarget.position).normalized;
-            Vector3 hidePos = bestCover.transform.position + hideDir * 2.0f;
+            Debug.Log("장애물 체크");
+            Vector3 hideDir = (c.transform.position - playerPosition.position).normalized;
+            Vector3 hidePos = c.transform.position + hideDir * 2.0f;
 
             if (NavMesh.SamplePosition(hidePos, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
             {
                 return hit.position;
             }
         }
+        Debug.Log("못찾음");
         return transform.position;
     }
 
@@ -408,7 +478,7 @@ public class RangeEnemy : Enemy
 
     void OnDrawGizmos()
     {
-        if (playerTarget == null) return;
+        if (playerPosition == null) return;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, enemyBodySO.DetectionRadius);
         Vector3 eyePos = eyePosition.position;
@@ -419,7 +489,7 @@ public class RangeEnemy : Enemy
         Gizmos.DrawRay(eyePos, leftView * enemyBodySO.DetectionRadius);
         Gizmos.DrawRay(eyePos, rightView * enemyBodySO.DetectionRadius);
 
-        Vector3 dirToTarget = (playerTarget.position - eyePos).normalized;
+        Vector3 dirToTarget = (playerPosition.position - eyePos).normalized;
 
         bool isHit = Physics.Raycast(eyePos, dirToTarget, out RaycastHit hit, enemyBodySO.DetectionRadius, viewLayerMask);
 
@@ -432,7 +502,7 @@ public class RangeEnemy : Enemy
         {
             Gizmos.color = Color.red;
         }
-        Gizmos.DrawLine(eyePos, playerTarget.position);
+        Gizmos.DrawLine(eyePos, playerPosition.position);
     }
 
     protected override void OnSpeedChange(float speedFactor)

@@ -1,14 +1,12 @@
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    [SerializeField] float projectileSpeed = 10f;
     [SerializeField] GameObject projectileHitVFX;
-    [SerializeField] float lifeTime = 3f;
+    float projectileSpeed;
+    float lifeTime;
     int damage;
     Rigidbody rb;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -26,9 +24,11 @@ public class Projectile : MonoBehaviour
         Invoke(nameof(Release), lifeTime);
     }
 
-    public void Initialize(int amount)
+    public void Initialize(int damage, float speed, float lifeTime)
     {
-        this.damage = amount;
+        projectileSpeed = speed;
+        this.damage = damage;
+        this.lifeTime = lifeTime;
     }
 
     void OnTriggerEnter(Collider other)

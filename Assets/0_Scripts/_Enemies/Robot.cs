@@ -33,7 +33,7 @@ public class Robot : Enemy
 
     protected override void Update()
     {
-        if (playerTarget == null) return;
+        if (playerPosition == null) return;
 
         Move();
     }
@@ -51,9 +51,9 @@ public class Robot : Enemy
 
     protected override void Move()
     {
-        if (playerTarget != null)
+        if (playerPosition != null)
         {
-            agent.SetDestination(playerTarget.position);
+            agent.SetDestination(playerPosition.position);
         }
     }
 

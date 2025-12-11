@@ -4,7 +4,10 @@ using UnityEngine;
 public class EnemyWeaponSO : ScriptableObject
 {
     public GameObject ProjectilePrefab;
-    public float Damage = 10f;
+    public float ProjectileSpeed = 20f;
+    public float ProjectileLifeTime = 3f;
+
+    public int Damage = 10;
     public float FireRate = 0.5f;
     public float AttackRange = 15f;
     public float AccuracyError = 2.0f;

@@ -7,9 +7,7 @@ public class Turret : Enemy
     [SerializeField] Transform projectileFirePoint;
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] GameObject deathParticle;
-    [SerializeField] float fireInterval = 5f;
-    [SerializeField] float attackRange = 10f;
-    [SerializeField] int damage = 2;
+    [SerializeField] EnemyWeaponSO enemyWeaponSO;
     [SerializeField] float turnSpeedHead = 2f;
 
     Quaternion originRotation;
@@ -43,7 +41,7 @@ public class Turret : Enemy
 
     protected override bool IsTargetInRange(float dist)
     {
-        return dist <= attackRange;
+        return dist <= enemyWeaponSO.AttackRange;
     }
 
     protected override void OnSpeedChange(float speedFactor)
@@ -58,12 +56,12 @@ public class Turret : Enemy
 
     protected override void TryAttack()
     {
-        Vector3 direction = playerTarget.position - turretHead.position;
+        Vector3 direction = playerPosition.position - turretHead.position;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         turretHead.rotation = Quaternion.Slerp(turretHead.rotation, lookRotation, Time.deltaTime * currentTurnSpeed);
         // turretHead.LookAt(playerTarget);
 
-        if (Time.time >= lastFire + fireInterval)
+        if (Time.time >= lastFire + enemyWeaponSO.FireRate)
         {
             Fire();
             lastFire = Time.time;
@@ -72,12 +70,12 @@ public class Turret : Enemy
 
     void Fire()
     {
-        Vector3 dir = (playerTarget.position - projectileFirePoint.position);
+        Vector3 dir = playerPosition.position - projectileFirePoint.position;
         Quaternion lookRotation = Quaternion.LookRotation(dir);
 
         GameObject projectile = PoolManager.Instance.Get(projectilePrefab, projectileFirePoint.position, lookRotation);
         Projectile newProjectile = projectile.GetComponent<Projectile>();
-        newProjectile.Initialize(damage);
+        newProjectile.Initialize(enemyWeaponSO.Damage, enemyWeaponSO.ProjectileSpeed, enemyWeaponSO.ProjectileLifeTime);
     }
 
     void Death()
