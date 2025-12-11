@@ -6,6 +6,7 @@ using StarterAssets;
 public class PlayMenuHandler : MenuHandler
 {
     [SerializeField] GameObject pausePanel;
+    [SerializeField] GameObject optionPanel;
     [SerializeField] InputActionReference pauseDetec;
     StarterAssetsInputs playerInputs;
     void Awake()
@@ -39,6 +40,8 @@ public class PlayMenuHandler : MenuHandler
     void OnPauseInput(InputAction.CallbackContext callback)
     {
         GameManager.instance?.PauseToggle();
+        optionPanel.SetActive(false);
+
     }
 
     void PausePanelPopup(bool isPause)

@@ -97,6 +97,7 @@ namespace StarterAssets
 
 		private void Start()
 		{
+			RotationSpeed = PlayerPrefs.GetFloat("MouseSens", 2.0f);
 			_controller = GetComponent<CharacterController>();
 			_input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM

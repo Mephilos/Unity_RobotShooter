@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AssultRifle
   m_EditorClassIdentifier: 
   WeaponPrefab: {fileID: 666028522017259864, guid: d749e6c60c17249eab9a9ee6e01c585e, type: 3}
-  Damage: 1
+  Damage: 30
   FireRate: 0.2
   HitVFXPrefab: {fileID: 8430451896267564482, guid: 74e69bf1a67af461eb9a7d82adee95e7, type: 3}
   CriVFXPrefab: {fileID: 4738451210866625002, guid: 6df81460064294f56ae46af4e4f12462, type: 3}

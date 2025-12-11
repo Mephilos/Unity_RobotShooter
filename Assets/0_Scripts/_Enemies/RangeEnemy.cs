@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Mathematics;
 
 public class RangeEnemy : EnemyBrain
 {
@@ -14,8 +15,8 @@ public class RangeEnemy : EnemyBrain
 
     [SerializeField] EnemyBodySO enemyBodySO;
     [SerializeField] float combatDistance = 15f;
+    [SerializeField] ParticleSystem deathParticle;
 
-    EnemySight enemySight;
     EnemyWeaponController enemyWeaponController;
     PlayerHealth playerHealth;
 
@@ -26,6 +27,7 @@ public class RangeEnemy : EnemyBrain
     {
         base.Awake();
         enemyWeaponController = GetComponent<EnemyWeaponController>();
+
         sight.viewDistance = enemyBodySO.DetectionRadius;
         sight.viewAngle = enemyBodySO.ViewAngle;
     }
@@ -35,8 +37,16 @@ public class RangeEnemy : EnemyBrain
         base.OnEnable();
         agent.speed = enemyBodySO.MoveSpeed;
         enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
+        Debug.LogWarning($"{enemyHealth.CurrentHP}");
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         firstAttack = false;
+        enemyHealth.OnDeath += Death;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        enemyHealth.OnDeath -= Death;
     }
 
     protected override void OnFound()
@@ -212,6 +222,11 @@ public class RangeEnemy : EnemyBrain
         Gizmos.DrawLine(eyePos, playerTransform.position);
     }
 
+    void Death()
+    {
+        Instantiate(deathParticle, transform.position, quaternion.identity);
+        Destroy(gameObject);
+    }
 
     protected override void OnSpeedChange(float speedFactor)
     {
@@ -220,6 +235,7 @@ public class RangeEnemy : EnemyBrain
     protected override bool IsTargetInRange(float dist) => true;
     protected override void Move() { }
     protected override void TryAttack() { }
+
 
 
     // public enum AIState { Patrol, Combat, Search }

@@ -10,4 +10,5 @@ public class Constants
     public const int SCENE_MAIN_MENU = 0;
     public const int ROBOT_SELF_DESTRUCT = 1000;
     public const int TOTAL_STAGE_COUNT = 2;
+    public const float MOUSE_SENS_MULTIPLIER = 2.0f;
 }

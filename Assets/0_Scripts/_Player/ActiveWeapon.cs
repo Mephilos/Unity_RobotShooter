@@ -15,8 +15,9 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] bool isInfinityAmmo;
 
     public event Action<int, int> OnAmmoChange;
+    public float DefaultRotationSpeed => defaultRotationSpeed;
     Weapon currentWeapon;
-    Animator animator;
+    // Animator animator;
     StarterAssetsInputs starterAssetsInputs;
     FirstPersonController firstPersonController;
     WeaponSO weaponSO;
@@ -31,13 +32,14 @@ public class ActiveWeapon : MonoBehaviour
     void Awake()
     {
         firstPersonController = GetComponentInParent<FirstPersonController>();
-        animator = GetComponentInParent<Animator>();
+        // animator = GetComponentInParent<Animator>();
         starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
-        defaultRotationSpeed = firstPersonController.RotationSpeed;
+        // defaultRotationSpeed = firstPersonController.RotationSpeed;
     }
 
     void Start()
     {
+        defaultRotationSpeed = PlayerPrefs.GetFloat("MouseSens", 2.0f);
         SwitchWeapon(startingWeaponOS);
     }
 
@@ -150,6 +152,15 @@ public class ActiveWeapon : MonoBehaviour
         }
     }
 
+    void HandleSpreadRecovery()
+    {
+        if (!isFire && keepFireRecoilPenalty > 0)
+        {
+            keepFireRecoilPenalty = Mathf.Lerp(keepFireRecoilPenalty, 0f, weaponSO.RecoverySpreadSpeed * Time.deltaTime);
+            if (keepFireRecoilPenalty < 0) keepFireRecoilPenalty = 0;
+        }
+    }
+
     public float GetCurrentSpread()
     {
         float currentSpread = weaponSO.DefaultSpread;
@@ -167,12 +178,13 @@ public class ActiveWeapon : MonoBehaviour
         return Mathf.Min(currentSpread, weaponSO.MaxSpread);
     }
 
-    void HandleSpreadRecovery()
+    public void UpdateSensitivity(float newSensitivity)
     {
-        if (!isFire && keepFireRecoilPenalty > 0)
+        defaultRotationSpeed = newSensitivity;
+
+        if (!isZoom)
         {
-            keepFireRecoilPenalty = Mathf.Lerp(keepFireRecoilPenalty, 0f, weaponSO.RecoverySpreadSpeed * Time.deltaTime);
-            if (keepFireRecoilPenalty < 0) keepFireRecoilPenalty = 0;
+            firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
         }
     }
 }

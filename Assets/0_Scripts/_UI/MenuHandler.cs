@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using System;
 
 public class MenuHandler : MonoBehaviour
@@ -21,7 +20,7 @@ public class MenuHandler : MonoBehaviour
         LogOut,
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct ButtonMapping
     {
         public string name;
@@ -36,7 +35,7 @@ public class MenuHandler : MonoBehaviour
     {
         if (GameManager.instance == null)
         {
-            Debug.LogWarning($"{gameObject}: GameManager 없음. 메인메뉴부터 실행 ㄱㄱ");
+            Debug.LogWarning($"{gameObject}: GameManager 없음");
         }
 
         foreach (var mapping in Buttons)

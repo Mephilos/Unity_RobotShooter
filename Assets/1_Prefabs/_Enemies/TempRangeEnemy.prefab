@@ -77,6 +77,9 @@ GameObject:
   - component: {fileID: 5097347337363278440}
   - component: {fileID: 8922432244685526455}
   - component: {fileID: 8343567913504236495}
+  - component: {fileID: 1565844057158632149}
+  - component: {fileID: 3524784111640568767}
+  - component: {fileID: 3947589717258687880}
   m_Layer: 6
   m_Name: TempRangeEnemy
   m_TagString: Untagged
@@ -234,6 +237,54 @@ MonoBehaviour:
   combatTime: 5
   enemyBodySO: {fileID: 11400000, guid: 34221c05d87c4434692d31cc2ff2006a, type: 2}
   combatDistance: 10
+  deathParticle: {fileID: 261765961484630299, guid: f44ab53478da0494b853a4b4880123c8, type: 3}
+--- !u!114 &1565844057158632149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5188183271266825324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b675aef62ad74fb0af6e8df5cfefa2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coverLayer:
+    serializedVersion: 2
+    m_Bits: 512
+--- !u!114 &3524784111640568767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5188183271266825324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa266858851c472787bf23814bec68c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponSO: {fileID: 11400000, guid: 849790d8b6e524d728ab4559ac7c5b9a, type: 2}
+  firePoint: {fileID: 7916934682210058213}
+--- !u!114 &3947589717258687880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5188183271266825324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276f82f5f0686453abfdad4f69dacdcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eyePosition: {fileID: 8673567715986876299}
+  viewLayerMask:
+    serializedVersion: 2
+    m_Bits: 959
+  viewAngle: 0
+  viewDistance: 0
 --- !u!1 &6759849284161308022
 GameObject:
   m_ObjectHideFlags: 0
