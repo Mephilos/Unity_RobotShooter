@@ -1,7 +1,6 @@
 using UnityEngine;
 using StarterAssets;
 using MoreMountains.Feedbacks;
-using System;
 using System.Collections;
 
 [RequireComponent(typeof(EnemyHealth))]
@@ -12,7 +11,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] MMF_Player hitFeedback;
 
     protected EnemyHealth enemyHealth;
-    protected Transform playerPosition;
+    protected Transform playerTransform;
     protected Coroutine slowRoutine;
 
     protected virtual void Awake()
@@ -23,7 +22,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void OnEnable()
     {
         var player = FindFirstObjectByType<FirstPersonController>();
-        playerPosition = player.transform.Find(Constants.PLAYER_TARGET);
+        playerTransform = player.transform.Find(Constants.PLAYER_TARGET);
         enemyHealth.OnHit += OnDamage;
     }
 
@@ -34,9 +33,9 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (playerPosition == null) return;
+        if (playerTransform == null) return;
 
-        float distToPlayer = Vector3.Distance(transform.position, playerPosition.position);
+        float distToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         if (IsTargetInRange(distToPlayer))
         {

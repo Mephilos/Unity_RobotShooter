@@ -7,6 +7,10 @@ public class EnemySight : MonoBehaviour
     public float viewAngle;
     public float viewDistance;
 
+    public Transform EyeTransform => eyePosition;
+    public Vector3 EyePosition => eyePosition.position;
+    public LayerMask ViewLayerMask => viewLayerMask;
+
     public bool CanSeePlayer(Transform target)
     {
         if (target == null) return false;

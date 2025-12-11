@@ -56,7 +56,7 @@ public class Turret : Enemy
 
     protected override void TryAttack()
     {
-        Vector3 direction = playerPosition.position - turretHead.position;
+        Vector3 direction = playerTransform.position - turretHead.position;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         turretHead.rotation = Quaternion.Slerp(turretHead.rotation, lookRotation, Time.deltaTime * currentTurnSpeed);
         // turretHead.LookAt(playerTarget);
@@ -70,7 +70,7 @@ public class Turret : Enemy
 
     void Fire()
     {
-        Vector3 dir = playerPosition.position - projectileFirePoint.position;
+        Vector3 dir = playerTransform.position - projectileFirePoint.position;
         Quaternion lookRotation = Quaternion.LookRotation(dir);
 
         GameObject projectile = PoolManager.Instance.Get(projectilePrefab, projectileFirePoint.position, lookRotation);

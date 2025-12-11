@@ -50,7 +50,7 @@ public class EnemyTactic : MonoBehaviour
         return transform.position;
     }
 
-    public Vector3 GetRandomPatrolPoint(Vector3 center, float range)
+    public Vector3 GetRandomWayPoint(Vector3 center, float range)
     {
         Vector3 randomPosition = center + Random.insideUnitSphere * range;
         if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, range, NavMesh.AllAreas))
