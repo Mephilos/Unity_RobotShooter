@@ -12,4 +12,5 @@ public class EnemyWeaponSO : ScriptableObject
     public float AttackRange = 15f;
     public float AccuracyError = 2.0f;
     public int BurstCount = 3;
+    public float BurstInterval = 0.1f;
 }

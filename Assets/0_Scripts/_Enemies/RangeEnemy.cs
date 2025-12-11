@@ -382,7 +382,7 @@ public class RangeEnemy : Enemy
         }
     }
 
-    void FireProjectile()
+    void FireProjectile(Transform playerPosition)
     {
         Vector3 spawnPosition = firePoint.position;
         Vector3 targetPosition = playerPosition.position;
