@@ -3,7 +3,7 @@ using UnityEngine.AI;
 using System.Linq;
 using System.Collections.Generic;
 
-public class EnemyTectic : MonoBehaviour
+public class EnemyTactic : MonoBehaviour
 {
     public enum Covering { Near, FarPlayer, NearPlayer }
     [SerializeField] LayerMask coverLayer;
