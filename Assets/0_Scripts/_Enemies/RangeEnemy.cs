@@ -24,6 +24,7 @@ public class RangeEnemy : EnemyBrain
     float lastAttacTime;
     bool firstAttack = false;
 
+
     protected override void Awake()
     {
         base.Awake();
@@ -41,13 +42,12 @@ public class RangeEnemy : EnemyBrain
         Debug.LogWarning($"{enemyHealth.CurrentHP}");
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         firstAttack = false;
-        enemyHealth.OnDeath += Death;
+
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        enemyHealth.OnDeath -= Death;
     }
 
     protected override void OnFound()
@@ -113,7 +113,9 @@ public class RangeEnemy : EnemyBrain
                 transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
-            yield return StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
+            animator.SetTrigger("Shoot");
+
+            // yield return StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
 
             firstAttack = false;
         }
@@ -178,8 +180,10 @@ public class RangeEnemy : EnemyBrain
             {
                 if (strategy == Strategy.AdvNear || strategy == Strategy.DisAdvNear || sight.CanSeePlayer(playerTransform))
                 {
-                    Vector3 fireTarget = playerTransform.position;
-                    StartCoroutine(enemyWeaponController.FireBurst(fireTarget));
+                    animator.SetTrigger("shoot");
+
+                    // Vector3 fireTarget = playerTransform.position;
+                    // StartCoroutine(enemyWeaponController.FireBurst(fireTarget));
                     lastAttacTime = Time.time;
                 }
             }
@@ -233,7 +237,13 @@ public class RangeEnemy : EnemyBrain
         Gizmos.DrawLine(eyePos, playerTransform.position);
     }
 
-    void Death()
+    public void OnAnimationShoot()
+    {
+        if (isDead || playerTransform == null || !sight.CanSeePlayer(playerTransform)) return;
+        StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
+    }
+
+    protected override void OnDeath()
     {
         Instantiate(deathParticle, transform.position, quaternion.identity);
         Destroy(gameObject);

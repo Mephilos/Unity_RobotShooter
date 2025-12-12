@@ -26,9 +26,6 @@ public class Robot : Enemy
         }
         agent.speed = backupSpeed;
         agent.Warp(transform.position);
-
-        enemyHealth.OnDeath += SelfDestruct;
-
     }
 
     protected override void Update()
@@ -36,11 +33,6 @@ public class Robot : Enemy
         if (playerTransform == null) return;
 
         Move();
-    }
-
-    protected override void OnDisable()
-    {
-        enemyHealth.OnDeath -= SelfDestruct;
     }
 
     protected override void OnSpeedChange(float speedFactor)
@@ -72,5 +64,11 @@ public class Robot : Enemy
         PoolManager.Instance.Release(gameObject);
     }
 
+    protected override void OnDeath()
+    {
+        SelfDestruct();
+    }
+
     protected override void TryAttack() { }
+
 }

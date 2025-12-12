@@ -56,15 +56,22 @@ public abstract class EnemyBrain : Enemy
             }
         }
 
+        animator.SetBool("IsPatrol", false);
+        animator.SetBool("IsCombat", false);
+        animator.SetBool("IsSearch", false);
+
         switch (currentState)
         {
             case AIState.Patrol:
+                animator.SetBool("IsPatrol", true);
                 UpdatePatrol();
                 break;
             case AIState.Combat:
+                animator.SetBool("IsCombat", true);
                 UpdateCombat();
                 break;
             case AIState.Search:
+                animator.SetBool("IsSearch", true);
                 UpdateSearch();
                 break;
         }

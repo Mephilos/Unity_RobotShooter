@@ -24,7 +24,6 @@ public class Turret : Enemy
     protected override void OnEnable()
     {
         base.OnEnable();
-        enemyHealth.OnDeath += Death;
         lastFire = Time.time;
     }
 
@@ -32,11 +31,6 @@ public class Turret : Enemy
     {
         // if (playerTarget != null) turretHead.LookAt(playerTarget);
         base.Update();
-    }
-
-    protected override void OnDisable()
-    {
-        enemyHealth.OnDeath -= Death;
     }
 
     protected override bool IsTargetInRange(float dist)
@@ -78,7 +72,7 @@ public class Turret : Enemy
         newProjectile.Initialize(enemyWeaponSO.Damage, enemyWeaponSO.ProjectileSpeed, enemyWeaponSO.ProjectileLifeTime);
     }
 
-    void Death()
+    protected override void OnDeath()
     {
         Instantiate(deathParticle, turretHead.position, quaternion.identity);
         // PoolManager.Instance.Get(deathParticle, transform.position, quaternion.identity);

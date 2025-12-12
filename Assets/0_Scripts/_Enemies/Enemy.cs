@@ -2,6 +2,7 @@ using UnityEngine;
 using StarterAssets;
 using MoreMountains.Feedbacks;
 using System.Collections;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(EnemyHealth))]
 public abstract class Enemy : MonoBehaviour
@@ -10,12 +11,15 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] protected float hitSlowFactor = 0.1f;
     [SerializeField] MMF_Player hitFeedback;
 
+    protected Animator animator;
     protected EnemyHealth enemyHealth;
     protected Transform playerTransform;
     protected Coroutine slowRoutine;
+    protected bool isDead;
 
     protected virtual void Awake()
     {
+        animator = GetComponentInChildren<Animator>();
         enemyHealth = GetComponent<EnemyHealth>();
     }
 
@@ -23,7 +27,11 @@ public abstract class Enemy : MonoBehaviour
     {
         var player = FindFirstObjectByType<FirstPersonController>();
         playerTransform = player.transform.Find(Constants.PLAYER_TARGET);
+
+        isDead = false;
+
         enemyHealth.OnHit += OnDamage;
+        enemyHealth.OnDeath += HandleDeath;
     }
 
     protected virtual void OnDisable()
@@ -71,8 +79,31 @@ public abstract class Enemy : MonoBehaviour
         slowRoutine = null;
     }
 
+    void HandleDeath()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        StopAllCoroutines();
+        if (GetComponent<NavMeshAgent>() != null)
+        {
+            var agent = GetComponent<NavMeshAgent>();
+
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        var collider = GetComponentsInChildren<Collider>();
+        foreach (var c in collider)
+        {
+            c.enabled = false;
+        }
+
+        OnDeath();
+    }
     protected abstract void OnSpeedChange(float speedFactor);
     protected abstract bool IsTargetInRange(float dist);
     protected abstract void Move();
     protected abstract void TryAttack();
+    protected abstract void OnDeath();
 }

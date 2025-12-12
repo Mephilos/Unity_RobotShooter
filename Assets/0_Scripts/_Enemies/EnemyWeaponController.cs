@@ -1,24 +1,46 @@
 using System.Collections;
+
 using UnityEngine;
 
 public class EnemyWeaponController : MonoBehaviour
 {
     [SerializeField] EnemyWeaponSO weaponSO;
     [SerializeField] Transform firePoint;
+    [SerializeField] LayerMask blockLayer;
 
+    EnemySight enemySight;
     public float FireRate => weaponSO.FireRate;
 
+    void Awake()
+    {
+        enemySight = GetComponent<EnemySight>();
+    }
     public IEnumerator FireBurst(Vector3 targetPosition)
     {
         for (int i = 0; i < weaponSO.BurstCount; i++)
         {
-            FireProjectile(targetPosition);
+            if (ShootLineCheck())
+            {
+                FireProjectile(targetPosition);
+            }
             // 마지막 발사는 코루틴 작동x;
             if (i < weaponSO.BurstCount - 1)
             {
                 yield return new WaitForSeconds(weaponSO.BurstInterval);
             }
         }
+    }
+
+    bool ShootLineCheck()
+    {
+        Vector3 eyePosition = enemySight.EyePosition;
+        Vector3 muzzlePosition = firePoint.position;
+
+        if (Physics.Linecast(eyePosition, muzzlePosition, blockLayer))
+        {
+            return false;
+        }
+        return true;
     }
 
     void FireProjectile(Vector3 playerPosition)
@@ -39,6 +61,5 @@ public class EnemyWeaponController : MonoBehaviour
         {
             p.Initialize(weaponSO.Damage, weaponSO.ProjectileSpeed, weaponSO.ProjectileLifeTime);
         }
-        Debug.Log("적발사");
     }
 }
