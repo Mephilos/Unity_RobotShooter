@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyWeaponSO : ScriptableObject
 {
     public GameObject ProjectilePrefab;
+    public GameObject MuzzleFlashVFX;
     public float ProjectileSpeed = 20f;
     public float ProjectileLifeTime = 3f;
 

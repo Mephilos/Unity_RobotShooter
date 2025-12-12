@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: EnemyWeapon
   m_EditorClassIdentifier: 
   ProjectilePrefab: {fileID: 539665210269405768, guid: 2f2faeb6065d54cb2a77538e32f0aa5f, type: 3}
+  MuzzleFlashVFX: {fileID: 5289015434729806262, guid: ca68ce417404b4a69ad0aaaf95be8ea2, type: 3}
   ProjectileSpeed: 30
   ProjectileLifeTime: 3
   Damage: 10

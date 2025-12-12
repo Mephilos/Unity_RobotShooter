@@ -80,6 +80,6 @@ public class PlayerHealth : MonoBehaviour
     void Invincible(bool invincibleMode)
     {
         if (!invincibleMode) return;
-        currentHitPoint = 100;
+        currentHitPoint = 40;
     }
 }

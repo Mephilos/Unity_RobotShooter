@@ -8,6 +8,7 @@ public class Projectile : MonoBehaviour
     float lifeTime;
     int damage;
     Rigidbody rb;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();

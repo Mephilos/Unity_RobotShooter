@@ -32,6 +32,8 @@ public class EnemyWeaponController : MonoBehaviour
         direction.y += Random.Range(-accErr, accErr) * .01f;
         direction.z += Random.Range(-accErr, accErr) * .01f;
 
+        PoolManager.Instance.Get(weaponSO.MuzzleFlashVFX, spawnPosition, firePoint.rotation);
+
         GameObject newProjectile = PoolManager.Instance.Get(weaponSO.ProjectilePrefab, spawnPosition, Quaternion.LookRotation(direction));
         if (newProjectile.TryGetComponent<Projectile>(out Projectile p))
         {

@@ -15,4 +15,4 @@ MonoBehaviour:
   MaxHP: 100
   MoveSpeed: 3.5
   DetectionRadius: 20
-  ViewAngle: 110
+  ViewAngle: 180
