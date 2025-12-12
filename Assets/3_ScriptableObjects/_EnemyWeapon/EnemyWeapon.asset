@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a0180bc368a4424b7306c15dd631a1, type: 3}
   m_Name: EnemyWeapon
   m_EditorClassIdentifier: 
-  ProjectilePrefab: {fileID: 5849176006788580604, guid: 334911fc3bb4b44f7ac12bf6967e74da, type: 3}
+  ProjectilePrefab: {fileID: 539665210269405768, guid: 2f2faeb6065d54cb2a77538e32f0aa5f, type: 3}
+  ProjectileSpeed: 30
+  ProjectileLifeTime: 3
   Damage: 10
   FireRate: 0.5
   AttackRange: 15
   AccuracyError: 2
   BurstCount: 3
+  BurstInterval: 0.1
