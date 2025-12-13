@@ -24,4 +24,10 @@ public class EnemyWeaponSO : ScriptableObject
 
     public int BurstCount = 3;
     public float BurstInterval = 0.1f;
+
+
+    [Range(0.0f, 1.0f)]
+    public float ShootingMoveSpeedPenalty = 0.5f;
+    [Range(0.0f, 1.0f)]
+    public float CombatStateMoveSpeedPenalty = 0.8f;
 }

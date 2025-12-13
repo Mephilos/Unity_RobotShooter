@@ -8,10 +8,16 @@ public class EnemyTactic : MonoBehaviour
     public enum Covering { Near, FarPlayer, NearPlayer }
     [SerializeField] LayerMask coverLayer;
 
-    public Vector3 FindCover(Transform playerPosition, Covering action, float searchRadius = 20f)
+    public Vector3 FindCover(Transform playerPosition, Covering action, float searchRadius = 20f, float maxRange = -.1f)
     {
         Debug.Log("장애물 찾기");
         Collider[] colliders = Physics.OverlapSphere(transform.position, searchRadius, coverLayer);
+
+        if (maxRange > 0)
+        {
+            colliders = colliders.Where(c => Vector3.Distance(playerPosition.position, c.transform.position) <= maxRange).ToArray();
+        }
+
         if (colliders.Length == 0) return Vector3.zero;
 
         List<Collider> bestCover = null;

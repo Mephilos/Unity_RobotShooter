@@ -23,3 +23,5 @@ MonoBehaviour:
   AccuracyError: 15
   BurstCount: 8
   BurstInterval: 0
+  ShootingMoveSpeedPenalty: 0.2
+  CombatStateMoveSpeedPenalty: 0.8

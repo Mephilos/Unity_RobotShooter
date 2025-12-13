@@ -10,11 +10,16 @@ public class EnemyWeaponController : MonoBehaviour
 
     EnemySight enemySight;
     public float FireRate => weaponSO.FireRate;
+    public float WeaponRange => weaponSO.AttackRange;
+
+    public float ShootingPenalty => weaponSO.ShootingMoveSpeedPenalty;
+    public float CombatStatePenalty => weaponSO.CombatStateMoveSpeedPenalty;
 
     void Awake()
     {
         enemySight = GetComponent<EnemySight>();
     }
+
     public IEnumerator FireBurst(Vector3 playerPosition)
     {
         if (weaponSO.weaponType == EnemyWeaponType.ShotGun)
