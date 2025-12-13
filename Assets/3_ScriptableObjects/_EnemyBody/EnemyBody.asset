@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxHP: 100
   MoveSpeed: 3.5
-  DetectionRadius: 20
+  DetectionRadius: 30
   ViewAngle: 180

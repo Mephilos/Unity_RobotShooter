@@ -19,6 +19,8 @@ public class Crosshair : MonoBehaviour
     }
     void Update()
     {
+        if (activeWeapon == null) return;
+
         float currentSpread = activeWeapon.GetCurrentSpread() * spreadMultiplier;
         spreadMove = Mathf.Lerp(currentSpread, currentSpread, Time.deltaTime * spreadSmooth);
 

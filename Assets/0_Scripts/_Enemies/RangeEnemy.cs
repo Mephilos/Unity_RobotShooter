@@ -113,8 +113,9 @@ public class RangeEnemy : EnemyBrain
                 transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
-            animator.SetTrigger("Shoot");
+            animator.SetTrigger("shoot");
 
+            lastAttacTime = Time.time;
             // yield return StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
 
             firstAttack = false;
@@ -162,6 +163,8 @@ public class RangeEnemy : EnemyBrain
         float actionTimer = 0f;
         while (actionTimer < 2.0f)
         {
+            if (playerTransform == null) yield break;
+
             actionTimer += Time.deltaTime;
 
             if (playerTransform != null && strategy != Strategy.DisAdvFar)

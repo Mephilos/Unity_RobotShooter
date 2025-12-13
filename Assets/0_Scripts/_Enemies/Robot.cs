@@ -30,6 +30,7 @@ public class Robot : Enemy
 
     protected override void Update()
     {
+        if (isDead) return;
         if (playerTransform == null) return;
 
         Move();

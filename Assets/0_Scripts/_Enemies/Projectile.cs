@@ -21,10 +21,10 @@ public class Projectile : MonoBehaviour
 
     void OnEnable()
     {
-        rb.linearVelocity = transform.forward * projectileSpeed;
-
         CancelInvoke(nameof(Release));
-        Invoke(nameof(Release), lifeTime);
+        // rb.linearVelocity = transform.forward * projectileSpeed;
+        // CancelInvoke(nameof(Release));
+        // Invoke(nameof(Release), lifeTime);
     }
 
     public void Initialize(int damage, float speed, float lifeTime)
@@ -32,6 +32,10 @@ public class Projectile : MonoBehaviour
         projectileSpeed = speed;
         this.damage = damage;
         this.lifeTime = lifeTime;
+        rb.linearVelocity = transform.forward * projectileSpeed;
+
+        CancelInvoke(nameof(Release));
+        Invoke(nameof(Release), lifeTime);
     }
 
     // void OnTriggerEnter(Collider other)

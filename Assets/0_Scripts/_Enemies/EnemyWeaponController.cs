@@ -15,18 +15,32 @@ public class EnemyWeaponController : MonoBehaviour
     {
         enemySight = GetComponent<EnemySight>();
     }
-    public IEnumerator FireBurst(Vector3 targetPosition)
+    public IEnumerator FireBurst(Vector3 playerPosition)
     {
-        for (int i = 0; i < weaponSO.BurstCount; i++)
+        if (weaponSO.weaponType == EnemyWeaponType.ShotGun)
         {
             if (ShootLineCheck())
             {
-                FireProjectile(targetPosition);
+                for (int i = 0; i < weaponSO.BurstCount; i++)
+                {
+                    FireProjectile(playerPosition);
+                }
             }
-            // 마지막 발사는 코루틴 작동x;
-            if (i < weaponSO.BurstCount - 1)
+        }
+        else
+        {
+            for (int i = 0; i < weaponSO.BurstCount; i++)
             {
-                yield return new WaitForSeconds(weaponSO.BurstInterval);
+                if (ShootLineCheck())
+                {
+                    FireProjectile(playerPosition);
+                }
+                // 마지막 발사는 코루틴 작동x;
+                if (i < weaponSO.BurstCount - 1)
+                {
+                    yield return new WaitForSeconds(weaponSO.BurstInterval);
+                }
+
             }
         }
     }
