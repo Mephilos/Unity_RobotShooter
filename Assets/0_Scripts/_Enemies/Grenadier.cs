@@ -1,101 +1,25 @@
-using UnityEngine;
 using System.Collections;
-using Unity.Mathematics;
+using Unity.VisualScripting;
+using UnityEngine;
 
-
-public class RangeEnemy : EnemyBrain
+public class Grenadier : RangeEnemy
 {
-    public enum Strategy
-    {
-        Equal,
-        DisAdvFar,
-        DisAdvNear,
-        AdvFar,
-        AdvNear
-    }
+    [SerializeField] GameObject grenadePrefab;
+    [SerializeField] Transform grenadeFirePoint;
+    [SerializeField] float grenadeCooltime = 10f;
+    [SerializeField] float throwAngle = 45f;
+    [SerializeField] float throwRangeMin = 5f;
+    [SerializeField] float throwRangeMax = 20f;
+    [SerializeField] LayerMask findRouteLayer;
 
-    [SerializeField] protected EnemyBodySO enemyBodySO;
-    [SerializeField] protected float combatDistance;
-    [SerializeField] protected ParticleSystem deathParticle;
-
-    protected EnemyWeaponController enemyWeaponController;
-    protected PlayerHealth playerHealth;
-
-    protected float advNearStateStopDist = 3f;
-    protected float lastAttacTime;
-    protected bool firstAttack = false;
-
-
-    protected override void Awake()
-    {
-        base.Awake();
-        enemyWeaponController = GetComponent<EnemyWeaponController>();
-
-        sight.viewDistance = enemyBodySO.DetectionRadius;
-        sight.viewAngle = enemyBodySO.ViewAngle;
-    }
+    Vector3 throwPosition;
+    float nextGrenadeTime;
+    bool isThrowing = false;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        agent.speed = enemyBodySO.MoveSpeed;
-        enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
-        combatDistance = enemyWeaponController.WeaponRange;
-        playerHealth = FindFirstObjectByType<PlayerHealth>();
-        firstAttack = false;
-
-    }
-
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-    }
-
-    protected override void OnFound()
-    {
-        base.OnFound();
-        firstAttack = true;
-    }
-
-    protected virtual Strategy DetermineStrategy()
-    {
-        if (playerHealth == null) return Strategy.Equal;
-
-        int myHP = enemyHealth.CurrentHP;
-        int playerHP = playerHealth.CurrentHP;
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-
-        if (Mathf.Abs(myHP - playerHP) <= 40)
-        {
-            Debug.Log("동등");
-            return Strategy.Equal;
-        }
-        else if (myHP < playerHP)
-        {
-            if (dist > combatDistance)
-            {
-                Debug.Log("약세 멈");
-                return Strategy.DisAdvFar;
-            }
-            else
-            {
-                Debug.Log("약세 가까움");
-                return Strategy.DisAdvNear;
-            }
-        }
-        else
-        {
-            if (dist > combatDistance)
-            {
-                Debug.Log("우세 멈");
-                return Strategy.AdvFar;
-            }
-            else
-            {
-                Debug.Log("우세 가까움");
-                return Strategy.AdvNear;
-            }
-        }
+        nextGrenadeTime = Time.time + grenadeCooltime;
     }
 
     protected override IEnumerator CombatRoutine()
@@ -107,6 +31,7 @@ public class RangeEnemy : EnemyBrain
         agent.speed = enemyBodySO.MoveSpeed * enemyWeaponController.CombatStatePenalty;
         if (agent.updateRotation) agent.updateRotation = false;
 
+        float currentSpeed = agent.speed;
         float actionTimer = 0f;
 
         bool isChasing = false;
@@ -119,7 +44,8 @@ public class RangeEnemy : EnemyBrain
             if (playerTransform != null)
             {
                 Vector3 lookDir = (playerTransform.position - transform.position).normalized;
-                FocusTarget(lookDir);
+                lookDir.y = 0;
+                transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
             animator.SetTrigger("ShootTrigger");
@@ -180,13 +106,18 @@ public class RangeEnemy : EnemyBrain
             agent.SetDestination(coveringPosition);
         }
 
-        float currentSpeed = agent.speed;
-
         while (actionTimer < 2.0f)
         {
             if (playerTransform == null) yield break;
 
             actionTimer += Time.deltaTime;
+
+            if (isThrowing)
+            {
+                agent.isStopped = true;
+                yield return null;
+                continue;
+            }
 
             var stateInfo = animator.GetCurrentAnimatorStateInfo(0);
             bool isShootAnim = stateInfo.IsTag("Shoot");
@@ -208,6 +139,13 @@ public class RangeEnemy : EnemyBrain
 
             float dist = Vector3.Distance(transform.position, playerTransform.position);
             bool inRange = dist <= combatDistance;
+
+
+            if (CanThrowGrenade(dist))
+            {
+                yield return StartCoroutine(ThrowGrenadeRoutine(playerTransform.position));
+                continue;
+            }
 
             if (isChasing)
             {
@@ -241,65 +179,108 @@ public class RangeEnemy : EnemyBrain
         isActing = false;
     }
 
-    void OnDrawGizmos()
+    protected override IEnumerator SearchRoutine()
     {
-        if (playerTransform == null) return;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, enemyBodySO.DetectionRadius);
-        Vector3 eyePos = sight.EyePosition;
-        Vector3 leftView = Quaternion.Euler(0, -enemyBodySO.ViewAngle / 2, 0) * sight.EyeTransform.forward;
-        Vector3 rightView = Quaternion.Euler(0, enemyBodySO.ViewAngle / 2, 0) * sight.EyeTransform.forward;
+        isActing = true;
+        agent.isStopped = false;
 
-        Gizmos.color = Color.blue;
-        Gizmos.DrawRay(eyePos, leftView * enemyBodySO.DetectionRadius);
-        Gizmos.DrawRay(eyePos, rightView * enemyBodySO.DetectionRadius);
+        if (agent.updateRotation) agent.updateRotation = false;
 
-        Vector3 dirToTarget = (playerTransform.position - eyePos).normalized;
+        int wayPointCounter = Random.Range(1, 3);
 
-        bool isHit = Physics.Raycast(eyePos, dirToTarget, out RaycastHit hit, enemyBodySO.DetectionRadius, sight.ViewLayerMask);
-
-        if (isHit && hit.transform.root.CompareTag("Player"))
+        for (int i = 0; i < wayPointCounter; i++)
         {
-            Gizmos.color = Color.green;
+            Vector3 bluffPosition = tactic.GetRandomWayPoint(lastPlayerPosition, 10f);
 
+            yield return StartCoroutine(SearchMove(bluffPosition));
+            if (!isActing) yield break;
         }
-        else
+
+        agent.SetDestination(lastPlayerPosition);
+
+        yield return StartCoroutine(SearchMove(lastPlayerPosition));
+
+        Debug.Log("수색 모드에서 정찰 모드로 전환");
+        currentState = AIState.Patrol;
+        isActing = false;
+    }
+
+    protected override IEnumerator SearchMove(Vector3 targetPosition)
+    {
+        agent.SetDestination(targetPosition);
+
+        while (agent.pathPending || agent.remainingDistance > .5f)
         {
-            Gizmos.color = Color.red;
+            if (sight.CanSeePlayer(playerTransform))
+            {
+                isActing = false;
+                yield break;
+            }
+
+            float dist = Vector3.Distance(transform.position, lastPlayerPosition);
+
+            if (CanThrowGrenade(dist))
+            {
+                yield return StartCoroutine(ThrowGrenadeRoutine(lastPlayerPosition));
+            }
+
+            Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
+            }
+            yield return null;
         }
-        Gizmos.DrawLine(eyePos, playerTransform.position);
     }
-
-    public void OnAnimationShoot()
+    public void OnAnimationThrow()
     {
-        if (isDead || playerTransform == null || !sight.CanSeePlayer(playerTransform)) return;
-        StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
-    }
+        if (!isThrowing || isDead) return;
 
-    protected virtual void FocusTarget(Vector3 target)
+        GameObject grenade = PoolManager.Instance.Get(grenadePrefab, grenadeFirePoint.position, Quaternion.identity);
+        var newGrenade = grenade.GetComponent<Grenade>();
+
+        Vector3 velocity = CalculateVelocity(throwPosition, grenadeFirePoint.position, throwAngle);
+        newGrenade.Throw(velocity);
+    }
+    bool CanThrowGrenade(float dist)
     {
-        Vector3 lookDir = (target - transform.position).normalized;
-        lookDir.y = 0;
-
-        if (lookDir != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(lookDir);
-        }
+        if (Time.time < nextGrenadeTime || isThrowing) return false;
+        if (dist < throwRangeMin || dist > throwRangeMax) return false;
+        if (Physics.Raycast(grenadeFirePoint.position, Vector3.up, 2f, findRouteLayer)) return false;
+        return true;
     }
 
-    protected override void OnDeath()
+    IEnumerator ThrowGrenadeRoutine(Vector3 targetPosition)
     {
-        Instantiate(deathParticle, transform.position, quaternion.identity);
-        Destroy(gameObject);
+        isThrowing = true;
+        agent.isStopped = true;
+        throwPosition = targetPosition;
+
+        FocusTarget(targetPosition);
+        animator.SetTrigger("ThrowGrenade");
+
+        nextGrenadeTime = Time.time + grenadeCooltime;
+
+        yield return new WaitForSeconds(1.0f);
+
+        isThrowing = false;
+        agent.isStopped = false;
     }
 
-    protected override void OnSpeedChange(float speedFactor)
+    Vector3 CalculateVelocity(Vector3 target, Vector3 start, float angle)
     {
-        agent.speed = enemyBodySO.MoveSpeed * speedFactor;
+        Vector3 direction = target - start;
+        float height = direction.y;
+        direction.y = 0;
+        float dist = direction.magnitude;
+        float a = angle * Mathf.Deg2Rad;
+
+        direction.y = dist * Mathf.Tan(a);
+        dist += Mathf.Abs(height / Mathf.Tan(a));
+
+        float vel = Mathf.Sqrt(dist * Physics.gravity.magnitude / Mathf.Sin(2 * a));
+        return vel * direction.normalized;
     }
-    protected override bool IsTargetInRange(float dist) => true;
-    protected override void Move() { }
-    protected override void TryAttack() { }
 }
-
 

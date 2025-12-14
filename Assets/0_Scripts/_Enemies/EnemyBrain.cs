@@ -146,41 +146,40 @@ public abstract class EnemyBrain : Enemy
         {
             Vector3 bluffPosition = tactic.GetRandomWayPoint(lastPlayerPosition, 10f);
 
-            agent.SetDestination(bluffPosition);
-
-            while (agent.pathPending || agent.remainingDistance > .5f)
-            {
-                if (sight.CanSeePlayer(playerTransform))
-                {
-                    isActing = false;
-                    yield break;
-                }
-                Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
-                lookDir.y = 0;
-                if (lookDir != Vector3.zero)
-                {
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
-                }
-                yield return null;
-            }
+            yield return StartCoroutine(SearchMove(bluffPosition));
+            if (!isActing) yield break;
         }
 
         agent.SetDestination(lastPlayerPosition);
 
-        while (agent.pathPending || agent.remainingDistance > 0.5f)
+        yield return StartCoroutine(SearchMove(lastPlayerPosition));
+
+        Debug.Log("수색 모드에서 정찰 모드로 전환");
+        currentState = AIState.Patrol;
+        isActing = false;
+    }
+
+    protected virtual IEnumerator SearchMove(Vector3 targetPosition)
+    {
+        agent.SetDestination(targetPosition);
+
+        while (agent.pathPending || agent.remainingDistance > .5f)
         {
             if (sight.CanSeePlayer(playerTransform))
             {
                 isActing = false;
                 yield break;
             }
+            Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
+            }
             yield return null;
         }
-
-        Debug.Log("수색 모드에서 정찰 모드로 전환");
-        currentState = AIState.Patrol;
-        isActing = false;
     }
+
     protected void SwitchingCombatMode()
     {
         currentState = AIState.Combat;

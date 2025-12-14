@@ -13,4 +13,9 @@ public class EnemyAnimationEventsReceiver : MonoBehaviour
     {
         rangeEnemy.OnAnimationShoot();
     }
+    public void OnThrowEvent()
+    {
+        if (rangeEnemy is Grenadier grenadier)
+            grenadier.OnAnimationThrow();
+    }
 }
