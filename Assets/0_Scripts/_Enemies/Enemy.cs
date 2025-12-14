@@ -1,5 +1,4 @@
 using UnityEngine;
-using StarterAssets;
 using MoreMountains.Feedbacks;
 using System.Collections;
 using UnityEngine.AI;
@@ -14,6 +13,7 @@ public abstract class Enemy : MonoBehaviour
     protected Animator animator;
     protected EnemyHealth enemyHealth;
     protected Transform playerTransform;
+    protected PlayerHealth playerHealth;
     protected Coroutine slowRoutine;
     protected bool isDead;
 
@@ -25,15 +25,50 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        var player = FindFirstObjectByType<FirstPersonController>();
-        playerTransform = player.transform.Find(Constants.PLAYER_TARGET);
-
         isDead = false;
+        if (TryGetComponent<NavMeshAgent>(out var agent))
+        {
+            agent.enabled = true;
+            agent.Warp(transform.position);
+
+            if (agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
+        }
+
+        var colliders = GetComponentsInChildren<Collider>();
+
+        foreach (var c in colliders)
+        {
+            c.enabled = true;
+        }
+
+        if (GameManager.instance.Player == null)
+        {
+            playerHealth = null;
+            playerTransform = null;
+            StartCoroutine(WaitForPlayer());
+        }
+        else
+        {
+            playerHealth = GameManager.instance.Player;
+            playerTransform = playerHealth.transform;
+        }
 
         enemyHealth.OnHit += OnDamage;
         enemyHealth.OnDeath += HandleDeath;
     }
+    IEnumerator WaitForPlayer()
+    {
+        while (GameManager.instance.Player == null)
+        {
+            yield return null;
+        }
 
+        playerHealth = GameManager.instance.Player;
+        playerTransform = playerHealth.transform;
+    }
     protected virtual void OnDisable()
     {
         enemyHealth.OnHit -= OnDamage;

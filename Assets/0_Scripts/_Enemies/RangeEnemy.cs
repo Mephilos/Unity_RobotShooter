@@ -19,8 +19,6 @@ public class RangeEnemy : EnemyBrain
     [SerializeField] protected ParticleSystem deathParticle;
 
     protected EnemyWeaponController enemyWeaponController;
-    protected PlayerHealth playerHealth;
-
     protected float advNearStateStopDist = 3f;
     protected float lastAttacTime;
     protected bool firstAttack = false;
@@ -41,7 +39,7 @@ public class RangeEnemy : EnemyBrain
         agent.speed = enemyBodySO.MoveSpeed;
         enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
         combatDistance = enemyWeaponController.WeaponRange;
-        playerHealth = FindFirstObjectByType<PlayerHealth>();
+        playerHealth = GameManager.instance.Player;
         firstAttack = false;
 
     }

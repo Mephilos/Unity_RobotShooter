@@ -8,7 +8,7 @@ public class SpawnGate : MonoBehaviour
     [SerializeField] GameObject deathParticle;
     [SerializeField] Transform spawnPoint;
     [SerializeField] float enemySpawnTime = 5f;
-    PlayerHealth player;
+
     EnemyHealth enemyHealth;
     WaitForSeconds wait;
     // Coroutine currentRoutine;
@@ -27,7 +27,6 @@ public class SpawnGate : MonoBehaviour
 
     void Start()
     {
-        player = FindFirstObjectByType<PlayerHealth>();
         StartCoroutine(EnemySpawnRoutine());
     }
 
@@ -38,16 +37,18 @@ public class SpawnGate : MonoBehaviour
 
     IEnumerator EnemySpawnRoutine()
     {
+        while (GameManager.instance.Player == null)
+        {
+            yield return null;
+        }
+
         while (true)
         {
-            if (!player)
+            if (GameManager.instance.Player != null)
             {
-                yield break;
+                //Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
+                PoolManager.Instance.Get(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
             }
-
-            //Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
-            PoolManager.Instance.Get(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
-
             yield return wait;
         }
     }

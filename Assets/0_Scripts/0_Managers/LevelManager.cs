@@ -35,7 +35,7 @@ public class LevelManager : MonoBehaviour
 
     void InitStageClearData()
     {
-        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex - Constants.SCENE_MAIN_MENU;
 
         StageClearTimeData data = CSVManager.Instance.GetStageClearTimeData(currentLevelIndex);
 

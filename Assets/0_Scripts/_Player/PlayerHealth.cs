@@ -23,8 +23,13 @@ public class PlayerHealth : MonoBehaviour
 
     void Awake()
     {
+    }
+
+    void Start()
+    {
         currentHitPoint = startingHealth;
         AdJustShieldUI();
+        GameManager.instance.FindPlayer(this);
     }
 
     void Update()

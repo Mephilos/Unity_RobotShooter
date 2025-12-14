@@ -20,12 +20,7 @@ public class Robot : Enemy
     protected override void OnEnable()
     {
         base.OnEnable();
-        if (agent.isOnNavMesh)
-        {
-            agent.ResetPath();
-        }
         agent.speed = backupSpeed;
-        agent.Warp(transform.position);
     }
 
     protected override void Update()
@@ -54,6 +49,7 @@ public class Robot : Enemy
 
     void OnTriggerEnter(Collider other)
     {
+        if (isDead) return;
         if (!other.CompareTag(Constants.PLAYER_TAG)) return;
         enemyHealth.TakeDamageProcess(Constants.ROBOT_SELF_DESTRUCT, false, false);
     }

@@ -18,8 +18,8 @@ public class CSVManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
             LoadCSVData();
+            DontDestroyOnLoad(gameObject);
         }
         else
         {

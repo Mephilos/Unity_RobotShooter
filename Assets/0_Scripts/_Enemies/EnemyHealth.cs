@@ -24,10 +24,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     void OnEnable()
     {
-        levelManager = FindFirstObjectByType<LevelManager>();
         currentHitPoint = hitPoint;
         isDead = false;
 
+        levelManager = LevelManager.Instance;
         levelManager.AdjustEnemiesLeft(1);
     }
 

@@ -7,8 +7,9 @@ public class Constants
     public const string ACC_STRING = "Acc: ";
     public const string PLAYER_TARGET = "PlayerCameraRoot";
     public const string UNKNOWN_PLAYER = "Unknow Player";
-    public const int SCENE_MAIN_MENU = 0;
+    public const int BOOT_SCENE = 0;
+    public const int SCENE_MAIN_MENU = 1;
     public const int ROBOT_SELF_DESTRUCT = 1000;
-    public const int TOTAL_STAGE_COUNT = 2;
+    public const int TOTAL_STAGE_COUNT = 3;
     public const float MOUSE_SENS_MULTIPLIER = 2.0f;
 }

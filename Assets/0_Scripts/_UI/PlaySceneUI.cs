@@ -59,7 +59,7 @@ public class PlaySceneUI : MonoBehaviour
         finalTimeText.text = $"TIME: {timeStr}";
         finalAccText.text = $"ACCURACY: {stageAcc:F1}%";
 
-        int currentStageIndex = SceneManager.GetActiveScene().buildIndex;
+        int currentStageIndex = SceneManager.GetActiveScene().buildIndex - Constants.SCENE_MAIN_MENU;
 
         if (leaderboardHandler != null)
         {

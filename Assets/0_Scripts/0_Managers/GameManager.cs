@@ -6,22 +6,31 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;
     public bool IsPause { get; private set; } = false;
-
+    public PlayerHealth Player { get; private set; }
     public event Action<bool> OnPauseToggle;
+
     void Awake()
     {
         if (instance == null)
         {
             instance = this;
-
-            transform.SetParent(null);
-
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        Player = null;
+        InitPause();
     }
 
     public void PauseToggle()
@@ -36,14 +45,12 @@ public class GameManager : MonoBehaviour
 
     public void RestartButton()
     {
-        InitPause();
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentScene);
     }
+
     public void NextScene()
     {
-        InitPause();
-
         int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
 
         if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
@@ -59,7 +66,6 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        InitPause();
         SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
 
         CursorManager.Instance.SetCursor(false);
@@ -73,5 +79,9 @@ public class GameManager : MonoBehaviour
     {
         IsPause = false;
         Time.timeScale = 1f;
+    }
+    public void FindPlayer(PlayerHealth playerHealth)
+    {
+        Player = playerHealth;
     }
 }
