@@ -18,7 +18,7 @@ public class PlayMenuHandler : MenuHandler
     {
         base.Start();
         playerInputs = FindFirstObjectByType<StarterAssetsInputs>();
-        GameManager.instance.OnPauseToggle += PausePanelPopup;
+        GameManager.Instance.OnPauseToggle += PausePanelPopup;
     }
 
     void OnDisable()
@@ -34,12 +34,12 @@ public class PlayMenuHandler : MenuHandler
 
     void OnDestroy()
     {
-        GameManager.instance.OnPauseToggle -= PausePanelPopup;
+        GameManager.Instance.OnPauseToggle -= PausePanelPopup;
     }
 
     void OnPauseInput(InputAction.CallbackContext callback)
     {
-        GameManager.instance?.PauseToggle();
+        GameManager.Instance?.PauseToggle();
         optionPanel.SetActive(false);
 
     }

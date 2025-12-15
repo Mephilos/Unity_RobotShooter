@@ -39,7 +39,7 @@ public class RangeEnemy : EnemyBrain
         agent.speed = enemyBodySO.MoveSpeed;
         enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
         combatDistance = enemyWeaponController.WeaponRange;
-        playerHealth = GameManager.instance.Player;
+        playerHealth = GameManager.Instance.Player;
         firstAttack = false;
 
     }

@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
-
+    public bool IsStageActive { get; set; } = false;
     public event Action<int> OnEnemyCountChanged;
     public event Action<int, float, float, int, bool> OnStageClearData;
 
@@ -13,6 +13,8 @@ public class LevelManager : MonoBehaviour
     float startTime;
     float limitTime;
     int scoreTime;
+
+
 
     void Awake()
     {
@@ -50,6 +52,9 @@ public class LevelManager : MonoBehaviour
         startTime = Time.time;
         ScoreManager.Instance.RestoreScore();
         InitStageClearData();
+
+        OnEnemyCountChanged?.Invoke(enemiesLeft);
+        IsStageActive = true;
     }
 
     void InitStageClearData()
@@ -67,9 +72,10 @@ public class LevelManager : MonoBehaviour
         enemiesLeft += amount;
 
         OnEnemyCountChanged?.Invoke(enemiesLeft);
-        if (enemiesLeft <= 0)
+        if (enemiesLeft <= 0 && IsStageActive)
         {
             Debug.Log("승리 호출");
+            IsStageActive = false;
             ProcessStageClearScore();
         }
     }

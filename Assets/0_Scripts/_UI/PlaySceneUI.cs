@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class PlaySceneUI : MonoBehaviour
 {
-    [SerializeField] ActiveWeapon activeWeapon;
     [SerializeField] TMP_Text ammoText;
     [SerializeField] TMP_Text enemiesLeftText;
     [SerializeField] TMP_Text scoreText;
@@ -17,13 +16,15 @@ public class PlaySceneUI : MonoBehaviour
     [SerializeField] TMP_Text finalAccText;
     [SerializeField] LeaderboardHandler leaderboardHandler;
     StarterAssetsInputs starterAssetsInputs;
+    ActiveWeapon activeWeapon;
 
     void Start()
     {
         starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
 
-        activeWeapon.OnAmmoChange += UpdateAmmoUI;
-        UpdateAmmoUI(activeWeapon.GetAmmo().currentAmmo, activeWeapon.GetAmmo().maxAmmo);
+        // activeWeapon = starterAssetsInputs.GetComponentInChildren<ActiveWeapon>();
+        // activeWeapon.OnAmmoChange += UpdateAmmoUI;
+        // UpdateAmmoUI(activeWeapon.GetAmmo().currentAmmo, activeWeapon.GetAmmo().maxAmmo);
         LevelManager.Instance.OnEnemyCountChanged += UpdateEnemyLeft;
         LevelManager.Instance.OnStageClearData += ShowWinUI;
         UpdateEnemyLeft(LevelManager.Instance.GetEnemiesCount());
@@ -32,6 +33,24 @@ public class PlaySceneUI : MonoBehaviour
         ScoreManager.Instance.OnAccChanged += UpdateAccUI;
         UpdateScoreUI(ScoreManager.Instance.GetCurrentScore());
         UpdateAccUI(ScoreManager.Instance.GetAccuracy());
+
+    }
+    public void BindWeapon(ActiveWeapon newWeapon)
+    {
+        // 기존 연결 끊기 (리스폰 시 중복 방지)
+        if (activeWeapon != null)
+        {
+            activeWeapon.OnAmmoChange -= UpdateAmmoUI;
+        }
+
+        // 새 무기 연결
+        activeWeapon = newWeapon;
+        if (activeWeapon != null)
+        {
+            activeWeapon.OnAmmoChange += UpdateAmmoUI;
+            var (curr, max) = activeWeapon.GetAmmo();
+            UpdateAmmoUI(curr, max);
+        }
     }
     void OnDestroy()
     {

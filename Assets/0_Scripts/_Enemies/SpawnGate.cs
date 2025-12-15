@@ -37,14 +37,14 @@ public class SpawnGate : MonoBehaviour
 
     IEnumerator EnemySpawnRoutine()
     {
-        while (GameManager.instance.Player == null)
+        while (GameManager.Instance.Player == null)
         {
             yield return null;
         }
 
         while (true)
         {
-            if (GameManager.instance.Player != null)
+            if (GameManager.Instance.Player != null)
             {
                 //Instantiate(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);
                 PoolManager.Instance.Get(enemyPrefabs, spawnPoint.position, spawnPoint.rotation);

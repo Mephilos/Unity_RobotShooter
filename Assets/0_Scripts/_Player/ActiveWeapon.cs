@@ -187,4 +187,10 @@ public class ActiveWeapon : MonoBehaviour
             firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
         }
     }
+
+    public void SetupReferences(CinemachineCamera playerCam, GameObject zoomUI)
+    {
+        cinemachineVirtualCamera = playerCam;
+        Zoom = zoomUI;
+    }
 }

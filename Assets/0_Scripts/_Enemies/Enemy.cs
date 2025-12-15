@@ -44,16 +44,14 @@ public abstract class Enemy : MonoBehaviour
             c.enabled = true;
         }
 
-        if (GameManager.instance.Player == null)
+        if (GameManager.Instance.Player == null)
         {
-            playerHealth = null;
-            playerTransform = null;
             StartCoroutine(WaitForPlayer());
         }
         else
         {
-            playerHealth = GameManager.instance.Player;
-            playerTransform = playerHealth.transform;
+            playerHealth = GameManager.Instance.Player;
+            playerTransform = playerHealth.CameraRoot;
         }
 
         enemyHealth.OnHit += OnDamage;
@@ -61,13 +59,13 @@ public abstract class Enemy : MonoBehaviour
     }
     IEnumerator WaitForPlayer()
     {
-        while (GameManager.instance.Player == null)
+        while (GameManager.Instance.Player == null)
         {
             yield return null;
         }
 
-        playerHealth = GameManager.instance.Player;
-        playerTransform = playerHealth.transform;
+        playerHealth = GameManager.Instance.Player;
+        playerTransform = playerHealth.CameraRoot;
     }
     protected virtual void OnDisable()
     {

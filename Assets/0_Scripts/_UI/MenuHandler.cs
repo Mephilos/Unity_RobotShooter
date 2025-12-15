@@ -33,7 +33,7 @@ public class MenuHandler : MonoBehaviour
 
     protected virtual void Start()
     {
-        if (GameManager.instance == null)
+        if (GameManager.Instance == null)
         {
             Debug.LogWarning($"{gameObject}: GameManager 없음");
         }
@@ -49,16 +49,16 @@ public class MenuHandler : MonoBehaviour
         switch (mapping.type)
         {
             case ButtonType.NextStage:
-                GameManager.instance.NextScene();
+                GameManager.Instance.NextScene();
                 break;
             case ButtonType.Restart:
-                GameManager.instance.RestartButton();
+                GameManager.Instance.RestartButton();
                 break;
             case ButtonType.ReturnToMainMenu:
-                GameManager.instance.ReturnToMainMenu();
+                GameManager.Instance.ReturnToMainMenu();
                 break;
             case ButtonType.Quit:
-                GameManager.instance.QuitGame();
+                GameManager.Instance.QuitGame();
                 break;
 
             case ButtonType.PanelOpen:

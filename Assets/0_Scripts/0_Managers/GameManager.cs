@@ -4,16 +4,16 @@ using System;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance = null;
+    public static GameManager Instance = null;
     public bool IsPause { get; private set; } = false;
     public PlayerHealth Player { get; private set; }
     public event Action<bool> OnPauseToggle;
 
     void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
@@ -45,12 +45,14 @@ public class GameManager : MonoBehaviour
 
     public void RestartButton()
     {
+        LevelManager.Instance.IsStageActive = false;
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentScene);
     }
 
     public void NextScene()
     {
+        LevelManager.Instance.IsStageActive = false;
         int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
 
         if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
@@ -66,6 +68,7 @@ public class GameManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
+        LevelManager.Instance.IsStageActive = false;
         SceneManager.LoadScene(Constants.SCENE_MAIN_MENU);
 
         CursorManager.Instance.SetCursor(false);
