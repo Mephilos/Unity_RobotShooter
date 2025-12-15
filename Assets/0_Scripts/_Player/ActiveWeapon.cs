@@ -94,6 +94,7 @@ public class ActiveWeapon : MonoBehaviour
 
     void HandleShoot()
     {
+        if (GameManager.Instance.IsPause) return;
         if (!starterAssetsInputs.shoot || isFire || currentAmmo <= 0) return;
 
         isFire = true;
@@ -129,6 +130,7 @@ public class ActiveWeapon : MonoBehaviour
 
     void HandleZoom()
     {
+        if (GameManager.Instance.IsPause) return;
         if (!weaponSO.CanZoom) return;
 
         if (starterAssetsInputs.zoom != isZoom)

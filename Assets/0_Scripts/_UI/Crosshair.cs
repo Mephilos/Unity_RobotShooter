@@ -10,12 +10,13 @@ public class Crosshair : MonoBehaviour
     [SerializeField] float spreadMultiplier = 500f;
     [SerializeField] float spreadSmooth = 15f;
     [SerializeField] float aimNarrow = 5f;
-    [SerializeField] ActiveWeapon activeWeapon;
+    ActiveWeapon activeWeapon;
 
     float spreadMove = 0;
-    void Awake()
+
+    public void Initialize(ActiveWeapon activeWeapon)
     {
-        activeWeapon = FindFirstObjectByType<ActiveWeapon>();
+        this.activeWeapon = activeWeapon;
     }
     void Update()
     {

@@ -49,6 +49,8 @@ public class PlaySceneUI : MonoBehaviour
             activeWeapon.OnAmmoChange += UpdateAmmoUI;
             var (curr, max) = activeWeapon.GetAmmo();
             UpdateAmmoUI(curr, max);
+            if (starterAssetsInputs == null)
+                starterAssetsInputs = activeWeapon.GetComponentInParent<StarterAssetsInputs>();
         }
     }
     void OnDestroy()
@@ -83,6 +85,7 @@ public class PlaySceneUI : MonoBehaviour
         {
             leaderboardHandler.LoadStageLeaderboard(currentStageIndex);
         }
+        CursorManager.Instance.SetCursor(false);
     }
 
     void DisplayComparisonScore(TMP_Text textUI, string label, float current, float best, bool isNewScore, string suffix = "", float invalidValue = 0f)
@@ -129,11 +132,5 @@ public class PlaySceneUI : MonoBehaviour
     void UpdateAccUI(float acc)
     {
         accText.text = Constants.ACC_STRING + $"{acc:F1}%";
-    }
-
-    void UnlockCursor()
-    {
-        starterAssetsInputs.SetInputBlocked(true);
-        CursorManager.Instance.SetCursor(false);
     }
 }

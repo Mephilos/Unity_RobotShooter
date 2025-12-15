@@ -47,10 +47,5 @@ public class PlayMenuHandler : MenuHandler
     void PausePanelPopup(bool isPause)
     {
         pausePanel.SetActive(isPause);
-
-        if (playerInputs != null)
-        {
-            playerInputs.SetInputBlocked(isPause);
-        }
     }
 }

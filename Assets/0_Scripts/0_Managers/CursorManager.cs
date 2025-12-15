@@ -28,6 +28,17 @@ public class CursorManager : MonoBehaviour
         {
             inputs.SetCursorState(isGameMode);
             inputs.cursorInputForLook = isGameMode;
+
+            if (!isGameMode)
+            {
+                inputs.look = Vector2.zero;
+                inputs.move = Vector2.zero;
+                inputs.SetInputBlocked(true);
+            }
+            else
+            {
+                inputs.SetInputBlocked(false);
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] Image[] shieldBar;
     [SerializeField] GameObject gameOverUI;
     [SerializeField] GameObject zoomUI;
+    [SerializeField] Crosshair crosshair;
 
     public event Action OnPlayerDeath;
 
@@ -69,6 +70,8 @@ public class PlayerSpawner : MonoBehaviour
         playerFollowCamera.LookAt = cameraRoot;
 
         CursorManager.Instance.SetCursor(true);
+
+        crosshair.Initialize(activeWeapon);
         playerHealth.Initialize();
     }
 
