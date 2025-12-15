@@ -8,7 +8,7 @@ using UnityEngine.Rendering.Universal;
 public class PlayerSpawner : MonoBehaviour
 {
     [SerializeField] bool isDeathMatchMode = false;
-
+    [SerializeField] bool autoSpawn = true;
     [SerializeField] GameObject playerPrefab;
     [SerializeField] Transform[] spawnPoints;
     [SerializeField] float respawnDelay = 4f;
@@ -25,7 +25,8 @@ public class PlayerSpawner : MonoBehaviour
 
     void Start()
     {
-        SpawnPlayer();
+        if (autoSpawn && !isDeathMatchMode)
+            SpawnPlayer();
     }
 
     public void SpawnPlayer()
