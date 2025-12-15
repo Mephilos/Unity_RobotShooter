@@ -46,14 +46,14 @@ public class EnemySpawner : MonoBehaviour
     void TrySpawnEnemy()
     {
         if (GameManager.Instance.Player == null) return;
-        Transform playerTF = GameManager.Instance.Player.transform;
+        Transform playerTransform = GameManager.Instance.Player.transform;
 
-        Vector3 spawnPos;
+        Vector3 enemySpawnPosition;
 
-        if (GetValidSpawnPosition(playerTF, out spawnPos))
+        if (GetValidSpawnPosition(playerTransform, out enemySpawnPosition))
         {
             GameObject prefab = enemyPrefabs[UnityEngine.Random.Range(0, enemyPrefabs.Length)];
-            GameObject enemy = PoolManager.Instance.Get(prefab, spawnPos, Quaternion.identity);
+            GameObject enemy = PoolManager.Instance.Get(prefab, enemySpawnPosition, Quaternion.identity);
 
             EnemyHealth health = enemy.GetComponent<EnemyHealth>();
             Action deathHandler = null;
@@ -73,12 +73,14 @@ public class EnemySpawner : MonoBehaviour
     {
         for (int i = 0; i < 15; i++)
         {
+            // 네임스페이스 모호함으로 인한 random 함수 네임스페이스 명시 후... 코드가 뭔가 샤프하지 못하다 짜증...
             Vector2 randomCircle = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(minSpawnDist, maxSpawnDist);
-            Vector3 targetPos = center.position + new Vector3(randomCircle.x, 0, randomCircle.y);
 
-            if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+            Vector3 targetPosition = center.position + new Vector3(randomCircle.x, 0, randomCircle.y);
+
+            if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
             {
-                if (!IsVisibleFromCamera(hit.position))
+                if (!IsVisibleCamera(hit.position))
                 {
                     result = hit.position;
                     return true;
@@ -89,7 +91,7 @@ public class EnemySpawner : MonoBehaviour
         return false;
     }
 
-    bool IsVisibleFromCamera(Vector3 pos)
+    bool IsVisibleCamera(Vector3 pos)
     {
         if (Camera.main == null) return false;
         Vector3 cameraVision = Camera.main.WorldToViewportPoint(pos);

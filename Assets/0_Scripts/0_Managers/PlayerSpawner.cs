@@ -13,7 +13,7 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] Transform[] spawnPoints;
     [SerializeField] float respawnDelay = 4f;
 
-    [SerializeField] CinemachineCamera playerFollowCam;
+    [SerializeField] CinemachineCamera playerFollowCamera;
     [SerializeField] CinemachineCamera deathCam;
     [SerializeField] Image damageOverlay;
     [SerializeField] Image[] shieldBars;
@@ -51,8 +51,9 @@ public class PlayerSpawner : MonoBehaviour
         {
             var cameraData = cameraComponent.GetUniversalAdditionalCameraData();
 
-            if (cameraData.renderType == CameraRenderType.Overlay || cameraComponent.name.Contains("Weapon"))
+            if (cameraData.renderType == CameraRenderType.Overlay || cameraComponent.name.Contains("WeaponCamera"))
             {
+                Debug.Log("이건???");
                 weaponCamera = cameraComponent;
                 break;
             }
@@ -70,8 +71,7 @@ public class PlayerSpawner : MonoBehaviour
         var activeWeapon = playerObject.GetComponentInChildren<ActiveWeapon>();
         PlaySceneUI playSceneUI = FindFirstObjectByType<PlaySceneUI>();
 
-        if (playSceneUI != null && activeWeapon != null)
-            playSceneUI.BindWeapon(activeWeapon);
+        playSceneUI.BindWeapon(activeWeapon);
 
         if (playerObject.TryGetComponent<PlayerHealth>(out var playerHealth))
         {
@@ -79,24 +79,17 @@ public class PlayerSpawner : MonoBehaviour
 
             if (isDeathMatchMode)
             {
+                // 핼스 에서 죽음 이밴트 날아가면 죽었다고 이벤트 날리기 누구한테 DeathMatchMode 한테.
                 playerHealth.OnPlayerDeath += () => OnPlayerDeath?.Invoke();
             }
-
             GameManager.Instance.FindPlayer(playerHealth);
         }
 
-        if (activeWeapon != null)
-            activeWeapon.SetupReferences(playerFollowCam, zoomUI);
+        activeWeapon.SetupReferences(playerFollowCamera, zoomUI);
 
-        if (playerFollowCam != null)
-        {
-            Transform cameraRoot = playerObject.transform.Find("PlayerCameraRoot");
-            if (cameraRoot == null)
-                cameraRoot = playerObject.transform;
-
-            playerFollowCam.Follow = cameraRoot;
-            playerFollowCam.LookAt = cameraRoot;
-        }
+        Transform cameraRoot = playerObject.transform.Find("PlayerCameraRoot");
+        playerFollowCamera.Follow = cameraRoot;
+        playerFollowCamera.LookAt = cameraRoot;
 
         CursorManager.Instance.SetCursor(true);
     }

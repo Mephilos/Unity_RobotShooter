@@ -118,32 +118,6 @@ public class PlaySceneUI : MonoBehaviour
         textUI.text = $"{label}: {current:0.##}{suffix} <color={resultColor}>{comparisonString}</color>";
     }
 
-    // void DisplayComparisonTime(TMP_Text textUI, float currentTime, float bestTime)
-    // {
-    //     string timeStr = string.Format("{0:00}:{1:00}", (int)currentTime / 60, (int)currentTime % 60);
-
-    //     float timeDiff = currentTime - bestTime;
-    //     string comparisonString = "";
-    //     string resultColor = "white";
-
-    //     if (bestTime > 9000)
-    //     {
-    //         comparisonString = "(New)";
-    //         resultColor = "yellow";
-    //     }
-    //     else if (timeDiff < 0)
-    //     {
-    //         comparisonString = $"(-{Mathf.Abs(timeDiff):0}s)";
-    //         resultColor = "#00FF00";
-    //     }
-    //     else
-    //     {
-    //         comparisonString = $"(+{timeDiff:0}s)";
-    //         resultColor = "#FF0000";
-    //     }
-    //     textUI.text = $"TIME: {timeStr} <color=\"{resultColor}\">{comparisonString}</color>";
-    // }
-
     void UpdateEnemyLeft(int count)
     {
         enemiesLeftText.text = Constants.ENEMIES_LEFT_STRING + count.ToString("D2");
