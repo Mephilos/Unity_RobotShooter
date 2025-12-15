@@ -42,7 +42,6 @@ public class PlaySceneUI : MonoBehaviour
         {
             activeWeapon.OnAmmoChange -= UpdateAmmoUI;
         }
-
         // 새 무기 연결
         activeWeapon = newWeapon;
         if (activeWeapon != null)
@@ -84,7 +83,6 @@ public class PlaySceneUI : MonoBehaviour
         {
             leaderboardHandler.LoadStageLeaderboard(currentStageIndex);
         }
-        UnlockCursor();
     }
 
     void DisplayComparisonScore(TMP_Text textUI, string label, float current, float best, bool isNewScore, string suffix = "", float invalidValue = 0f)

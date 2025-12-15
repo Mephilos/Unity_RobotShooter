@@ -9,28 +9,29 @@ public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] Transform playerCameraRoot;
     [SerializeField] ActiveWeapon activeWeapon;
-
-    [SerializeField] CinemachineCamera deathVirtualCam;
-    [SerializeField] Transform weaponCamera;
-    [SerializeField] Image damageOverlay;
-    [SerializeField] float damageFlashSpeed = 2f;
-    [SerializeField] Image[] shieldBars;
     [Range(1, 10)]
     [SerializeField] int startingHealth = 10;
-    [SerializeField] GameObject gameOverContainer;
     [SerializeField] bool invincibleMode = false;
     int currentHitPoint;
-    int gameOverVirtualCameraPrioity = 20;
+    public event Action OnPlayerDeath;
+    public event Action OnPlayerHit;
+    public event Action<int, int> OnHealthChanged;
+
     public int CurrentHP => currentHitPoint;
     public int MaxHP => startingHealth;
     public Transform CameraRoot => playerCameraRoot;
     public ActiveWeapon Weapon => activeWeapon;
-    public event Action OnPlayerDeath;
 
-    void Start()
+    void Awake()
+    {
+        playerCameraRoot = transform.Find("PlayerCameraRoot");
+        activeWeapon = GetComponentInChildren<ActiveWeapon>();
+    }
+
+    public void Initialize()
     {
         currentHitPoint = startingHealth;
-        AdJustShieldUI();
+        OnHealthChanged?.Invoke(startingHealth, startingHealth);
         GameManager.Instance.FindPlayer(this);
     }
 
@@ -41,64 +42,23 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        currentHitPoint -= amount;
-        AdJustShieldUI();
+        // if (invincibleMode) return;
 
-        StartCoroutine(DamageFlashRoutine());
+        currentHitPoint -= amount;
+
+        OnHealthChanged?.Invoke(currentHitPoint, startingHealth);
+        OnPlayerHit?.Invoke();
+
         if (currentHitPoint <= 0)
         {
-            PlayerGameOver();
+            Die();
         }
     }
-
-    IEnumerator DamageFlashRoutine()
+    void Die()
     {
-        Color color = damageOverlay.color;
-        color.a = 0.8f;
-        damageOverlay.color = color;
+        OnPlayerDeath?.Invoke();
 
-        while (damageOverlay.color.a > 0)
-        {
-            color.a -= Time.deltaTime * damageFlashSpeed;
-            damageOverlay.color = color;
-            yield return null;
-        }
-    }
-
-    void PlayerGameOver()
-    {
-        if (OnPlayerDeath != null)
-        {
-            OnPlayerDeath.Invoke();
-            Destroy(this.gameObject);
-            return;
-        }
-
-        weaponCamera.parent = null;
-        deathVirtualCam.Priority = gameOverVirtualCameraPrioity;
-        gameOverContainer.SetActive(true);
-        StarterAssetsInputs starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
-        starterAssetsInputs.SetInputBlocked(true);
-        CursorManager.Instance.SetCursor(false);
-        Destroy(this.gameObject);
-    }
-
-    void AdJustShieldUI()
-    {
-        for (int i = 0; i < shieldBars.Length; i++)
-        {
-            shieldBars[i].enabled = (i < currentHitPoint);
-        }
-    }
-
-    public void SetupReferences(CinemachineCamera deathCam, Image overlay, Image[] shields, GameObject gameOverUI)
-    {
-        deathVirtualCam = deathCam;
-        damageOverlay = overlay;
-        shieldBars = shields;
-        gameOverContainer = gameOverUI;
-
-        AdJustShieldUI();
+        Destroy(gameObject);
     }
 
     void Invincible(bool invincibleMode)

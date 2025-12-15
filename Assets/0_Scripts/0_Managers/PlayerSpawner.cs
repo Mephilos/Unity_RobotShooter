@@ -16,7 +16,7 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] CinemachineCamera playerFollowCamera;
     [SerializeField] CinemachineCamera deathCam;
     [SerializeField] Image damageOverlay;
-    [SerializeField] Image[] shieldBars;
+    [SerializeField] Image[] shieldBar;
     [SerializeField] GameObject gameOverUI;
     [SerializeField] GameObject zoomUI;
 
@@ -29,12 +29,10 @@ public class PlayerSpawner : MonoBehaviour
 
     public void SpawnPlayer()
     {
-
         Vector3 spawnPosition = Vector3.zero;
         Quaternion spawnRotation = Quaternion.identity;
 
         int spawnIndex = isDeathMatchMode ? UnityEngine.Random.Range(0, spawnPoints.Length) : 0;
-
         spawnPosition = spawnPoints[spawnIndex].position;
         spawnRotation = spawnPoints[spawnIndex].rotation;
 
@@ -44,46 +42,25 @@ public class PlayerSpawner : MonoBehaviour
 
     void InjectDependencies(GameObject playerObject)
     {
-        Camera[] allCameras = playerObject.GetComponentsInChildren<Camera>(true);
-        Camera weaponCamera = null;
+        Camera weaponCamera = playerObject.GetComponentInChildren<Camera>();
 
-        foreach (var cameraComponent in allCameras)
+        var mainCameraData = Camera.main.GetUniversalAdditionalCameraData();
+        mainCameraData.cameraStack.Add(weaponCamera);
+
+        PlayerHealth playerHealth = playerObject.GetComponent<PlayerHealth>();
+        PlayerOverlayHandler playerOverlay = playerObject.GetComponent<PlayerOverlayHandler>();
+        ActiveWeapon activeWeapon = playerObject.GetComponentInChildren<ActiveWeapon>();
+        playerOverlay.SetupOverlay(deathCam, weaponCamera, damageOverlay, shieldBar, gameOverUI, isDeathMatchMode);
+
+        if (isDeathMatchMode)
         {
-            var cameraData = cameraComponent.GetUniversalAdditionalCameraData();
-
-            if (cameraData.renderType == CameraRenderType.Overlay || cameraComponent.name.Contains("WeaponCamera"))
-            {
-                Debug.Log("이건???");
-                weaponCamera = cameraComponent;
-                break;
-            }
+            // 핼스 에서 죽음 이밴트 날아가면 죽었다고 이벤트 날리기 누구한테 DeathMatchMode 한테.
+            playerHealth.OnPlayerDeath += () => OnPlayerDeath?.Invoke();
         }
+        GameManager.Instance.FindPlayer(playerHealth);
 
-        if (weaponCamera != null)
-        {
-            var mainCameraData = Camera.main.GetUniversalAdditionalCameraData();
-            if (!mainCameraData.cameraStack.Contains(weaponCamera))
-            {
-                mainCameraData.cameraStack.Add(weaponCamera);
-            }
-        }
-
-        var activeWeapon = playerObject.GetComponentInChildren<ActiveWeapon>();
         PlaySceneUI playSceneUI = FindFirstObjectByType<PlaySceneUI>();
-
         playSceneUI.BindWeapon(activeWeapon);
-
-        if (playerObject.TryGetComponent<PlayerHealth>(out var playerHealth))
-        {
-            playerHealth.SetupReferences(deathCam, damageOverlay, shieldBars, gameOverUI);
-
-            if (isDeathMatchMode)
-            {
-                // 핼스 에서 죽음 이밴트 날아가면 죽었다고 이벤트 날리기 누구한테 DeathMatchMode 한테.
-                playerHealth.OnPlayerDeath += () => OnPlayerDeath?.Invoke();
-            }
-            GameManager.Instance.FindPlayer(playerHealth);
-        }
 
         activeWeapon.SetupReferences(playerFollowCamera, zoomUI);
 
@@ -92,7 +69,9 @@ public class PlayerSpawner : MonoBehaviour
         playerFollowCamera.LookAt = cameraRoot;
 
         CursorManager.Instance.SetCursor(true);
+        playerHealth.Initialize();
     }
+
     public void RequestRespawn()
     {
         if (isDeathMatchMode)
