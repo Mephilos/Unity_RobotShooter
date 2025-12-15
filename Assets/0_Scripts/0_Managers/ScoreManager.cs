@@ -87,7 +87,7 @@ public class ScoreManager : MonoBehaviour
         stageScores.Add(newScore);
     }
 
-    public void CalculateTimeAndAccBonus(float clearTime, float timeLimit, int scorePerSec)
+    public void CalculateTotalScoreAndAdd(float clearTime, float timeLimit, int scorePerSec)
     {
         float timeRemaining = timeLimit - clearTime;
 

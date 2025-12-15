@@ -8,9 +8,9 @@ public class LevelManager : MonoBehaviour
 
     public event Action<int> OnEnemyCountChanged;
     public event Action<int, float, float, int, bool> OnStageClearData;
+
     int enemiesLeft = 0;
     float startTime;
-
     float limitTime;
     int scoreTime;
 
@@ -19,6 +19,7 @@ public class LevelManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -26,7 +27,25 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    void Start()
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        if (scene.buildIndex == Constants.BOOT_SCENE || scene.buildIndex == Constants.SCENE_MAIN_MENU)
+            return;
+
+        InitializeStage();
+    }
+
+    void InitializeStage()
     {
         startTime = Time.time;
         ScoreManager.Instance.RestoreScore();
@@ -58,9 +77,9 @@ public class LevelManager : MonoBehaviour
     void ProcessStageClearScore()
     {
         float levelClearTime = Time.time - startTime;
-        ScoreManager.Instance.CalculateTimeAndAccBonus(levelClearTime, limitTime, scoreTime);
+        ScoreManager.Instance.CalculateTotalScoreAndAdd(levelClearTime, limitTime, scoreTime);
 
-        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex - Constants.SCENE_MAIN_MENU;
         int stageScore = ScoreManager.Instance.GetCurrentScore();
         float stageAcc = ScoreManager.Instance.GetAccuracy();
 
