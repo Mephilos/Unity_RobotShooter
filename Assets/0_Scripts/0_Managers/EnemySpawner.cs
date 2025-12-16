@@ -24,9 +24,9 @@ public class EnemySpawner : MonoBehaviour
         spawnCoolTime = new WaitForSeconds(spawnInterval);
     }
 
-    public void StartSpawning(Action onKilledCallback)
+    public void StartSpawning(Action OnKilledCallback)
     {
-        this.OnEnemyKilledCallback = onKilledCallback;
+        this.OnEnemyKilledCallback = OnKilledCallback;
         currentEnemyCount = 0;
         isSpawning = true;
         StartCoroutine(SpawnRoutine());

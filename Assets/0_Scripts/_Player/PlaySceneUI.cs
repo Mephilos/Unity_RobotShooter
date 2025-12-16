@@ -13,6 +13,8 @@ public class PlaySceneUI : MonoBehaviour
     [SerializeField] TMP_Text finalScoreText;
     [SerializeField] TMP_Text finalTimeText;
     [SerializeField] TMP_Text finalAccText;
+    [SerializeField] TMP_Text enemyScoreText;
+    [SerializeField] PlayerSpawner playerSpawner;
     [SerializeField] LeaderboardHandler leaderboardHandler;
     [SerializeField] GameObject winContainer;
     [SerializeField] GameObject gameOverContainer;
@@ -48,9 +50,14 @@ public class PlaySceneUI : MonoBehaviour
             playerHealth.OnPlayerDeath -= ShowGameOverUI;
         }
         this.playerHealth = playerHealth;
-
         this.playerHealth.OnHealthChanged += UpdatePlayerHP;
-        this.playerHealth.OnPlayerDeath += ShowGameOverUI;
+        bool isDeathMatchMode = playerSpawner.IsDeathMatchMode;
+
+        if (!isDeathMatchMode)
+        {
+            this.playerHealth.OnPlayerDeath += ShowGameOverUI;
+        }
+
         UpdatePlayerHP(playerHealth.CurrentHP, playerHealth.MaxHP);
     }
 
@@ -71,11 +78,7 @@ public class PlaySceneUI : MonoBehaviour
         }
     }
 
-    public void ShowGameOverUI()
-    {
-        gameOverContainer.SetActive(true);
-        CursorManager.Instance.SetCursor(false);
-    }
+
 
     void UpdatePlayerHP(int currentHp, int maxHp)
     {
@@ -117,6 +120,11 @@ public class PlaySceneUI : MonoBehaviour
         CursorManager.Instance.SetCursor(false);
     }
 
+    public void ShowGameOverUI()
+    {
+        gameOverContainer.SetActive(true);
+        CursorManager.Instance.SetCursor(false);
+    }
     void DisplayComparisonScore(TMP_Text textUI, string label, float current, float best, bool isNewScore, string suffix = "", float invalidValue = 0f)
     {
         float valueDiff = current - best;
@@ -161,5 +169,14 @@ public class PlaySceneUI : MonoBehaviour
     void UpdateAccUI(float acc)
     {
         accText.text = Constants.ACC_STRING + $"{acc:F1}%";
+    }
+
+    public void UpdateDeathMatchScore(int playerScore, int enemyScore, int targetScore)
+    {
+        if (scoreText != null)
+            scoreText.text = $"PLAYER: {playerScore} / {targetScore}";
+
+        if (enemyScoreText != null)
+            enemyScoreText.text = $"ENEMY: {enemyScore} / {targetScore}";
     }
 }

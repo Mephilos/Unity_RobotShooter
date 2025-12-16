@@ -75,11 +75,15 @@ public class LevelManager : MonoBehaviour
         if (enemiesLeft <= 0 && IsStageActive)
         {
             Debug.Log("승리 호출");
-            IsStageActive = false;
-            ProcessStageClearScore();
+            GameClear();
         }
     }
 
+    public void GameClear()
+    {
+        IsStageActive = false;
+        ProcessStageClearScore();
+    }
     void ProcessStageClearScore()
     {
         float levelClearTime = Time.time - startTime;

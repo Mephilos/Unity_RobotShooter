@@ -18,7 +18,7 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] Image damageOverlay;
     [SerializeField] GameObject zoomUI;
     [SerializeField] Crosshair crosshair;
-
+    public bool IsDeathMatchMode => isDeathMatchMode;
     public event Action OnPlayerDeath;
 
     void Start()

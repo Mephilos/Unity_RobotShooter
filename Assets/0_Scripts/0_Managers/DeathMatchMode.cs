@@ -5,6 +5,7 @@ public class DeathMatchMode : MonoBehaviour
     [SerializeField] int targetKillScore = 20;
     [SerializeField] PlayerSpawner playerSpawner;
     [SerializeField] EnemySpawner enemySpawner;
+    [SerializeField] PlaySceneUI playSceneUI;
 
     int playerScore = 0;
     int enemyScore = 0;
@@ -15,6 +16,9 @@ public class DeathMatchMode : MonoBehaviour
         playerScore = 0;
         enemyScore = 0;
         isGameEnded = false;
+
+        UpdateUIScore();
+
         playerSpawner.SpawnPlayer();
         playerSpawner.OnPlayerDeath += HandlePlayerDeath;
         StartCoroutine(StartGameRoutine());
@@ -30,6 +34,7 @@ public class DeathMatchMode : MonoBehaviour
         if (isGameEnded) return;
 
         enemyScore++;
+        UpdateUIScore();
 
         if (enemyScore >= targetKillScore)
         {
@@ -46,10 +51,19 @@ public class DeathMatchMode : MonoBehaviour
         if (isGameEnded) return;
 
         playerScore++;
+        UpdateUIScore();
 
         if (playerScore >= targetKillScore)
         {
             EndGame(true);
+        }
+    }
+
+    void UpdateUIScore()
+    {
+        if (playSceneUI != null)
+        {
+            playSceneUI.UpdateDeathMatchScore(playerScore, enemyScore, targetKillScore);
         }
     }
 
@@ -59,13 +73,14 @@ public class DeathMatchMode : MonoBehaviour
         enemySpawner.StopSpawning();
         playerSpawner.OnPlayerDeath -= HandlePlayerDeath;
 
-        // 임시
         if (playerWin)
         {
-            LevelManager.Instance.AdjustEnemiesLeft(-9999);
+            LevelManager.Instance.GameClear();
         }
         else
         {
+            playSceneUI.ShowGameOverUI();
         }
+        CursorManager.Instance.SetCursor(false);
     }
 }
