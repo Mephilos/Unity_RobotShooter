@@ -45,7 +45,7 @@ public abstract class Enemy : MonoBehaviour
         // 플레이어 초기화 방법 변경
         if (GameManager.Instance.Player != null)
         {
-            InitializePlayer(GameManager.Instance.Player);
+            InitializePlayer(GameManager.Instance.Player, GameManager.Instance.PlayerTargetPoint);
         }
         if (GameManager.Instance != null)
         {
@@ -82,10 +82,10 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
-    void InitializePlayer(PlayerHealth player)
+    void InitializePlayer(PlayerHealth player, Transform playerTargetTransform)
     {
         this.playerHealth = player;
-        this.playerTransform = player.CameraRoot;
+        this.playerTransform = playerTargetTransform;
     }
     protected virtual void OnDamage()
     {

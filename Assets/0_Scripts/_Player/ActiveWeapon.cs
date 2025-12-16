@@ -6,13 +6,13 @@ using System;
 
 public class ActiveWeapon : MonoBehaviour
 {
-    [SerializeField] WeaponSO startingWeaponOS;
-    [SerializeField] GameObject Zoom;
-    // [SerializeField] TMP_Text ammoText;
-    [SerializeField] CinemachineCamera cinemachineVirtualCamera;
     [SerializeField] Camera weaponCamera;
     [SerializeField] float zoomTransSpeed = 20f;
     [SerializeField] bool isInfinityAmmo;
+    [SerializeField] WeaponSO startingWeaponOS;
+    // [SerializeField] TMP_Text ammoText;
+    GameObject Zoom;
+    CinemachineCamera cinemachineVirtualCamera;
 
     public event Action<int, int> OnAmmoChange;
     public float DefaultRotationSpeed => defaultRotationSpeed;
@@ -34,14 +34,13 @@ public class ActiveWeapon : MonoBehaviour
     void Awake()
     {
         firstPersonController = GetComponentInParent<FirstPersonController>();
-        // animator = GetComponentInParent<Animator>();
         starterAssetsInputs = GetComponentInParent<StarterAssetsInputs>();
-        // defaultRotationSpeed = firstPersonController.RotationSpeed;
     }
 
-    void Start()
+    public void Initialize()
     {
         defaultRotationSpeed = PlayerPrefs.GetFloat("MouseSens", 2.0f);
+        firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
         SwitchWeapon(startingWeaponOS);
     }
 
@@ -64,7 +63,6 @@ public class ActiveWeapon : MonoBehaviour
     }
     public (int currentAmmo, int maxAmmo) GetAmmo()
     {
-        if (weaponSO == null) return (0, 0);
         int currentAmmo = this.currentAmmo;
         int maxAmmo = weaponSO.MagazineSize;
         return (currentAmmo, maxAmmo);

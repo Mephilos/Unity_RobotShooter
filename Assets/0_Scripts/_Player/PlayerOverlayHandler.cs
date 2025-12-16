@@ -3,18 +3,19 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 using StarterAssets;
+using TMPro;
 
 public class PlayerOverlayHandler : MonoBehaviour
 {
     [SerializeField] float damageFlashSpeed = 2f;
     [SerializeField] int gameOverVirtualCameraPrioity = 20;
+    [SerializeField] ActiveWeapon activeWeapon;
+    [SerializeField] Transform cameraRoot;
     CinemachineCamera deathVirtualCamera;
-    Camera weaponCamera;
     Image damageOverlay;
-    Image[] shieldBar;
-    GameObject gameOverContainer;
-    bool isDeathMatch;
     PlayerHealth playerHealth;
+    public Transform CameraRoot => cameraRoot;
+    public ActiveWeapon ActiveWeapon => activeWeapon;
 
     void Awake()
     {
@@ -23,32 +24,20 @@ public class PlayerOverlayHandler : MonoBehaviour
 
     void OnEnable()
     {
-        playerHealth.OnHealthChanged += UpdateShieldUI;
         playerHealth.OnPlayerHit += PlayerDamageFlash;
-        playerHealth.OnPlayerDeath += PlayerGameOver;
-    }
-    void OnDisable()
-    {
-        playerHealth.OnHealthChanged -= UpdateShieldUI;
-        playerHealth.OnPlayerHit -= PlayerDamageFlash;
-        playerHealth.OnPlayerDeath -= PlayerGameOver;
-    }
-    public void SetupOverlay(CinemachineCamera cinemachine, Camera weaponCamera, Image damageOverlay, Image[] shield, GameObject gameOverContainer, bool isDeathMatch)
-    {
-        this.deathVirtualCamera = cinemachine;
-        this.weaponCamera = weaponCamera;
-        this.damageOverlay = damageOverlay;
-        this.shieldBar = shield;
-        this.gameOverContainer = gameOverContainer;
-        this.isDeathMatch = !isDeathMatch;
+        playerHealth.OnPlayerDeath += DeathCameraMove;
     }
 
-    void UpdateShieldUI(int currentHp, int maxHp)
+    void OnDisable()
     {
-        for (int i = 0; i < shieldBar.Length; i++)
-        {
-            shieldBar[i].enabled = (i < currentHp);
-        }
+        playerHealth.OnPlayerHit -= PlayerDamageFlash;
+        playerHealth.OnPlayerDeath -= DeathCameraMove;
+    }
+
+    public void SetupOverlay(CinemachineCamera cinemachine, Image damageOverlay)
+    {
+        this.deathVirtualCamera = cinemachine;
+        this.damageOverlay = damageOverlay;
     }
 
     void PlayerDamageFlash()
@@ -69,18 +58,8 @@ public class PlayerOverlayHandler : MonoBehaviour
             yield return null;
         }
     }
-    void PlayerGameOver()
+    void DeathCameraMove()
     {
-        weaponCamera.transform.parent = null;
         deathVirtualCamera.Priority = gameOverVirtualCameraPrioity;
-
-        StarterAssetsInputs starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
-        starterAssetsInputs.SetInputBlocked(true);
-
-        CursorManager.Instance.SetCursor(false);
-        if (isDeathMatch)
-        {
-            gameOverContainer.SetActive(true);
-        }
     }
 }

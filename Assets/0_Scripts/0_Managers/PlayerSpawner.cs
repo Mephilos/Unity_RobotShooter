@@ -16,8 +16,6 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] CinemachineCamera playerFollowCamera;
     [SerializeField] CinemachineCamera deathCam;
     [SerializeField] Image damageOverlay;
-    [SerializeField] Image[] shieldBar;
-    [SerializeField] GameObject gameOverUI;
     [SerializeField] GameObject zoomUI;
     [SerializeField] Crosshair crosshair;
 
@@ -47,33 +45,34 @@ public class PlayerSpawner : MonoBehaviour
         Camera weaponCamera = playerObject.GetComponentInChildren<Camera>();
 
         var mainCameraData = Camera.main.GetUniversalAdditionalCameraData();
+        if (mainCameraData.cameraStack.Count > 0)
+        {
+            mainCameraData.cameraStack.RemoveAll(cam => cam == null);
+        }
         mainCameraData.cameraStack.Add(weaponCamera);
 
         PlayerHealth playerHealth = playerObject.GetComponent<PlayerHealth>();
         PlayerOverlayHandler playerOverlay = playerObject.GetComponent<PlayerOverlayHandler>();
         ActiveWeapon activeWeapon = playerObject.GetComponentInChildren<ActiveWeapon>();
-        playerOverlay.SetupOverlay(deathCam, weaponCamera, damageOverlay, shieldBar, gameOverUI, isDeathMatchMode);
+        Transform cameraRoot = playerOverlay.CameraRoot;
 
+
+        deathCam.Priority = 0;
         if (isDeathMatchMode)
         {
             // 핼스 에서 죽음 이밴트 날아가면 죽었다고 이벤트 날리기 누구한테 DeathMatchMode 한테.
             playerHealth.OnPlayerDeath += () => OnPlayerDeath?.Invoke();
         }
-        GameManager.Instance.FindPlayer(playerHealth);
-
-        PlaySceneUI playSceneUI = FindFirstObjectByType<PlaySceneUI>();
-        playSceneUI.BindWeapon(activeWeapon);
-
         activeWeapon.SetupReferences(playerFollowCamera, zoomUI);
-
-        Transform cameraRoot = playerObject.transform.Find("PlayerCameraRoot");
+        playerOverlay.SetupOverlay(deathCam, damageOverlay);
         playerFollowCamera.Follow = cameraRoot;
         playerFollowCamera.LookAt = cameraRoot;
 
-        CursorManager.Instance.SetCursor(true);
-
-        crosshair.Initialize(activeWeapon);
+        activeWeapon.Initialize();
         playerHealth.Initialize();
+        crosshair.Initialize(activeWeapon);
+        CursorManager.Instance.SetCursor(true);
+        GameManager.Instance.FindPlayer(playerHealth, cameraRoot);
     }
 
     public void RequestRespawn()

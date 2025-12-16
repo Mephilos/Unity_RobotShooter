@@ -9,22 +9,18 @@ public class PlaySceneUI : MonoBehaviour
     [SerializeField] TMP_Text enemiesLeftText;
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text accText;
-    [SerializeField] GameObject winContainer;
-
+    [SerializeField] TMP_Text hpText;
     [SerializeField] TMP_Text finalScoreText;
     [SerializeField] TMP_Text finalTimeText;
     [SerializeField] TMP_Text finalAccText;
     [SerializeField] LeaderboardHandler leaderboardHandler;
-    StarterAssetsInputs starterAssetsInputs;
+    [SerializeField] GameObject winContainer;
+    [SerializeField] GameObject gameOverContainer;
     ActiveWeapon activeWeapon;
+    PlayerHealth playerHealth;
 
     void Start()
     {
-        starterAssetsInputs = FindFirstObjectByType<StarterAssetsInputs>();
-
-        // activeWeapon = starterAssetsInputs.GetComponentInChildren<ActiveWeapon>();
-        // activeWeapon.OnAmmoChange += UpdateAmmoUI;
-        // UpdateAmmoUI(activeWeapon.GetAmmo().currentAmmo, activeWeapon.GetAmmo().maxAmmo);
         LevelManager.Instance.OnEnemyCountChanged += UpdateEnemyLeft;
         LevelManager.Instance.OnStageClearData += ShowWinUI;
         UpdateEnemyLeft(LevelManager.Instance.GetEnemiesCount());
@@ -34,25 +30,58 @@ public class PlaySceneUI : MonoBehaviour
         UpdateScoreUI(ScoreManager.Instance.GetCurrentScore());
         UpdateAccUI(ScoreManager.Instance.GetAccuracy());
 
+        GameManager.Instance.OnPlayerRegistered += HandleRegister;
     }
+
+    void HandleRegister(PlayerHealth playerHealth, Transform transform)
+    {
+        PlayerOverlayHandler playerOverlay = playerHealth.GetComponent<PlayerOverlayHandler>();
+        BindPlayerHealth(playerHealth);
+        BindWeapon(playerOverlay.ActiveWeapon);
+    }
+
+    void BindPlayerHealth(PlayerHealth playerHealth)
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.OnHealthChanged -= UpdatePlayerHP;
+            playerHealth.OnPlayerDeath -= ShowGameOverUI;
+        }
+        this.playerHealth = playerHealth;
+
+        this.playerHealth.OnHealthChanged += UpdatePlayerHP;
+        this.playerHealth.OnPlayerDeath += ShowGameOverUI;
+        UpdatePlayerHP(playerHealth.CurrentHP, playerHealth.MaxHP);
+    }
+
     public void BindWeapon(ActiveWeapon newWeapon)
     {
-        // 기존 연결 끊기 (리스폰 시 중복 방지)
         if (activeWeapon != null)
         {
             activeWeapon.OnAmmoChange -= UpdateAmmoUI;
         }
-        // 새 무기 연결
+
         activeWeapon = newWeapon;
+
         if (activeWeapon != null)
         {
             activeWeapon.OnAmmoChange += UpdateAmmoUI;
             var (curr, max) = activeWeapon.GetAmmo();
             UpdateAmmoUI(curr, max);
-            if (starterAssetsInputs == null)
-                starterAssetsInputs = activeWeapon.GetComponentInParent<StarterAssetsInputs>();
         }
     }
+
+    public void ShowGameOverUI()
+    {
+        gameOverContainer.SetActive(true);
+        CursorManager.Instance.SetCursor(false);
+    }
+
+    void UpdatePlayerHP(int currentHp, int maxHp)
+    {
+        hpText.text = $"{currentHp}";
+    }
+
     void OnDestroy()
     {
         activeWeapon.OnAmmoChange -= UpdateAmmoUI;

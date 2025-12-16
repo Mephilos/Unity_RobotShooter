@@ -7,8 +7,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance = null;
     public bool IsPause { get; private set; } = false;
     public PlayerHealth Player { get; private set; }
+    public Transform PlayerTargetPoint { get; private set; }
     public event Action<bool> OnPauseToggle;
-    public event Action<PlayerHealth> OnPlayerRegistered;
+    public event Action<PlayerHealth, Transform> OnPlayerRegistered;
 
     void Awake()
     {
@@ -84,9 +85,10 @@ public class GameManager : MonoBehaviour
         IsPause = false;
         Time.timeScale = 1f;
     }
-    public void FindPlayer(PlayerHealth playerHealth)
+    public void FindPlayer(PlayerHealth playerHealth, Transform targetPoint)
     {
         Player = playerHealth;
-        OnPlayerRegistered?.Invoke(Player);
+        PlayerTargetPoint = targetPoint;
+        OnPlayerRegistered?.Invoke(Player, targetPoint);
     }
 }

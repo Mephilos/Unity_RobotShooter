@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [SerializeField] Transform playerCameraRoot;
-    [SerializeField] ActiveWeapon activeWeapon;
-    [Range(1, 10)]
-    [SerializeField] int startingHealth = 10;
+    [SerializeField] int maxHp = 100;
     [SerializeField] bool invincibleMode = false;
     int currentHitPoint;
     public event Action OnPlayerDeath;
@@ -15,15 +12,12 @@ public class PlayerHealth : MonoBehaviour
     public event Action<int, int> OnHealthChanged;
 
     public int CurrentHP => currentHitPoint;
-    public int MaxHP => startingHealth;
-    public Transform CameraRoot => playerCameraRoot;
-    public ActiveWeapon Weapon => activeWeapon;
+    public int MaxHP => maxHp;
 
     public void Initialize()
     {
-        currentHitPoint = startingHealth;
-        OnHealthChanged?.Invoke(startingHealth, startingHealth);
-        GameManager.Instance.FindPlayer(this);
+        currentHitPoint = maxHp;
+        OnHealthChanged?.Invoke(currentHitPoint, maxHp);
     }
 
     void Update()
@@ -37,7 +31,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentHitPoint -= amount;
 
-        OnHealthChanged?.Invoke(currentHitPoint, startingHealth);
+        OnHealthChanged?.Invoke(currentHitPoint, maxHp);
         OnPlayerHit?.Invoke();
 
         if (currentHitPoint <= 0)

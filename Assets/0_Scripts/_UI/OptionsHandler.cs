@@ -79,11 +79,12 @@ public class OptionsHandler : MonoBehaviour
         PlayerPrefs.Save();
         var player = FindFirstObjectByType<FirstPersonController>();
 
-
-        player.RotationSpeed = PlayerPrefs.GetFloat("MouseSens", Constants.MOUSE_SENS_MULTIPLIER);
-        var weapon = player.GetComponentInChildren<ActiveWeapon>();
-        weapon.UpdateSensitivity(finalSens);
-
+        if (player != null)
+        {
+            player.RotationSpeed = PlayerPrefs.GetFloat("MouseSens", Constants.MOUSE_SENS_MULTIPLIER);
+            var weapon = player.GetComponentInChildren<ActiveWeapon>();
+            weapon.UpdateSensitivity(finalSens);
+        }
         Debug.Log($"감도 저장 전: {currentSens} / 후: {finalSens}");
     }
 
