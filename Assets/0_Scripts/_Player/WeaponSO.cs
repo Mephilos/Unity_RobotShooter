@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponSO", menuName = "Scriptable Objects/WeaponSO")]

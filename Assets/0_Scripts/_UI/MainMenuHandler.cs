@@ -1,5 +1,4 @@
 using System.Collections;
-using Firebase.Auth;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

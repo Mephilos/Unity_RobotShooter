@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     public bool IsPause { get; private set; } = false;
     public PlayerHealth Player { get; private set; }
     public event Action<bool> OnPauseToggle;
+    public event Action<PlayerHealth> OnPlayerRegistered;
 
     void Awake()
     {
@@ -86,5 +87,6 @@ public class GameManager : MonoBehaviour
     public void FindPlayer(PlayerHealth playerHealth)
     {
         Player = playerHealth;
+        OnPlayerRegistered?.Invoke(Player);
     }
 }

@@ -38,38 +38,32 @@ public abstract class Enemy : MonoBehaviour
         }
 
         var colliders = GetComponentsInChildren<Collider>();
-
         foreach (var c in colliders)
         {
             c.enabled = true;
         }
-
-        if (GameManager.Instance.Player == null)
+        // 플레이어 초기화 방법 변경
+        if (GameManager.Instance.Player != null)
         {
-            StartCoroutine(WaitForPlayer());
+            InitializePlayer(GameManager.Instance.Player);
         }
-        else
+        if (GameManager.Instance != null)
         {
-            playerHealth = GameManager.Instance.Player;
-            playerTransform = playerHealth.CameraRoot;
+            GameManager.Instance.OnPlayerRegistered += InitializePlayer;
         }
 
         enemyHealth.OnHit += OnDamage;
         enemyHealth.OnDeath += HandleDeath;
     }
-    IEnumerator WaitForPlayer()
-    {
-        while (GameManager.Instance.Player == null)
-        {
-            yield return null;
-        }
 
-        playerHealth = GameManager.Instance.Player;
-        playerTransform = playerHealth.CameraRoot;
-    }
     protected virtual void OnDisable()
     {
         enemyHealth.OnHit -= OnDamage;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnPlayerRegistered -= InitializePlayer;
+        }
     }
 
     protected virtual void Update()
@@ -88,6 +82,11 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
+    void InitializePlayer(PlayerHealth player)
+    {
+        this.playerHealth = player;
+        this.playerTransform = player.CameraRoot;
+    }
     protected virtual void OnDamage()
     {
         // hitFeedback.PlayFeedbacks();

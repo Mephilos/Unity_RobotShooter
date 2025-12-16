@@ -1,9 +1,6 @@
 using System;
-using Unity.Cinemachine;
-using StarterAssets;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -21,12 +18,6 @@ public class PlayerHealth : MonoBehaviour
     public int MaxHP => startingHealth;
     public Transform CameraRoot => playerCameraRoot;
     public ActiveWeapon Weapon => activeWeapon;
-
-    void Awake()
-    {
-        playerCameraRoot = transform.Find("PlayerCameraRoot");
-        activeWeapon = GetComponentInChildren<ActiveWeapon>();
-    }
 
     public void Initialize()
     {

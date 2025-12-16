@@ -3,7 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 using StarterAssets;
-using UnityEngine.Rendering.Universal;
+
 public class PlayerOverlayHandler : MonoBehaviour
 {
     [SerializeField] float damageFlashSpeed = 2f;

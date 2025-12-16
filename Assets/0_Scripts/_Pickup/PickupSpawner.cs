@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using Unity.VisualScripting;
+
 public class PickupSpawner : MonoBehaviour
 {
     [SerializeField] Pickup pickupPrefab;
