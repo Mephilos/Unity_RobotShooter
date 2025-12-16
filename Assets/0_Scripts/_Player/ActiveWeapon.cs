@@ -26,6 +26,7 @@ public class ActiveWeapon : MonoBehaviour
     float defaultFOV = 75f;
     float defaultRotationSpeed;
     float keepFireRecoilPenalty = 0f;
+    float fireSpreadRecoveryDelay = 0.2f;
     float nextFireTime = 0f;
     bool isZoom = false;
 
@@ -148,7 +149,7 @@ public class ActiveWeapon : MonoBehaviour
 
     void HandleSpreadRecovery()
     {
-        if (Time.time < nextFireTime && keepFireRecoilPenalty > 0)
+        if (Time.time > nextFireTime + fireSpreadRecoveryDelay && keepFireRecoilPenalty > 0)
         {
             keepFireRecoilPenalty = Mathf.Lerp(keepFireRecoilPenalty, 0f, weaponSO.RecoverySpreadSpeed * Time.deltaTime);
             if (keepFireRecoilPenalty < 0) keepFireRecoilPenalty = 0;

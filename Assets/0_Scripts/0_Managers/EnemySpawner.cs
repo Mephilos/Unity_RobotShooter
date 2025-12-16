@@ -13,9 +13,16 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] float maxSpawnDist = 30f;
     [SerializeField] LayerMask groundLayer;
 
-    Action OnEnemyKilledCallback;
     int currentEnemyCount = 0;
     bool isSpawning = false;
+
+    Action OnEnemyKilledCallback;
+    WaitForSeconds spawnCoolTime;
+
+    void Awake()
+    {
+        spawnCoolTime = new WaitForSeconds(spawnInterval);
+    }
 
     public void StartSpawning(Action onKilledCallback)
     {
@@ -39,7 +46,7 @@ public class EnemySpawner : MonoBehaviour
             {
                 TrySpawnEnemy();
             }
-            yield return new WaitForSeconds(spawnInterval);
+            yield return spawnCoolTime;
         }
     }
 

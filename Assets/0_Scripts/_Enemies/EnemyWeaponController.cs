@@ -8,16 +8,19 @@ public class EnemyWeaponController : MonoBehaviour
     [SerializeField] Transform firePoint;
     [SerializeField] LayerMask blockLayer;
 
-    EnemySight enemySight;
     public float FireRate => weaponSO.FireRate;
     public float WeaponRange => weaponSO.AttackRange;
 
     public float ShootingPenalty => weaponSO.ShootingMoveSpeedPenalty;
     public float CombatStatePenalty => weaponSO.CombatStateMoveSpeedPenalty;
 
+    EnemySight enemySight;
+    WaitForSeconds burstInterval;
+
     void Awake()
     {
         enemySight = GetComponent<EnemySight>();
+        burstInterval = new WaitForSeconds(weaponSO.BurstInterval);
     }
 
     public IEnumerator FireBurst(Vector3 playerPosition)
@@ -43,7 +46,7 @@ public class EnemyWeaponController : MonoBehaviour
                 // 마지막 발사는 코루틴 작동x;
                 if (i < weaponSO.BurstCount - 1)
                 {
-                    yield return new WaitForSeconds(weaponSO.BurstInterval);
+                    yield return burstInterval;
                 }
 
             }

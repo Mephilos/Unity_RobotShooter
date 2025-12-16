@@ -6,65 +6,72 @@ public class Weapon : MonoBehaviour
 {
     [SerializeField] MMF_Player shootFeedback;
     [SerializeField] LayerMask InteractionLayer;
-    ParticleSystem muzzleFlash;
+    [SerializeField] ParticleSystem muzzleFlash;
     CinemachineImpulseSource impulseSource;
-
+    Camera mainCamera;
     void Awake()
     {
         impulseSource = GetComponent<CinemachineImpulseSource>();
+        mainCamera = Camera.main;
     }
 
-    void Start()
+    public void Shoot(WeaponSO weaponSO, float currentSpeed)
     {
-        muzzleFlash = GetComponentInChildren<ParticleSystem>();
+        PlayShootEffect(weaponSO);
+        ScoreManager.Instance.ReportShot();
+        Vector3 shootDirection = ApplyShootSpread(currentSpeed);
+
+        if (Physics.Raycast(mainCamera.transform.position, shootDirection, out RaycastHit hit, Mathf.Infinity,
+                     InteractionLayer, QueryTriggerInteraction.Ignore))
+        {
+            HandleShootHit(hit, weaponSO);
+        }
+
     }
-    public void Shoot(WeaponSO weaponSO, float currentSpread)
+
+    public void HandleShootHit(RaycastHit hit, WeaponSO weaponSO)
+    {
+        Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
+        IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
+        GameObject vfxPrefab = weaponSO.HitVFXPrefab.gameObject;
+        bool isWeak = false;
+
+        if (hit.collider.TryGetComponent<WeakPoint>(out WeakPoint weakPoint))
+        {
+            vfxPrefab = weaponSO.CriVFXPrefab.gameObject;
+            isWeak = true;
+            damageable = weakPoint;
+        }
+
+        PoolManager.Instance.Get(vfxPrefab, hit.point, effectRotation);
+
+        if (damageable != null)
+        {
+            damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
+
+            ScoreManager.Instance.ReportHit();
+
+            HitIndicator.Instance.ShowMaker(isWeak);
+        }
+
+    }
+
+    Vector3 ApplyShootSpread(float currentSpread)
+    {
+        Vector3 spread = mainCamera.transform.up * Random.Range(-currentSpread, currentSpread) +
+                            mainCamera.transform.right * Random.Range(-currentSpread, currentSpread);
+        Vector3 shootDirection = (mainCamera.transform.forward + spread).normalized;
+
+        return shootDirection;
+    }
+
+    void PlayShootEffect(WeaponSO weaponSO)
     {
         muzzleFlash.Play();
         impulseSource.GenerateImpulse();
-
         float randomPitch = Random.Range(.9f, 1.1f);
         SoundManager.Instance.PlaySFX(weaponSO.ShootClip, transform.position, randomPitch);
-
-        ScoreManager.Instance.ReportShot();
-        RaycastHit hit;
-
-        // 반동 설정
-        Vector3 spread = Camera.main.transform.up * Random.Range(-currentSpread, currentSpread) +
-                            Camera.main.transform.right * Random.Range(-currentSpread, currentSpread);
-        Vector3 shootDirection = (Camera.main.transform.forward + spread).normalized;
-
         shootFeedback?.PlayFeedbacks();
-        if (Physics.Raycast(Camera.main.transform.position, shootDirection, out hit, Mathf.Infinity,
-                             InteractionLayer, QueryTriggerInteraction.Ignore))
-        {
-            Quaternion effectRotation = Quaternion.LookRotation(hit.normal);
-            // Instantiate(weaponSO.HitVFXPrefab, hit.point, effectRotation);
-
-            // PoolManager.Instance.Get(weaponSO.HitVFXPrefab.gameObject, hit.point, effectRotation);
-
-            IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
-            bool isWeak = false;
-
-            if (hit.collider.TryGetComponent<WeakPoint>(out WeakPoint weakPoint))
-            {
-                PoolManager.Instance.Get(weaponSO.CriVFXPrefab.gameObject, hit.point, effectRotation);
-                isWeak = true;
-                damageable = weakPoint;
-            }
-            else
-            {
-                PoolManager.Instance.Get(weaponSO.HitVFXPrefab.gameObject, hit.point, effectRotation);
-            }
-
-            if (damageable != null)
-            {
-                ScoreManager.Instance.ReportHit();
-                damageable.TakeDamage(weaponSO.Damage, hit.point, DamageType.Normal);
-
-                HitIndicator.Instance.ShowMaker(isWeak);
-            }
-        }
     }
 }
 
