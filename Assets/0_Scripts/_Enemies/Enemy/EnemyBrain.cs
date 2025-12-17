@@ -4,16 +4,27 @@ using System.Collections;
 
 public abstract class EnemyBrain : Enemy
 {
-    public enum AIState { Patrol, Combat, Search }
-    [SerializeField] protected AIState currentState;
-    [SerializeField] protected float combatTime = 5f;
+    // public enum AIState { Patrol, Combat, Search }
+    // [SerializeField] protected AIState currentState;
+    // [SerializeField] protected float combatTime = 5f;
+    // protected float combatDuration;
+    // protected bool isActing = false;
 
+    public NavMeshAgent Agent => agent;
+    public EnemySight Sight => sight;
+    public EnemyTactic Tactic => tactic;
+    public Animator Animator => animator;
+
+    public Vector3 LastPlayerPosition { get; set; }
+    public BaseEnemyState PatrolState { get; private set; }
+    public BaseEnemyState CombatState { get; private set; }
+    public BaseEnemyState SearchState { get; private set; }
+
+    protected BaseEnemyState currentState;
     protected NavMeshAgent agent;
     protected EnemySight sight;
     protected EnemyTactic tactic;
-    protected Vector3 lastPlayerPosition;
-    protected float combatDuration;
-    protected bool isActing = false;
+
 
     protected override void Awake()
     {
@@ -23,11 +34,14 @@ public abstract class EnemyBrain : Enemy
         tactic = GetComponent<EnemyTactic>();
     }
 
+    protected virtual void InitailizeState()
+    {
+
+    }
     protected override void OnEnable()
     {
         base.OnEnable();
-        currentState = AIState.Patrol;
-        combatDuration = 0;
+
     }
 
     protected override void Update()
@@ -74,6 +88,14 @@ public abstract class EnemyBrain : Enemy
                 UpdateSearch();
                 break;
         }
+    }
+
+    public void ChangeState(BaseEnemyState newEnemyState)
+    {
+        if (currentState == newEnemyState) return;
+        currentState?.Exit();
+        currentState?.Enter();
+        currentState = newEnemyState;
     }
     protected override void OnDamage()
     {
@@ -193,5 +215,12 @@ public abstract class EnemyBrain : Enemy
         agent.ResetPath();
         isActing = false;
     }
+
+    public void StartStateCorutine(IEnumerator routine)
+    {
+        StopAllCoroutines();
+        StartCoroutine(routine);
+    }
+
     protected virtual void OnFound() { }
 }
