@@ -33,9 +33,10 @@ public abstract class EnemyBrain : Enemy
         agent = GetComponent<NavMeshAgent>();
         sight = GetComponent<EnemySight>();
         tactic = GetComponent<EnemyTactic>();
+        InitializeState();
     }
 
-    protected virtual void InitailizeState()
+    protected virtual void InitializeState()
     {
         PatrolState = new EnemyPatrolState(this);
         SearchState = new EnemySearchState(this);
@@ -67,8 +68,9 @@ public abstract class EnemyBrain : Enemy
     {
         if (currentState == newEnemyState) return;
         currentState?.Exit();
-        currentState?.Enter();
         currentState = newEnemyState;
+        currentState?.Enter();
+
     }
     protected override void OnDamage()
     {
@@ -97,7 +99,7 @@ public abstract class EnemyBrain : Enemy
 
     protected abstract IEnumerator CombatRoutine();
 
-    public void StartStateCorutine(IEnumerator routine)
+    public void StartStateCoroutine(IEnumerator routine)
     {
         StopAllCoroutines();
         StartCoroutine(routine);

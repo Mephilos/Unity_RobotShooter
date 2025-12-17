@@ -26,7 +26,7 @@ public class RangeEnemy : EnemyBrain
     public EnemyBodySO EnemyBodySO => enemyBodySO;
     public float AdvNearStateStopDist => advNearStateStopDist;
     public bool FirstAttack { get; set; } = false;
-    public float LastAttacTime { get; set; }
+    public float LastAttackTime { get; set; }
 
 
     protected override void Awake()
@@ -38,9 +38,9 @@ public class RangeEnemy : EnemyBrain
         sight.viewAngle = enemyBodySO.ViewAngle;
     }
 
-    protected override void InitailizeState()
+    protected override void InitializeState()
     {
-        base.InitailizeState();
+        base.InitializeState();
         CombatState = new RangeCombatState(this);
     }
 
@@ -107,8 +107,6 @@ public class RangeEnemy : EnemyBrain
         }
     }
 
-
-
     void OnDrawGizmos()
     {
         if (playerTransform == null) return;
@@ -154,6 +152,11 @@ public class RangeEnemy : EnemyBrain
         {
             transform.rotation = Quaternion.LookRotation(lookDir);
         }
+    }
+
+    public virtual void OnCombatFinish()
+    {
+        ChangeState(SearchState);
     }
 
     protected override void OnDeath()
