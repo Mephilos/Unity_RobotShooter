@@ -14,11 +14,12 @@ public abstract class EnemyBrain : Enemy
     public EnemySight Sight => sight;
     public EnemyTactic Tactic => tactic;
     public Animator Animator => animator;
+    public Transform PlayerTransform => playerTransform;
 
     public Vector3 LastPlayerPosition { get; set; }
-    public BaseEnemyState PatrolState { get; private set; }
-    public BaseEnemyState CombatState { get; private set; }
-    public BaseEnemyState SearchState { get; private set; }
+    public BaseEnemyState PatrolState { get; protected set; }
+    public BaseEnemyState CombatState { get; protected set; }
+    public BaseEnemyState SearchState { get; protected set; }
 
     protected BaseEnemyState currentState;
     protected NavMeshAgent agent;

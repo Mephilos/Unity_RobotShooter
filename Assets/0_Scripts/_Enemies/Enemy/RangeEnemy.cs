@@ -20,8 +20,13 @@ public class RangeEnemy : EnemyBrain
 
     protected EnemyWeaponController enemyWeaponController;
     protected float advNearStateStopDist = 3f;
-    protected float lastAttacTime;
-    protected bool firstAttack = false;
+
+    public EnemyWeaponController EnemyWeaponController => enemyWeaponController;
+    public float CombatDistance => combatDistance;
+    public EnemyBodySO EnemyBodySO => enemyBodySO;
+    public float AdvNearStateStopDist => advNearStateStopDist;
+    public bool FirstAttack { get; set; } = false;
+    public float LastAttacTime { get; set; }
 
 
     protected override void Awake()
@@ -33,6 +38,12 @@ public class RangeEnemy : EnemyBrain
         sight.viewAngle = enemyBodySO.ViewAngle;
     }
 
+    protected override void InitailizeState()
+    {
+        base.InitailizeState();
+        CombatState = new RangeCombatState(this);
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -40,7 +51,7 @@ public class RangeEnemy : EnemyBrain
         enemyHealth.InitializeHealth(enemyBodySO.MaxHP);
         combatDistance = enemyWeaponController.WeaponRange;
         playerHealth = GameManager.Instance.Player;
-        firstAttack = false;
+        FirstAttack = false;
 
     }
 
@@ -52,10 +63,10 @@ public class RangeEnemy : EnemyBrain
     protected override void OnFound()
     {
         base.OnFound();
-        firstAttack = true;
+        FirstAttack = true;
     }
 
-    protected virtual Strategy DetermineStrategy()
+    public virtual Strategy DetermineStrategy()
     {
         if (playerHealth == null) return Strategy.Equal;
 
@@ -96,148 +107,7 @@ public class RangeEnemy : EnemyBrain
         }
     }
 
-    protected override IEnumerator CombatRoutine()
-    {
-        Strategy strategy = DetermineStrategy();
-        Vector3 coveringPosition = transform.position;
 
-        agent.isStopped = false;
-        agent.speed = enemyBodySO.MoveSpeed * enemyWeaponController.CombatStatePenalty;
-        if (agent.updateRotation) agent.updateRotation = false;
-
-        float actionTimer = 0f;
-
-        bool isChasing = false;
-        isActing = true;
-
-        if (firstAttack)
-        {
-            Debug.Log("기습공격");
-
-            if (playerTransform != null)
-            {
-                Vector3 lookDir = (playerTransform.position - transform.position).normalized;
-                FocusTarget(lookDir);
-            }
-
-            animator.SetTrigger("ShootTrigger");
-
-            lastAttacTime = Time.time;
-            // yield return StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
-
-            firstAttack = false;
-        }
-
-        switch (strategy)
-        {
-            // 사거리 안 엄페물 찾기
-            case Strategy.Equal:
-                coveringPosition = tactic.FindCover(playerTransform, EnemyTactic.Covering.Near, 20f, combatDistance);
-                if (coveringPosition == Vector3.zero)
-                {
-                    coveringPosition = playerTransform.position;
-                    isChasing = true;
-                }
-                break;
-
-            // 런이야
-            case Strategy.DisAdvFar:
-                coveringPosition = tactic.FindCover(playerTransform, EnemyTactic.Covering.FarPlayer);
-                agent.updateRotation = true;
-                agent.speed = enemyBodySO.MoveSpeed * 1.5f;
-                break;
-
-            // 약세 가까움 제자리에
-            case Strategy.DisAdvNear:
-                coveringPosition = transform.position;
-                agent.isStopped = true;
-                break;
-
-            // 플레이어에 접근
-            case Strategy.AdvFar:
-                coveringPosition = tactic.FindCover(playerTransform, EnemyTactic.Covering.NearPlayer);
-                if (coveringPosition == Vector3.zero)
-                {
-                    coveringPosition = playerTransform.position;
-                    isChasing = true;
-                }
-                break;
-
-            // 플레이어한테 이동.
-            case Strategy.AdvNear:
-                coveringPosition = playerTransform.position;
-                isChasing = true;
-                break;
-        }
-
-        Debug.Log($"{isChasing} 추노 모드 확인");
-
-        // 커버링 전용 이동 로직
-        if (!isChasing && !agent.isStopped && coveringPosition != Vector3.zero)
-        {
-            agent.SetDestination(coveringPosition);
-        }
-
-        float currentSpeed = agent.speed;
-
-        while (actionTimer < 2.0f)
-        {
-            if (playerTransform == null) yield break;
-
-            actionTimer += Time.deltaTime;
-
-            var stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            bool isShootAnim = stateInfo.IsTag("Shoot");
-
-            if (isShootAnim)
-            {
-                agent.speed = currentSpeed * enemyWeaponController.ShootingPenalty;
-            }
-            else
-            {
-                agent.speed = currentSpeed;
-            }
-
-            if (playerTransform != null && strategy != Strategy.DisAdvFar)
-            {
-                Vector3 lookTarget = sight.CanSeePlayer(playerTransform) ? playerTransform.position : lastPlayerPosition;
-                FocusTarget(lookTarget);
-            }
-
-            float dist = Vector3.Distance(transform.position, playerTransform.position);
-            bool inRange = dist <= combatDistance;
-
-            if (isChasing)
-            {
-                float stopDist = (strategy == Strategy.AdvNear) ? advNearStateStopDist : combatDistance * .5f;
-
-                if (dist > stopDist)
-                {
-                    agent.isStopped = false;
-                    agent.SetDestination(playerTransform.position);
-                }
-                else
-                {
-                    agent.isStopped = true;
-                }
-            }
-
-            if (Time.time >= lastAttacTime + enemyWeaponController.FireRate)
-            {
-                if ((strategy == Strategy.AdvNear || strategy == Strategy.DisAdvNear || sight.CanSeePlayer(playerTransform)) && inRange)
-                {
-                    animator.SetTrigger("ShootTrigger");
-                    lastAttacTime = Time.time;
-
-                    // Vector3 fireTarget = playerTransform.position;
-                    // StartCoroutine(enemyWeaponController.FireBurst(fireTarget));
-                }
-            }
-            yield return null;
-        }
-        agent.updateRotation = true;
-        isActing = false;
-    }
 
     void OnDrawGizmos()
     {
@@ -274,6 +144,7 @@ public class RangeEnemy : EnemyBrain
         StartCoroutine(enemyWeaponController.FireBurst(playerTransform.position));
     }
 
+    public void GetFocusTarget(Vector3 target) => FocusTarget(target);
     protected virtual void FocusTarget(Vector3 target)
     {
         Vector3 lookDir = (target - transform.position).normalized;
@@ -298,6 +169,11 @@ public class RangeEnemy : EnemyBrain
     protected override bool IsTargetInRange(float dist) => true;
     protected override void Move() { }
     protected override void TryAttack() { }
+
+    protected override IEnumerator CombatRoutine()
+    {
+        yield break;
+    }
 }
 
 
