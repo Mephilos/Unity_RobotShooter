@@ -36,12 +36,13 @@ public abstract class EnemyBrain : Enemy
 
     protected virtual void InitailizeState()
     {
-
+        PatrolState = new EnemyPatrolState(this);
+        SearchState = new EnemySearchState(this);
     }
     protected override void OnEnable()
     {
         base.OnEnable();
-
+        ChangeState(PatrolState); // 초기 상태 패트롤
     }
 
     protected override void Update()
@@ -50,44 +51,15 @@ public abstract class EnemyBrain : Enemy
 
         if (sight.CanSeePlayer(playerTransform))
         {
-            lastPlayerPosition = playerTransform.position;
+            LastPlayerPosition = playerTransform.position;
 
-            if (currentState != AIState.Combat)
+            if (currentState != CombatState)
             {
                 OnFound();
-                SwitchingCombatMode();
+                ChangeState(CombatState);
             }
         }
-        else if (currentState == AIState.Combat)
-        {
-            // 전투 초기화
-            combatDuration += Time.deltaTime;
-            if (combatDuration > combatTime)
-            {
-                SwitchingSearchMode();
-                return;
-            }
-        }
-
-        animator.SetBool("IsPatrol", false);
-        animator.SetBool("IsCombat", false);
-        animator.SetBool("IsSearch", false);
-
-        switch (currentState)
-        {
-            case AIState.Patrol:
-                animator.SetBool("IsPatrol", true);
-                UpdatePatrol();
-                break;
-            case AIState.Combat:
-                animator.SetBool("IsCombat", true);
-                UpdateCombat();
-                break;
-            case AIState.Search:
-                animator.SetBool("IsSearch", true);
-                UpdateSearch();
-                break;
-        }
+        currentState?.Execute();
     }
 
     public void ChangeState(BaseEnemyState newEnemyState)
@@ -99,10 +71,9 @@ public abstract class EnemyBrain : Enemy
     }
     protected override void OnDamage()
     {
-        if (currentState == AIState.Combat) return;
+        if (currentState == CombatState) return;
 
         StopAllCoroutines();
-        isActing = false;
 
         base.OnDamage();
 
@@ -114,107 +85,16 @@ public abstract class EnemyBrain : Enemy
             transform.rotation = Quaternion.LookRotation(lookDir);
         }
 
-        if (currentState != AIState.Combat)
+        if (currentState != CombatState)
         {
             Debug.Log("기습당함");
-            currentState = AIState.Combat;
-            lastPlayerPosition = playerTransform.position;
-            combatDuration = 0;
-        }
-    }
-    protected virtual void UpdatePatrol()
-    {
-        if (!agent.pathPending && agent.remainingDistance < 0.5f)
-        {
-            if (!agent.updateRotation) agent.updateRotation = true;
 
-            Vector3 ramdomPoint = tactic.GetRandomWayPoint(transform.position, 10f);
-            agent.SetDestination(ramdomPoint);
-        }
-    }
-    protected virtual void UpdateCombat()
-    {
-        if (isActing) return;
-        StartCoroutine(CombatRoutine());
-    }
-    protected virtual void UpdateSearch()
-    {
-        Debug.LogWarning("서치모드");
-
-        if (sight.CanSeePlayer(playerTransform))
-        {
-            SwitchingCombatMode();
-            return;
-        }
-
-        if (!isActing)
-        {
-            StartCoroutine(SearchRoutine());
+            LastPlayerPosition = playerTransform.position;
+            ChangeState(CombatState);
         }
     }
 
     protected abstract IEnumerator CombatRoutine();
-    protected virtual IEnumerator SearchRoutine()
-    {
-        isActing = true;
-        agent.isStopped = false;
-
-        if (agent.updateRotation) agent.updateRotation = false;
-
-        int wayPointCounter = Random.Range(1, 3);
-
-        for (int i = 0; i < wayPointCounter; i++)
-        {
-            Vector3 bluffPosition = tactic.GetRandomWayPoint(lastPlayerPosition, 10f);
-
-            yield return StartCoroutine(SearchMove(bluffPosition));
-            if (!isActing) yield break;
-        }
-
-        agent.SetDestination(lastPlayerPosition);
-
-        yield return StartCoroutine(SearchMove(lastPlayerPosition));
-
-        Debug.Log("수색 모드에서 정찰 모드로 전환");
-        currentState = AIState.Patrol;
-        isActing = false;
-    }
-
-    protected virtual IEnumerator SearchMove(Vector3 targetPosition)
-    {
-        agent.SetDestination(targetPosition);
-
-        while (agent.pathPending || agent.remainingDistance > .5f)
-        {
-            if (sight.CanSeePlayer(playerTransform))
-            {
-                isActing = false;
-                yield break;
-            }
-            Vector3 lookDir = (lastPlayerPosition - transform.position).normalized;
-            lookDir.y = 0;
-            if (lookDir != Vector3.zero)
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
-            }
-            yield return null;
-        }
-    }
-
-    protected void SwitchingCombatMode()
-    {
-        currentState = AIState.Combat;
-        combatDuration = 0;
-        StopAllCoroutines();
-        isActing = false;
-    }
-    protected void SwitchingSearchMode()
-    {
-        Debug.Log("전투종료 수색 ㄱㄱ");
-        currentState = AIState.Search;
-        agent.ResetPath();
-        isActing = false;
-    }
 
     public void StartStateCorutine(IEnumerator routine)
     {
