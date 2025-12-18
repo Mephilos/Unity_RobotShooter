@@ -41,7 +41,6 @@
 
 ---
 
-[https://www.notion.so](https://www.notion.so)
 
 ## 3. 기술 구현 및 아키텍처
 
