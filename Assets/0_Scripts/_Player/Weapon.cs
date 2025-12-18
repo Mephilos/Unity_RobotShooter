@@ -17,6 +17,7 @@ public class Weapon : MonoBehaviour
 
     public void Shoot(WeaponSO weaponSO, float currentSpeed)
     {
+        if (mainCamera == null) return;
         PlayShootEffect(weaponSO);
         ScoreManager.Instance.ReportShot();
         Vector3 shootDirection = ApplyShootSpread(currentSpeed);
