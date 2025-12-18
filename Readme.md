@@ -1,13 +1,5 @@
 # FPS RobotShooter
 
-제목: FPS RobotShooter
-태그: Firebase, InputSystem, ScriptableObject, 데이터 기반 설계, 리더보드, 상태 패턴, 지능형적 설계
-요약: Firebase 연동, 지능형 적 설계, 확장성과 재사용성을 고민하며 임했습니다.
-GitHub: https://github.com/Mephilos/Unity_RobotShooter
-
-Unity 6000.0.59f2
-
-개발 플랫폼 : MacOS Tahoe 26
 
 ## 1. 프로젝트 개요
 
