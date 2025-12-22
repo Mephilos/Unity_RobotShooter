@@ -1,5 +1,4 @@
-# FPS RobotShooter
-
+# FPS Dynamic 에임 트레이닝
 
 ## 1. 프로젝트 개요
 
@@ -12,46 +11,84 @@
 - **기술 스택**: Unity3D URP, UGUI, VSCode, GitHub
 
 ---
-
 ![대문화면](_images/longbattle.gif)
+
 ## 2. 기획 의도 및 목표
+
+![수류탄 투척](_images/grenade.gif)
+
+### 기술적 목표
+
+- Firebase를 이용한 실시간 온라인 리더보드, 인증 시스템 구축
+- ScriptableObject를 활용한 데이터 중심 설계를 통해 무기 추가, 적, 적의 타입을 확장, 수정 하기 쉽게 구현
+- 유니티6의 새로운 인풋 시스템 활용
+- 시야를 기반으로 적의 행동이 변하는 동적인 적 완성
+
+### 게임 컨셉
+
+- 보다 좋은 에임 정확도와 빠른 스테이지 클리어를 통해 보다 높은 스코어를 얻는 에임 트레이닝 게임
 
 ### 개발 동기
 
-- 기존의 FPS 에임 트레이닝 게임들의 단조로움에서 벗어나 트레이닝 게임을 재미있고, 도전욕구를 자극, 그리고 비교적 예측하기 어려운 동선, 행동을 적에게 부여하여 PvP FPS게임에서의 교전 상황을 모사 할 수 있는 게임을 목표로 개발하였습니다.
-
-### 게임 개요
-
-- 캐주얼 건 슈팅 게임
-- 무기 종류 별로 다른 반동, 탄 퍼짐 시스템
-- 적의 타입마다 다른 특징 부여
-- 명중률, 클리어 시간, 약점 공격 시 보너스 점수
+- 기존의 FPS 에임 트레이닝 게임들의 단조로움에서 벗어나 트레이닝 게임을 재미있고, 도전욕구를 자극하고, 비교적 예측하기 어려운 동선과 행동을 적에게 부여하여 PvP FPS게임에서의 교전 상황을 모사 할 수 있는 게임을 목표로 개발하였습니다.
 
 ### 개발 목표
 
 - 플레이어의 도전욕구 자극을 위한 스코어 보드 시스템
-    - 명중률, 순위, 클리어 시간, 점수, 백분위 표기
+- 명중률, 순위, 클리어 시간, 점수, 백분위 표기
 - 범용적인 FPS 게임의 무기특징을 가진 무기의 구현과 바리에이션
 - 적들이 상황에 따라 다른 행동을 하여 쉽게 적을 격파 할 수 없는 시스템
 - 적에게 약점을 부여하여 약점 타격시 데미지 보너스, 약점 킬시 스코어 보너스를 부여
 
-### 기술적 목표
-
-- 백엔드 연동
-- 유니티6의 새로운 인풋 시스템 활용
-
 ---
-![수류탄 투척](_images/grenade.gif)
 
 ## 3. 기술 구현 및 아키텍처
+
+![적 상태 패턴 적용.png](_images/diagram.png)
 
 ### 1. 현상황을 고려하여 전술을 선택 하는 상태 패턴 AI 설계
 
 - 구현 이유
-    - 단순 공격, 추적을 하는 적이 아닌, 플레이어의 거리, 체력 상황에 따라 적 AI의 행동을 다르게 하여 단조로운 타켓의 움직임에서 벗어나 체력이 유리하면 플레이어를 압박하고, 불리하면 엄폐 도망을 고려하는 타켓이 아닌 적같은 움직임을 구현하기 위해서 설계하였습니다.
+    - 단순 공격, 추적을 하는 적이 아닌, 플레이어의 거리, 체력 상황에 따라 적 AI의 행동을 다르게 하여 단조로운 타켓의 움직임에서 벗어나 체력이 유리하면 플레이어를 압박하고, 불리하면 엄폐 도망을 고려하는 타켓이 아닌 적같은 움직임을 구현하기 위해서 설계하였습니다
 - 상세
-    1. **상태 패턴 설계** 
-        1. EnemyBrain을 Context로 두고 베이스 추상 클래스 BaseEnemyState을 상속하여 적의 행동들을 상태 클래스 PatrolState, SearchState, RangeCombat, GrenadeThrow로 작성하고 캡슐화 하였습니다.
+    1. Raycast기반의 시야 체크형 설계
+        1. EnemySight를 시야 베이스로 플레이어가 시야에 있는가 없는가를 베이스로 움직임이 결정됩니다.
+        - 관련 코드 스니펫
+            
+            ```csharp
+            // EnemySight.cs
+            
+            public bool CanSeePlayer(Transform target)
+            {
+                if (target == null) return false;
+            		
+            		//타켓 방향
+                Vector3 targetDir = (target.position - eyePosition.position).normalized;
+            		
+            		// 타켓과의 거리 확인
+                float dist = Vector3.Distance(eyePosition.position, target.position);
+                if (dist > viewDistance) return false; // 설정된 거리 보다 멀면 그냥 리턴
+            		
+            		// 시야 정면과 타켓 방향간의 각도 확인
+                float angle = Vector3.Angle(eyePosition.forward, targetDir);
+            
+                RaycastHit hit;
+                if (angle < viewAngle / 2f)
+                {
+            		    // 각도와 거리가 체크를 통과하였다면 실제 장애물에 가려졌는지 레이를 쏴서 최종 확인
+                    // 타겟까지의 거리만큼만 설정하여 리소스를 줄였습니다
+                    if (Physics.Raycast(eyePosition.position, targetDir, out hit, dist, viewLayerMask))
+                    {
+            		        // 타켓이 플레이어일 경우 참 리턴
+                        if (hit.transform.CompareTag(Constants.PLAYER_TAG)) return true;
+                    }
+                }
+                return false;
+            }
+            ```
+            
+    2. **상태 패턴 설계** 
+        1. EnemyBrain을 컨텍스트로 두고 베이스 추상 클래스 BaseEnemyState을 상속하여 적의 행동들을 상태 클래스 PatrolState, SearchState, RangeCombat, GrenadeThrow로 작성하고 캡슐화 하였습니다.
         2. OCP를 고려하여 상태전환 로직 함수인 ChangeState와 행동로직 함수 Execute와 코루틴을 분리하여 새로운 상태 추가만 하면 되도록 하였습니다.
         - 관련 코드 스니펫
             
@@ -65,14 +102,14 @@
                 public abstract void Exit();
             }
             
-            // [EnemyBrain.cs] 상태 전환 및 실행 관리 (Context)
+            // EnemyBrain.cs 상태 전환 및 실행 관리
             public abstract class EnemyBrain : Enemy
             {
                 protected BaseEnemyState currentState;
             
                 protected override void Update()
                 {
-                    // 생략
+                    // ---(생략)--- //
                     currentState?.Execute(); // 현재 상태의 행동 프래임마다 실행
                 }
             
@@ -87,7 +124,7 @@
             }
             ```
             
-    2. **상황에 따라 달라지는 적의 전략**
+    3. **상황에 따라 달라지는 적의 전략**
         1. 적은 상태 판단 함수를 통해 상황을 판단합니다
             1. 체력 비교: 우위 동등 불리
             2. 거리 비교: 현재 거리와 무기 사거리를 기준으로 유리 불리
@@ -98,7 +135,7 @@
             // RangeEnemy.cs
             public virtual Strategy DetermineStrategy()
             {
-            		// 채력, 거리 채크 변수들
+            		// ---(채력, 거리 채크 변수들 생략)--- //
              
                 // 체력 상황 비교 (동등 열세 우세)
                 if (Mathf.Abs(myHP - playerHP) <= 40) return Strategy.Equal;
@@ -117,7 +154,7 @@
             }
             ```
             
-    3. **분기된 행동전략에 의거한 엄폐물 탐색**
+    4. **분기된 행동전략에 의거한 엄폐물 탐색**
         1. 전투 루틴중에는 단순히 가까운 엄페물이 아닌 현재 전략에 따른 엄폐물을 찾도록 설계 하였습니다.
             1. Physics.OverlapSphereNonAlloc를 사용 하여 주변을 탐색
             2. 전략에 따라 감지된 엄폐물을 필터링 합니다.
@@ -126,6 +163,7 @@
             
             ```csharp
             // EnemyTactic.cs
+            
             public Vector3 FindCover
             	(Transform playerPosition, Covering action, float searchRadius = 20f)
             {
@@ -134,7 +172,7 @@
             		    (transform.position, searchRadius, coverColliders, coverLayer);
                 if (cnt == 0) return Vector3.zero;
             
-                // 유효한 엄폐물 필터링
+                // ---(유효한 엄폐물 필터링 로직 생략)--- //
             
                 // 전략에 따른 엄폐물 우선순위 정렬
                 switch (action)
@@ -158,7 +196,7 @@
             }
             ```
             
-    4. **코루틴 기반 비동기 전투 제어**
+    5. **코루틴 기반 비동기 전투 제어**
         1. RangeCombatState는 코루틴을 이용하여 전투 루틴을 관리하여 행동단위로 상태 판단 제어를 했습니다.
         - 관련 코드 스니펫
             
@@ -166,7 +204,7 @@
             // RangeCombatState.cs
             protected virtual IEnumerator CombatRoutine()
             {
-                // 현재 상황에 맞는 전략 판단
+                // 현재 상황에 맞는 전략 판단 (DetermineStrategy 함수 호출)
                 RangeEnemy.Strategy strategy = range.DetermineStrategy();
                 Vector3 coveringPosition = Vector3.zero;
             
@@ -181,7 +219,7 @@
                         coveringPosition = range.Tactic.
             	            FindCover(playerTransform, EnemyTactic.Covering.NearPlayer);
                         break;
-                    // 기타 케이스 생략
+                    // --- (기타 케이스 생략) --- //
                 }
             
                 // 이동 전투 액션 실행파트
@@ -191,16 +229,15 @@
                 float actionTimer = 0f;
                 while (actionTimer < 2.0f) // 일정 시간 동안 전략 수행
                 {
-                    // 사격, 애니메이션, 회전 로직
+                    // --- (사격, 애니메이션, 회전 로직 생략) --- //
                     yield return null;
                 }
                 
                 range.OnCombatFinish(); // 행동 종료 후 다음 상태로 전환
             }
             ```
-            
-        
-        ![적 상태 패턴 적용.png](_images/diagram.png)
+
+![적 상태 패턴 적용.png](_images/diagram.png)
         
 
 ### 2. Firebase 기반 비동기 백엔드 및 실시간 리더보드 시스템
@@ -225,6 +262,7 @@
         
         ```csharp
         // AuthManager.cs
+        
         public class AuthManager : MonoBehaviour
         {
             // 외부에서 구독할 이벤트 정의
@@ -253,7 +291,7 @@
             void SignInAnonymously()
             {
                 firebaseAuth.SignInAnonymouslyAsync().
-        	        ContinueWithOnMainThread(task => { // 생략});
+        	        ContinueWithOnMainThread(task => { // ... (생략) ... // });
             }
         }
         ```
@@ -263,7 +301,7 @@
     
     - 로그인, 점수 저장, 데이터 로드 등 모든 네트워크 i/o는 Task메서드로 처리해 프리징이 발생하지 않도록 했습니다.
         
-        Unity API는 메인 스레드에서만 접근 가능하므로, Firebase의 ContinueWithOnMainThread를 사용해 스레드 컨텍스트  불일치 문제를 방지하고, 콜백이 중첩되지 않게 하여 가독성을 높였습니다.
+        Unity API는 메인 스레드에서만 접근 가능하므로, Firebase의 ContinueWithOnMainThread를 사용해 스레드 컨텍스트 불일치 문제를 방지하고, 콜백이 중첩되지 않게 하여 가독성을 높였습니다.
         
     - 관련 코드 스니펫
         
@@ -279,7 +317,7 @@
                     return; // 예외 처리
                 }
                 DataSnapshot snapshot = task.Result; // 메인 스레드 컨텍스트 보장 UI
-                // 데이터 파싱 로직
+                // ---(데이터 파싱 로직)--- //
                 onLoad?.Invoke(rankList);
             });
         }
@@ -287,7 +325,7 @@
         
     
     **3. 점수 저장 최적화, 저장시 데이터 동기화**
-    
+
     - 점수 저장 시 매번 덮어쓸때의 리소스 낭비를 막기위해 기존의 최고 기록과 현재 기록을 비교해 고점 갱신 시에만 서버에 갱신을 요청하도록 최적화 하였습니다.
         
         그리고 닉네임 변경시 점수 갱신이 함께 이루어지도록 UpdateChildrenAsync을 사용 하여 한번의 요청으로 묶어서 처리하도록 하였습니다.
@@ -302,7 +340,7 @@
         {
             // dbBestScore 디비에 저장된 최고 점수 조회 로직
         
-            // 최적화: 신기록일 경우에만 요청
+            // 신기록일 경우에만 요청하여 네크워크 리소스 최적화
             if (currentScore > dbBestScore)
             {
                 // 닉네임과 점수를 묶어서 처리 (유실될지언정 꼬여서 데이터베이스 더럽히지 않게)
@@ -337,13 +375,14 @@
             databaseReference.Child("users").OrderByChild(stageScorePath).GetValueAsync().ContinueWithOnMainThread(task => 
             {
                 // 애초부터 점수순으로 정렬된 데이터를 받아옴
-                // 생략
+                // ... (기타로직 생략) ... //
             });
         }
         ```
         
 
 ### 3. 데이터 관리, 확장성의 효율을 위해 데이터 시스템 분리
+
 
 - 구현 이유
     
@@ -440,6 +479,7 @@
 
 ### 4. 전투 시스템
 
+
 - 구현 내용
     
     기본적인 FPS게임의 타격감과 조작감을 위하여 반동, 탄퍼짐 이에 따른 크로스헤어의 벌어짐과 히트마커 연출을 구현하였고, 사격시의 충격을 연출하기 위해 시네머신 기능을 활용하여 카메라가 흔들리는 연출을 가미하였습니다.
@@ -508,7 +548,6 @@
             
             ```csharp
             // Weapon.cs
-            
             // 피격 판정 및 데미지 분기
             public void HandleShootHit(RaycastHit hit, WeaponSO weaponSO)
             {
@@ -766,14 +805,15 @@
     - 관련 코드 스니펫
         
         ```csharp
-        // FirebaseManager.cs 
+        // FirebaseManager.cs
+        
         // Dictionary 캐스팅을 제거하고 Snapshot API로 직접 접근
         
-        if (stageIndex == 0) { // 종합 점수 처리 로직 }
+        if (stageIndex == 0) { // ---(종합 점수 처리 로직)--- // }
         else
         {
             // 수정전 (Dictionary<string, object>)data.Value["stages"]-> 리스트로 오기 때문에 받을 수 없음
-            // 수정후: data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
+            // 수정후 data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
         
             // stages 노드와 stageIndex가 존재하는지 Snapshot 메서드로 안전하게 확인 없으면 다음 스테이지 체크
             if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) 
@@ -788,7 +828,7 @@
             if (stageSnap.HasChild("time")) 
                 uTime = Convert.ToSingle(stageSnap.Child("time").Value);
                 
-            // ...
+            // ---(이외 코드 생략)--- //
         }
         ```
         
@@ -829,12 +869,12 @@
         
             protected BaseEnemyState currentState;
             
-            // 생량
+            // ---(생략)--- //
             
-            // 거대한 Switch문 대신 현재 상태의 Execute()만 호출 해당상태의 로직이 실행
+            // Switch문 대신 현재 상태의 Execute()만 호출 설정상태의 로직 실행
             protected override void Update()
             {
-                // ...
+                // ---(생략)--- //
                 currentState?.Execute();
             }
         }
@@ -844,26 +884,24 @@
         {
             float dist = Vector3.Distance(transform.position, LastPlayerPosition);
         
-            // 투척 가능 조건만 확인 맞다면 투척 상태로 전환
+            // 투척 가능 조건 확인 맞다면 투척 상태로 전환
             if (CanThrowGrenade(dist))
             {
-                ChangeState(ThrowState); // GrenadeThrowState로 전이
+                ChangeState(ThrowState); // GrenadeThrowState로
             }
             else
             {
-                ChangeState(SearchState); // 아니라면 다시 서치모드
+                ChangeState(SearchState); // 아니라면 다시 서치모드 상태
             }
         }
         
         // GrenadeThrowState.cs
         public class GrenadeThrowState : BaseEnemyState
         {
-            // 생략
             public override void Enter()
             {
                 grenadier.Agent.isStopped = true;
                 grenadier.Animator.SetTrigger("ThrowGrenade");
-                // 생략
                 grenadier.StartStateCoroutine(ThrowGrenadeRoutine());
             }
         
@@ -936,7 +974,7 @@
             OnPlayerRegistered?.Invoke(Player, targetPoint);
         }
         
-        // [Enemy.cs]
+        // Enemy.cs
         protected virtual void OnEnable()
         {
             // 생략
@@ -970,32 +1008,43 @@
         
         ```csharp
         // OptimizationMeasurement.cs
+        
+        void OnEnable()
+        {
+            profilerRecorder = ProfilerRecorder
+        			    .StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
+        }
+        
         void Update()
         {
-            if (m_timeCounter < m_refreshTime)
+            deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+        
+            if (saveToCSV)
             {
-                m_timeCounter += Time.deltaTime;
-                m_frameCounter++;
+                timer += Time.deltaTime;
+                if (timer >= recordInterval)
+                {
+                    RecordData();
+                    timer = 0f;
+                }
             }
-            else
-            {
-                // GC 횟수, 메모리 사용량 수집
-                int gcCount = GC.CollectionCount(0); 
-                long memory = GC.GetTotalMemory(false);
-                
-                // StringBuilder로 CSV 포맷 데이터 생성 (GC 최소화 노력)
-                m_sb.Append($"{System.DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss")},{m_lastFramerate},{memory},{gcCount}");
-                
-                // 생략
-            }
+        }
+        
+        void RecordData()
+        {
+            float fps = 1.0f / deltaTime;
+            float totalMem = UnityEngine.Profiling.Profiler
+        						    .GetTotalAllocatedMemoryLong() / 1024f / 1024f;
+        
+            float gcAlloc = profilerRecorder.LastValue / 1024f;
+            int gcCount = GC.CollectionCount(0) - initGcCount;
+        
+            csvContent.AppendLine
+            ($"{Time.time:F1},{fps:F1},{totalMem:F1},{gcAlloc:F1},{gcCount}");
         }
         ```
         
-
 ![최적화 csv](_images/fps1.png)
 
 ![최적화 csv2](_images/fps2.png)
-
 ---
-
-## 5. 개발 과정, 교훈
