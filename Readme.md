@@ -50,7 +50,8 @@
 - 상세
     1. Raycast기반의 시야 체크형 설계
         1. EnemySight를 시야 베이스로 플레이어가 시야에 있는가 없는가를 베이스로 움직임이 결정됩니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // EnemySight.cs
@@ -83,11 +84,13 @@
                 return false;
             }
             ```
+        </details>
             
     2. **상태 패턴 설계** 
         1. EnemyBrain을 컨텍스트로 두고 베이스 추상 클래스 BaseEnemyState을 상속하여 적의 행동들을 상태 클래스 PatrolState, SearchState, RangeCombat, GrenadeThrow로 작성하고 캡슐화 하였습니다.
         2. OCP를 고려하여 상태전환 로직 함수인 ChangeState와 행동로직 함수 Execute와 코루틴을 분리하여 새로운 상태 추가만 하면 되도록 하였습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // BaseEnemyState.cs 추상 클래스로 공통 인터페이스 정의
@@ -120,13 +123,15 @@
                 }
             }
             ```
-            
+        </details>
+
     3. **상황에 따라 달라지는 적의 전략**
         1. 적은 상태 판단 함수를 통해 상황을 판단합니다
             1. 체력 비교: 우위 동등 불리
             2. 거리 비교: 현재 거리와 무기 사거리를 기준으로 유리 불리
         2. 이러한 판단 기준으로 동등, 유리 사정권안, 유리 사정권밖, 불리 사정권안, 불리 사정권밖의 5개의 행동로직으로 분기하여 작동합니다. 
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // RangeEnemy.cs
@@ -150,13 +155,15 @@
                 }
             }
             ```
+        </details>
             
     4. **분기된 행동전략에 의거한 엄폐물 탐색**
         1. 전투 루틴중에는 단순히 가까운 엄페물이 아닌 현재 전략에 따른 엄폐물을 찾도록 설계 하였습니다.
             1. Physics.OverlapSphereNonAlloc를 사용 하여 주변을 탐색
             2. 전략에 따라 감지된 엄폐물을 필터링 합니다.
             3. 필터링 된 엄폐물에 의거하여 NavMesh.SamplePosition을 이용하여 검증한뒤 이동을 실행합니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // EnemyTactic.cs
@@ -192,10 +199,13 @@
                 return transform.position;
             }
             ```
+        </details>
+
             
     5. **코루틴 기반 비동기 전투 제어**
         1. RangeCombatState는 코루틴을 이용하여 전투 루틴을 관리하여 행동단위로 상태 판단 제어를 했습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // RangeCombatState.cs
@@ -233,8 +243,8 @@
                 range.OnCombatFinish(); // 행동 종료 후 다음 상태로 전환
             }
             ```
-
-![적 상태 패턴 적용.png](_images/diagram.png)
+        </details>
+    ![적 상태 패턴 적용.png](_images/diagram.png)
         
 
 ### 2. Firebase 기반 비동기 백엔드 및 실시간 리더보드 시스템
@@ -255,7 +265,8 @@
         
         그리고 접근성을 위해 익명 로그인과 로그인 환경이 변하더라도 게임 기록을 유지 할 수 있는 이메일 로그인도 지원 하도록 설계하였습니다.
         
-    - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // AuthManager.cs
@@ -292,6 +303,7 @@
             }
         }
         ```
+        </details>
         
     
     **2. Task 기반 비동기 네트워크 처리**
@@ -300,7 +312,8 @@
         
         Unity API는 메인 스레드에서만 접근 가능하므로, Firebase의 ContinueWithOnMainThread를 사용해 스레드 컨텍스트 불일치 문제를 방지하고, 콜백이 중첩되지 않게 하여 가독성을 높였습니다.
         
-    - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // FirebaseManager.cs
@@ -319,6 +332,7 @@
             });
         }
         ```
+        </details>
         
     
     **3. 점수 저장 최적화, 저장시 데이터 동기화**
@@ -329,7 +343,8 @@
         
         이로써 네트워크 리소스는 줄이고 둘중하나만 저장되는 경우를 없게 하여 데이터가 유실 되더라도 최소한 데이터가 꼬이는 일이 없도록 하였습니다.
         
-    - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // FirebaseManager.cs
@@ -354,12 +369,13 @@
             }
         }
         ```
+        </details>
         
-    
     **4. Firebase DB 구조 설계, 리더 보드 최적화**
     
     - 데이터 조회 리소스를 줄이기 위하여 유저→(유저 데이터) 스테이지 → (스테이지별 데이터)로 계층을 나누어 DB를 설계 하였고 유저가 리더보드 데이터 갱신을 요청할 시 유저(클라이언트)가 아닌 서버에서 정렬된 데이터를 받아올 수 있도록 하여 클라이언트, 네크워크 리소스를 절약할수 있게 하였습니다.
-    - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // FirebaseManager.cs
@@ -376,6 +392,7 @@
             });
         }
         ```
+        </details>
         
 
 ### 3. 데이터 관리, 확장성의 효율을 위해 데이터 시스템 분리
@@ -390,7 +407,8 @@
 - 상세
     1. 스테이지 보너스 점수 관리는 한눈에
         - 작은 볼륨의 많은 스테이지를 생각하고 만든 게임에 맞게 클리어시 타임 보너스를 추가하고 계산하는 기준이 되는 데이터는 한번에 많은 양을 관리 할 수 있는 익숙한 엑셀CSV를 사용 하게 설계하였고, 프로그램 동작시 효율을 챙기기 위해 데이터 파싱시 Dictionary로 캐싱하게 하여 효율을 높였습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // CSVManager.cs
@@ -425,13 +443,15 @@
                 }
             }
             ```
-            
+        </details>
+        
     2. 무기, 적개체의 데이터 관리는 확장을 고려
         - 무기와 적개체에 관한 데이터는 새로운 속성들이 추가 될 확률이 높은 데이터(새로운 스킬의 쿨타임 이라 던가)들이기 때문에 데이터 속성 추가가 용이한게 좋다고 생각했습니다.
             
             그래서 ScriptableObject를 통해 데이터의 속성 추가의 편리함을 챙기고, 유니티 에디터 안에서의 데이터 조정을 편리하게 하였고, 같은 속성의 적개체를 새로운 추가 할 때에도 쉽게 새로운 ScriptObject를 할당하여 데이터를 다르게 하는 것으로 쉽게 적 개체를 늘리거나, 특별한 기믹이 없는 무기의 경우 같은 ScriptableObject로 데이터값만 다르게 하여 저격총, 기관총, 핸드건, 샷건 등 여러 무기로 확장 될 수 있었습니다.
             
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // WeaponSO.cs
@@ -471,7 +491,7 @@
                 }
             }
             ```
-            
+        </details>
     
 
 ### 4. 전투 시스템
@@ -484,7 +504,8 @@
 - 상세
     1. 반동과 탄퍼짐 구현
         - 이를 위해 사격지속 시간과, 플레이어의 이동속도에 비례하여 탄퍼짐이 증가하고, 사격지속 시간에 비례하여 카메라가 위로 들리는 반동 시스템을 구현하였습니다.
-        - **관련 코드 스니펫**
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // FirstPersonController.cs를 분석하여 내부에 작성한 게터와 세터 함수
@@ -538,10 +559,13 @@
                 keepFireRecoilPenalty += 1f;
             }
             ```
+        </details>
+        
             
     2. 부위별 피격 판정
         - 적에게 적중 시 IDamageable 인터페이스와 별도로 WeakPoint 컴포넌트를 감지하도록 구현했습니다. (약점 타격 시 전용 VFX와 추가 점수를 부여)
-        - **관련 코드 스니펫**
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // Weapon.cs
@@ -589,10 +613,13 @@
                 }
             }
             ```
+        </details>
+        
             
     3. 타격감 및 피격 경직 시스템
         - 적 피격 시 코루틴을 통해 이동 속도를 일시적으로 감소시켜 물리적인 타격감을 표현하였습니다.
-        - **관련 코드 스니펫**
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // Enemy.cs
@@ -623,7 +650,7 @@
                 slowRoutine = null;
             }
             ```
-            
+        </details>
     
 
 ### 5. 최적화를 위한 설계
@@ -635,7 +662,8 @@
 - 상세
     1. 물리 연산 최적화
         - 처음에 사용했던 OverlapSphere은 쓰면 매번 새로운 배열을 만들어 메모리(GC)가 쌓이는 문제가 있어, 이를 해결하기 위해 OverlapSphereNonAlloc을 사용하여 배열을 한번만 할당하고 재사용하도록 바꿨습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // EnemyTactic.cs
@@ -653,10 +681,12 @@
                 if (cnt == 0) return Vector3.zero;
             }
             ```
-            
+        </details>
+        
     2. 오브젝트 풀링
         - 총알이나 적처럼 자주 생기고 사라지는 오브젝트는 매번 생성/파괴하면 리소스 효율이 나쁩니다. 이를 위해 사용한 오브젝트를 끄고 대기시켰다가 다시 사용하는 풀링 시스템을 만들었습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // PoolManager.cs
@@ -682,10 +712,12 @@
                 }
             }
             ```
-            
+        </details>
+        
     3. 성능 측정 툴 제작
         - 최적화를 실질적인 데이터로 확인하기 위해 프레임과 메모리 사용량, GC메모리와 카운터를 텍스트 CSV로 저장하는 기능을 추가하여 최적화 전후 성능 차이를 숫자로 비교할 수 있게되었습니다.
-        - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
             
             ```csharp
             // OptimizationMeasurement.cs
@@ -707,7 +739,7 @@
                 csvContent.AppendLine($"{Time.time:F1},{fps:F1},{totalMem:F1},{gcAlloc:F1}");
             }
             ```
-            
+        </details>
         
 
 ---
@@ -731,57 +763,60 @@
         
         그리고 MainMenuHandler에 AuthManger의 Ready플레그를 기다리는 코루틴을 작성하여 AuthManager가 초기화완료 시점에 UI를 연결하도록 대기 하는 코루틴을 추가하였습니다.
         
-    - 관련 코드 스니펫
-        
-        ```csharp
-        // MainMenuHandler.cs
-        
-        // 파이어베이스 인증 초기화 대기 루틴
-        IEnumerator AuthInitWaitRoutine()
-        {
-            // 일단 버튼들을 비활성화 연결이 되지 않으면 아예 클릭도 못하도록
-            loginButton.SetActive(false);
-            logoutButton.SetActive(false);
-        
-            // 인증 매니저가 생성될 때까지 대기
-            while (AuthManager.Instance == null)
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
+            
+            ```csharp
+            // MainMenuHandler.cs
+            
+            // 파이어베이스 인증 초기화 대기 루틴
+            IEnumerator AuthInitWaitRoutine()
             {
-                yield return null;
-            }
-        
-            // 이벤트 연결
-            AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
-            AuthManager.Instance.OnLogout += OnLogout;
-        
-            // 파이어베이스가 완전히 준비될 때까지 대기
-            while (!AuthManager.Instance.IsFirebaseReady)
-            {
-                yield return null;
-            }
-        
-            // 준비 완료 후에 유저 상태에 맞춰 갱신
-            RefreshAuthUI(AuthManager.Instance.CurrentUser);
-        }
-        
-        // AuthManager.cs
-        void InitializeAuth()
-        {
-            // 비동기 의존성 확인(CheckAndFixDependenciesAsync)
-            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
-            {
-                var dependencyStatus = task.Result;
-                if (dependencyStatus == DependencyStatus.Available)
+                // 일단 버튼들을 비활성화 연결이 되지 않으면 아예 클릭도 못하도록
+                loginButton.SetActive(false);
+                logoutButton.SetActive(false);
+            
+                // 인증 매니저가 생성될 때까지 대기
+                while (AuthManager.Instance == null)
                 {
-                    firebaseAuth = FirebaseAuth.DefaultInstance;
-                    
-                    // 초기화 생략
-        
-                    // 초기화가 끝났음을 알리는 플래그 설정
-                    IsFirebaseReady = true; 
+                    yield return null;
                 }
-            });
-        }
-        ```
+            
+                // 이벤트 연결
+                AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
+                AuthManager.Instance.OnLogout += OnLogout;
+            
+                // 파이어베이스가 완전히 준비될 때까지 대기
+                while (!AuthManager.Instance.IsFirebaseReady)
+                {
+                    yield return null;
+                }
+            
+                // 준비 완료 후에 유저 상태에 맞춰 갱신
+                RefreshAuthUI(AuthManager.Instance.CurrentUser);
+            }
+            
+            // AuthManager.cs
+            void InitializeAuth()
+            {
+                // 비동기 의존성 확인(CheckAndFixDependenciesAsync)
+                FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+                {
+                    var dependencyStatus = task.Result;
+                    if (dependencyStatus == DependencyStatus.Available)
+                    {
+                        firebaseAuth = FirebaseAuth.DefaultInstance;
+                        
+                        // 초기화 생략
+            
+                        // 초기화가 끝났음을 알리는 플래그 설정
+                        IsFirebaseReady = true; 
+                    }
+                });
+            }
+            ```
+        </details>
+        
         
     
 2. **firebase 특성으로 인한 스테이지 별 데이터 파싱 오류 발생**
@@ -799,35 +834,37 @@
         Dictionary형 변환 방식을 버리고 Firebase SDK의 DataSnapshot 메서드Child(), HasChild(), Exists를 활용하는 것으로 수정하였습니다.
         이를 통해 서버가 데이터를 어떤 방식으로 반환하든, 키값을 중심으로 값에 접근할 수 있게 설계하여 해결하였습니다.
         
-    - 관련 코드 스니펫
+        <details>
+        <summary><strong>관련 코드 스니펫</summary></strong>
         
-        ```csharp
-        // FirebaseManager.cs
-        
-        // Dictionary 캐스팅을 제거하고 Snapshot API로 직접 접근
-        
-        if (stageIndex == 0) { // ---(종합 점수 처리 로직)--- // }
-        else
-        {
-            // 수정전 (Dictionary<string, object>)data.Value["stages"]-> 리스트로 오기 때문에 받을 수 없음
-            // 수정후 data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
-        
-            // stages 노드와 stageIndex가 존재하는지 Snapshot 메서드로 안전하게 확인 없으면 다음 스테이지 체크
-            if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) 
-                continue;
-        
-            DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
+            ```csharp
+            // FirebaseManager.cs
             
-            // 값 추출도 Child().Value로
-            if (stageSnap.HasChild("score")) 
-                uScore = Convert.ToInt32(stageSnap.Child("score").Value);
+            // Dictionary 캐스팅을 제거하고 Snapshot API로 직접 접근
             
-            if (stageSnap.HasChild("time")) 
-                uTime = Convert.ToSingle(stageSnap.Child("time").Value);
+            if (stageIndex == 0) { // ---(종합 점수 처리 로직)--- // }
+            else
+            {
+                // 수정전 (Dictionary<string, object>)data.Value["stages"]-> 리스트로 오기 때문에 받을 수 없음
+                // 수정후 data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
+            
+                // stages 노드와 stageIndex가 존재하는지 Snapshot 메서드로 안전하게 확인 없으면 다음 스테이지 체크
+                if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) 
+                    continue;
+            
+                DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
                 
-            // ---(이외 코드 생략)--- //
-        }
-        ```
+                // 값 추출도 Child().Value로
+                if (stageSnap.HasChild("score")) 
+                    uScore = Convert.ToInt32(stageSnap.Child("score").Value);
+                
+                if (stageSnap.HasChild("time")) 
+                    uTime = Convert.ToSingle(stageSnap.Child("time").Value);
+                    
+                // ---(이외 코드 생략)--- //
+            }
+            ```
+        </details>
         
     
 3. **길고 복잡한 EnemyBrain.cs 의 전투 상태 로직을 유동적으로 추가 활용하기 위한 상태 패턴 도입**
@@ -849,7 +886,8 @@
     그리해여 투척을 GrenadeThrowState라는 하나의 클래스로 분리했습니다.
     전투 중 투척 조건이 만족되면 RangeCombatState에서 GrenadeThrowState로 상태가 바뀌고 투척 후 다시 SearchState로 복귀하는 순환 루프를 만들었습니다.
     이러한 결과로 새로운 행동 패턴을 추가할 때 기존 코드를 건드리지 않고 새로운 상태를 넣어주면 되도록 변경되었습니다.
-    - 관련 코드 스니펫
+    <details>
+    <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // EnemyBrain.cs
@@ -910,6 +948,8 @@
             }
         }
         ```
+    </details>
+        
         
     
 4. **초기화 순서, 동적 객체 Player 참조 문제 해결**
@@ -925,7 +965,8 @@
         1. PlayerSpawner가 의존성(카메라, UI)을 직접 주입하여 초기값을 세팅한후 플레이어 초기화를 호출하고 GameManager에 등록합니다.
         2. GameManager는 플레이어 등록 이벤트인 OnPlayerRegistered 이벤트를 날립니다.
         3. 적이나 UI는 이 이벤트를 구독하여 플레이어가 생성된 시점에 안전하게 참조를 가져오도록 수정했습니다.
-    - 관련 코드 스니펫
+    <details>
+    <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // GameInitializer.cs
@@ -990,7 +1031,8 @@
             }
         }
         ```
-        
+    </details>
+            
     
 5. **체감하기 어려운 최적화 문제**
 - 이슈
@@ -1001,7 +1043,8 @@
     
     FPS(프레임), 메모리 사용량, GC(가비지 컬렉터) 발생 횟수를 실시간으로 측정하여 CSV 파일로 저장하는 툴(OptimizationMeasurement)을 작성해 보았습니다.
     
-    - 관련 코드 스니펫
+    <details>
+    <summary><strong>관련 코드 스니펫</summary></strong>
         
         ```csharp
         // OptimizationMeasurement.cs
@@ -1040,7 +1083,8 @@
             ($"{Time.time:F1},{fps:F1},{totalMem:F1},{gcAlloc:F1},{gcCount}");
         }
         ```
-        
+    </details>
+    
 ![최적화 csv](_images/fps1.png)
 
 ![최적화 csv2](_images/fps2.png)
