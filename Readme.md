@@ -747,142 +747,143 @@
 ## 4. 문제 해결 및 기술적 도전
 
 1. **firebase 연동 로그인 문제 (비동기)**
-    - 발생이슈
+- 발생이슈
+    
+    로그인 기능을 구현했으나, 앱 실행 초기 파이어베이스의 초기화(비동기)가 완료되기 전에 메인 메뉴 UI가 먼저 로드되는 문제가 발생했습니다. 
+    
+    이로 인해 이미 로그인된 유저임에도 불구하고, 로그인 버튼이 노출되거나 닉네임이 UnknownPlayer(플플레이어 데이터를 찾지못하면 나오는 이름)로 나오는 레이스 컨디션 이슈가 있었습니다.
+    
+- 원인
+    
+    유니티의 생명주기와 파이어베이스의 네크워크 데이터 연동 시점이 동기화 되지 않아 데이터를 받아 오지 못한 상태에서 UI 갱신 로직이 실행되어서 발생한 문제 였습니다.
+    
+- 해결 방법
+    
+    초기화 상태를 확인하기위해 AuthManager에 IsFirebaseReady 라는 플레기를 선언하고, 초기화상태에 따라 상태를 받을 수  있게 하였습니다.
+    
+    그리고 MainMenuHandler에 AuthManger의 Ready플레그를 기다리는 코루틴을 작성하여 AuthManager가 초기화완료 시점에 UI를 연결하도록 대기 하는 코루틴을 추가하였습니다.
+    
+    <details>
+    <summary><strong>관련 코드 스니펫</summary></strong>
         
-        로그인 기능을 구현했으나, 앱 실행 초기 파이어베이스의 초기화(비동기)가 완료되기 전에 메인 메뉴 UI가 먼저 로드되는 문제가 발생했습니다. 
+        ```csharp
+        // MainMenuHandler.cs
         
-        이로 인해 이미 로그인된 유저임에도 불구하고, 로그인 버튼이 노출되거나 닉네임이 UnknownPlayer(플플레이어 데이터를 찾지못하면 나오는 이름)로 나오는 레이스 컨디션 이슈가 있었습니다.
+        // 파이어베이스 인증 초기화 대기 루틴
+        IEnumerator AuthInitWaitRoutine()
+        {
+            // 일단 버튼들을 비활성화 연결이 되지 않으면 아예 클릭도 못하도록
+            loginButton.SetActive(false);
+            logoutButton.SetActive(false);
         
-    - 원인
-        
-        유니티의 생명주기와 파이어베이스의 네크워크 데이터 연동 시점이 동기화 되지 않아 데이터를 받아 오지 못한 상태에서 UI 갱신 로직이 실행되어서 발생한 문제 였습니다.
-        
-    - 해결 방법
-        
-        초기화 상태를 확인하기위해 AuthManager에 IsFirebaseReady 라는 플레기를 선언하고, 초기화상태에 따라 상태를 받을 수  있게 하였습니다.
-        
-        그리고 MainMenuHandler에 AuthManger의 Ready플레그를 기다리는 코루틴을 작성하여 AuthManager가 초기화완료 시점에 UI를 연결하도록 대기 하는 코루틴을 추가하였습니다.
-        
-        <details>
-        <summary><strong>관련 코드 스니펫</summary></strong>
-            
-            ```csharp
-            // MainMenuHandler.cs
-            
-            // 파이어베이스 인증 초기화 대기 루틴
-            IEnumerator AuthInitWaitRoutine()
+            // 인증 매니저가 생성될 때까지 대기
+            while (AuthManager.Instance == null)
             {
-                // 일단 버튼들을 비활성화 연결이 되지 않으면 아예 클릭도 못하도록
-                loginButton.SetActive(false);
-                logoutButton.SetActive(false);
-            
-                // 인증 매니저가 생성될 때까지 대기
-                while (AuthManager.Instance == null)
-                {
-                    yield return null;
-                }
-            
-                // 이벤트 연결
-                AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
-                AuthManager.Instance.OnLogout += OnLogout;
-            
-                // 파이어베이스가 완전히 준비될 때까지 대기
-                while (!AuthManager.Instance.IsFirebaseReady)
-                {
-                    yield return null;
-                }
-            
-                // 준비 완료 후에 유저 상태에 맞춰 갱신
-                RefreshAuthUI(AuthManager.Instance.CurrentUser);
+                yield return null;
             }
-            
-            // AuthManager.cs
-            void InitializeAuth()
+        
+            // 이벤트 연결
+            AuthManager.Instance.OnLoginSuccess += RefreshAuthUI;
+            AuthManager.Instance.OnLogout += OnLogout;
+        
+            // 파이어베이스가 완전히 준비될 때까지 대기
+            while (!AuthManager.Instance.IsFirebaseReady)
             {
-                // 비동기 의존성 확인(CheckAndFixDependenciesAsync)
-                FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
-                {
-                    var dependencyStatus = task.Result;
-                    if (dependencyStatus == DependencyStatus.Available)
-                    {
-                        firebaseAuth = FirebaseAuth.DefaultInstance;
-                        
-                        // 초기화 생략
-            
-                        // 초기화가 끝났음을 알리는 플래그 설정
-                        IsFirebaseReady = true; 
-                    }
-                });
+                yield return null;
             }
-            ```
-        </details>
         
+            // 준비 완료 후에 유저 상태에 맞춰 갱신
+            RefreshAuthUI(AuthManager.Instance.CurrentUser);
+        }
         
+        // AuthManager.cs
+        void InitializeAuth()
+        {
+            // 비동기 의존성 확인(CheckAndFixDependenciesAsync)
+            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+            {
+                var dependencyStatus = task.Result;
+                if (dependencyStatus == DependencyStatus.Available)
+                {
+                    firebaseAuth = FirebaseAuth.DefaultInstance;
+                    
+                    // 초기화 생략
+        
+                    // 초기화가 끝났음을 알리는 플래그 설정
+                    IsFirebaseReady = true; 
+                }
+            });
+        }
+        ```
+    </details>
+    
+    
     
 2. **firebase 특성으로 인한 스테이지 별 데이터 파싱 오류 발생**
-    - 발생이슈
+- 발생이슈
+    
+    스테이지별 점수 데이터를 연동하는 과정에서, 종합 랭킹은 정상적으로 표시되나, 스테이지별 랭킹 조회 시 데이터가 로드되지 않고 리더보드 목록이 전부 초기값(점수 0, 이름 없음)으로만 표시되는 문제가 발생했습니다.
+    
+- 원인
+    
+    Firebase Realtime Database는 키값이 0, 1, 2와 같이 연속된 정수 인덱스일 경우 네트워크 효율을 위해 Dictionary가 아닌 List 형태로 데이터를 반환한다는 걸 알게 되었습니다.
+    기존 코드는 데이터를 Dictionary<string, object>로 캐스팅 하도록 작성되어 있었기 때문에, List 형태로 들어온 데이터를 처리하지 못하고 캐스팅 실패, 아예 파싱 로직 자체가 동작하지 않았었습니다.
+    
+- 해결방법
+    
+    Dictionary형 변환 방식을 버리고 Firebase SDK의 DataSnapshot 메서드Child(), HasChild(), Exists를 활용하는 것으로 수정하였습니다.
+    이를 통해 서버가 데이터를 어떤 방식으로 반환하든, 키값을 중심으로 값에 접근할 수 있게 설계하여 해결하였습니다.
+    
+    <details>
+    <summary><strong>관련 코드 스니펫</summary></strong>
+    
+        ```csharp
+        // FirebaseManager.cs
         
-        스테이지별 점수 데이터를 연동하는 과정에서, 종합 랭킹은 정상적으로 표시되나, 스테이지별 랭킹 조회 시 데이터가 로드되지 않고 리더보드 목록이 전부 초기값(점수 0, 이름 없음)으로만 표시되는 문제가 발생했습니다.
+        // Dictionary 캐스팅을 제거하고 Snapshot API로 직접 접근
         
-    - 원인
+        if (stageIndex == 0) { // ---(종합 점수 처리 로직)--- // }
+        else
+        {
+            // 수정전 (Dictionary<string, object>)data.Value["stages"]-> 리스트로 오기 때문에 받을 수 없음
+            // 수정후 data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
         
-        Firebase Realtime Database는 키값이 0, 1, 2와 같이 연속된 정수 인덱스일 경우 네트워크 효율을 위해 Dictionary가 아닌 List 형태로 데이터를 반환한다는 걸 알게 되었습니다.
-        기존 코드는 데이터를 Dictionary<string, object>로 캐스팅 하도록 작성되어 있었기 때문에, List 형태로 들어온 데이터를 처리하지 못하고 캐스팅 실패, 아예 파싱 로직 자체가 동작하지 않았었습니다.
+            // stages 노드와 stageIndex가 존재하는지 Snapshot 메서드로 안전하게 확인 없으면 다음 스테이지 체크
+            if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) 
+                continue;
         
-    - 해결방법
-        
-        Dictionary형 변환 방식을 버리고 Firebase SDK의 DataSnapshot 메서드Child(), HasChild(), Exists를 활용하는 것으로 수정하였습니다.
-        이를 통해 서버가 데이터를 어떤 방식으로 반환하든, 키값을 중심으로 값에 접근할 수 있게 설계하여 해결하였습니다.
-        
-        <details>
-        <summary><strong>관련 코드 스니펫</summary></strong>
-        
-            ```csharp
-            // FirebaseManager.cs
+            DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
             
-            // Dictionary 캐스팅을 제거하고 Snapshot API로 직접 접근
+            // 값 추출도 Child().Value로
+            if (stageSnap.HasChild("score")) 
+                uScore = Convert.ToInt32(stageSnap.Child("score").Value);
             
-            if (stageIndex == 0) { // ---(종합 점수 처리 로직)--- // }
-            else
-            {
-                // 수정전 (Dictionary<string, object>)data.Value["stages"]-> 리스트로 오기 때문에 받을 수 없음
-                // 수정후 data.Child("stages").Child(index) -> 데이터 구조에 상관없이 스냅샷으로 받아옴
-            
-                // stages 노드와 stageIndex가 존재하는지 Snapshot 메서드로 안전하게 확인 없으면 다음 스테이지 체크
-                if (!data.HasChild("stages") || !data.Child("stages").Child(stageIndex.ToString()).Exists) 
-                    continue;
-            
-                DataSnapshot stageSnap = data.Child("stages").Child(stageIndex.ToString());
+            if (stageSnap.HasChild("time")) 
+                uTime = Convert.ToSingle(stageSnap.Child("time").Value);
                 
-                // 값 추출도 Child().Value로
-                if (stageSnap.HasChild("score")) 
-                    uScore = Convert.ToInt32(stageSnap.Child("score").Value);
-                
-                if (stageSnap.HasChild("time")) 
-                    uTime = Convert.ToSingle(stageSnap.Child("time").Value);
-                    
-                // ---(이외 코드 생략)--- //
-            }
-            ```
-        </details>
+            // ---(이외 코드 생략)--- //
+        }
+        ```
+    </details>
         
     
 3. **길고 복잡한 EnemyBrain.cs 의 전투 상태 로직을 유동적으로 추가 활용하기 위한 상태 패턴 도입**
-    - 발생이슈
-        
-        초기 AI 로직은 enum과 switch 문을 사용하여 하나의 Update 함수 안에서 모든 분기를 처리했습니다.
-        하지만 새로운 적 척탄병을 추가하고 난 뒤 코드가 너무나도 복잡하고 난잡하고 다음에 추가할 새로운 타입의 적을 추가 한다면 RangeCombatRoutine을 상속하여 또 새로운 적의 루틴을 전투루틴에 새로 작성 할 생각을 하니 이게 맞는 방법인가 진짜 이게 FSM이라고 볼수 있나 싶었습니다.
-        
-        증가한 복잡도는 차치하고서라도 똑같은 코드를 복사해와서 그 코드 로직안에 충돌없이 새로운 로직을 짜넣기란 생각만해도 머리가 아파왔습니다.
-        
-        그리하여 간단하게 상태를 정의하는 클래스들을 만들어 파츠를 갈아 끼우듯이 코드를 변경하기로하였습니다.
-        
-    - 시행착오
-        
-        처음에는 기존과 별 다를 바 없이 CombatState를 상속받은 GrenadierCombatState를 만들어 사격과 투척을 동시에 처리하려 했습니다. 
-        하지만 이는 전과 모양만 다를 뿐 똑같은 구조를 가지고 있었고, 다음 추가가 아니라 지금 베이직 코드를 정해놓고 상태 별로 전환이라는 형태로 구상하였고, 이 과정에서 투척이라는 로직을 하나의 상태로 빼기로 하였습니다.
-        
-    - 문제 해결
+- 발생이슈
+    
+    초기 AI 로직은 enum과 switch 문을 사용하여 하나의 Update 함수 안에서 모든 분기를 처리했습니다.
+    하지만 새로운 적 척탄병을 추가하고 난 뒤 코드가 너무나도 복잡하고 난잡하고 다음에 추가할 새로운 타입의 적을 추가 한다면 RangeCombatRoutine을 상속하여 또 새로운 적의 루틴을 전투루틴에 새로 작성 할 생각을 하니 이게 맞는 방법인가 진짜 이게 FSM이라고 볼수 있나 싶었습니다.
+    
+    증가한 복잡도는 차치하고서라도 똑같은 코드를 복사해와서 그 코드 로직안에 충돌없이 새로운 로직을 짜넣기란 생각만해도 머리가 아파왔습니다.
+    
+    그리하여 간단하게 상태를 정의하는 클래스들을 만들어 파츠를 갈아 끼우듯이 코드를 변경하기로하였습니다.
+    
+- 시행착오
+    
+    처음에는 기존과 별 다를 바 없이 CombatState를 상속받은 GrenadierCombatState를 만들어 사격과 투척을 동시에 처리하려 했습니다. 
+    하지만 이는 전과 모양만 다를 뿐 똑같은 구조를 가지고 있었고, 다음 추가가 아니라 지금 베이직 코드를 정해놓고 상태 별로 전환이라는 형태로 구상하였고, 이 과정에서 투척이라는 로직을 하나의 상태로 빼기로 하였습니다.
+    
+- 문제 해결
+
     그리해여 투척을 GrenadeThrowState라는 하나의 클래스로 분리했습니다.
     전투 중 투척 조건이 만족되면 RangeCombatState에서 GrenadeThrowState로 상태가 바뀌고 투척 후 다시 SearchState로 복귀하는 순환 루프를 만들었습니다.
     이러한 결과로 새로운 행동 패턴을 추가할 때 기존 코드를 건드리지 않고 새로운 상태를 넣어주면 되도록 변경되었습니다.
@@ -953,18 +954,20 @@
         
     
 4. **초기화 순서, 동적 객체 Player 참조 문제 해결**
-    - 발생 이슈
+- 발생 이슈
+
     싱글톤 매니저들이 초기화되기 전에 다른 스크립트가 매니저를 호출하여 NullReferenceException이 간헐적으로 발생하는 이슈가 있었고,  GameInitializer를 작성하여 매니저들의 생성 순서를 명시적으로 정하였으나 인게임 씬 로드 직후 적이나 UI가 OnEnable에서 플레이어를 참조하려다 실패하는 문제가 발생하였습니다.
-    - 해결 과정
-        
-        실행 순서 강제 
-        우선 유니티의 Script Execution Order를 조정하여 플레이어 관련 스크립트들을 먼저 실행시켰서 해결했으나 이는 프로젝트가 커질수록 관리 포인트가 초기화 문제 발생시 원인을 찾기 힘든 구조라 생각하였습니다..
-        
-    - 문제 해결
+- 해결 과정
+    
+    실행 순서 강제 
+    우선 유니티의 Script Execution Order를 조정하여 플레이어 관련 스크립트들을 먼저 실행시켰서 해결했으나 이는 프로젝트가 커질수록 관리 포인트가 초기화 문제 발생시 원인을 찾기 힘든 구조라 생각하였습니다..
+    
+- 문제 해결
+
     GameManager를 기준으로 플레이어가 생성되고 등록되는 시점을 기준으로 플레이어 초기화 완료 이벤트를 날리기로 하였습니다.
-        1. PlayerSpawner가 의존성(카메라, UI)을 직접 주입하여 초기값을 세팅한후 플레이어 초기화를 호출하고 GameManager에 등록합니다.
-        2. GameManager는 플레이어 등록 이벤트인 OnPlayerRegistered 이벤트를 날립니다.
-        3. 적이나 UI는 이 이벤트를 구독하여 플레이어가 생성된 시점에 안전하게 참조를 가져오도록 수정했습니다.
+    1. PlayerSpawner가 의존성(카메라, UI)을 직접 주입하여 초기값을 세팅한후 플레이어 초기화를 호출하고 GameManager에 등록합니다.
+    2. GameManager는 플레이어 등록 이벤트인 OnPlayerRegistered 이벤트를 날립니다.
+    3. 적이나 UI는 이 이벤트를 구독하여 플레이어가 생성된 시점에 안전하게 참조를 가져오도록 수정했습니다.
     <details>
     <summary><strong>관련 코드 스니펫</summary></strong>
         
@@ -1032,7 +1035,7 @@
         }
         ```
     </details>
-            
+        
     
 5. **체감하기 어려운 최적화 문제**
 - 이슈
@@ -1042,7 +1045,7 @@
 - 해결 방법
     
     FPS(프레임), 메모리 사용량, GC(가비지 컬렉터) 발생 횟수를 실시간으로 측정하여 CSV 파일로 저장하는 툴(OptimizationMeasurement)을 작성해 보았습니다.
-    
+
     <details>
     <summary><strong>관련 코드 스니펫</summary></strong>
         
@@ -1052,7 +1055,7 @@
         void OnEnable()
         {
             profilerRecorder = ProfilerRecorder
-        			    .StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
+                        .StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
         }
         
         void Update()
@@ -1074,7 +1077,7 @@
         {
             float fps = 1.0f / deltaTime;
             float totalMem = UnityEngine.Profiling.Profiler
-        						    .GetTotalAllocatedMemoryLong() / 1024f / 1024f;
+                                    .GetTotalAllocatedMemoryLong() / 1024f / 1024f;
         
             float gcAlloc = profilerRecorder.LastValue / 1024f;
             int gcCount = GC.CollectionCount(0) - initGcCount;
@@ -1084,7 +1087,7 @@
         }
         ```
     </details>
-    
+
 ![최적화 csv](_images/fps1.png)
 
 ![최적화 csv2](_images/fps2.png)
